@@ -3,13 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using FlowFreeSolverWpf.Model;
-using Path = FlowFreeSolverWpf.Model.Path;
 
 namespace FlowFreeSolverWpf
 {
+    public class CellClickedEventArgs : EventArgs
+    {
+        public CellClickedEventArgs(Coords coords)
+        {
+            Coords = coords;
+        }
+
+        public Coords Coords { get; private set; }
+    }
+
     public partial class BoardControl
     {
         private readonly Color _gridLineColour = Colors.Yellow;
@@ -20,16 +30,69 @@ namespace FlowFreeSolverWpf
         public BoardControl()
         {
             InitializeComponent();
+            BoardCanvas.MouseLeftButtonDown += BoardCanvasOnMouseLeftButtonDown;
+        }
+
+        public event EventHandler<CellClickedEventArgs> CellClicked;
+
+        private void BoardCanvasOnMouseLeftButtonDown(object sender, MouseButtonEventArgs mouseButtonEventArgs)
+        {
+            var aw = ActualWidth;
+            var ah = ActualHeight;
+            var sw = (aw - GridLineThickness) / GridSize;
+            var sh = (ah - GridLineThickness) / GridSize;
+
+            var pt = mouseButtonEventArgs.MouseDevice.GetPosition(this);
+
+            for (var x = 0; x < GridSize; x++)
+            {
+                for (var y = 0; y < GridSize; y++)
+                {
+                    var rect = new Rect(x * sw + GridLineHalfThickness, (GridSize - y - 1) * sh + GridLineHalfThickness, sw, sh);
+                    if (rect.Contains(pt))
+                    {
+                        RaiseCellClicked(new Coords(x, y));
+                        return;
+                    }
+                }
+            }
+        }
+
+        private void RaiseCellClicked(Coords coords)
+        {
+            var handler = CellClicked;
+
+            if (handler != null)
+            {
+                handler(this, new CellClickedEventArgs(coords));
+            }
         }
 
         public int GridSize { get; set; }
 
         public IList<ColourPair> GetColourPairs()
         {
-            var colourPairs = new List<ColourPair>();
-            // TODO: find a smart arse way to extract the colour pairs from _coordsToTagsAndDots
-            // throw an exception if there are validation errors
-            return colourPairs;
+            var dotsGroupedByTag = _coordsToTagsAndDots.GroupBy(kvp => kvp.Value.Item1,
+                                                                kvp => new {Coords = kvp.Key})
+                                                       .ToList();
+
+            if (dotsGroupedByTag.Any(x => x.Count() != 2))
+            {
+                throw new InvalidOperationException("Dots must be in pairs!");
+            }
+
+            if (!dotsGroupedByTag.Any())
+            {
+                throw new InvalidOperationException("No pairs of dots!");
+            }
+
+            return dotsGroupedByTag.Select(x =>
+                {
+                    var startCoords = x.ElementAt(0).Coords;
+                    var endCoords = x.ElementAt(1).Coords;
+                    var tag = x.Key;
+                    return new ColourPair(startCoords, endCoords, tag);
+                }).ToList();
         }
 
         public void DrawGrid()
@@ -44,6 +107,11 @@ namespace FlowFreeSolverWpf
 
         public void AddDot(Coords coords, string tag)
         {
+            if (_coordsToTagsAndDots.ContainsKey(coords))
+            {
+                return;
+            }
+
             var aw = ActualWidth;
             var ah = ActualHeight;
             var sw = (aw - GridLineThickness) / GridSize;
@@ -75,7 +143,7 @@ namespace FlowFreeSolverWpf
             }
         }
 
-        public void DrawPath(ColourPair colourPair, Path path)
+        public void DrawPath(ColourPair colourPair, Model.Path path)
         {
             var aw = ActualWidth;
             var ah = ActualHeight;

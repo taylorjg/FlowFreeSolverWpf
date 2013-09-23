@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Windows;
 using DlxLib;
 using FlowFreeSolverWpf.Model;
 
@@ -24,7 +23,6 @@ namespace FlowFreeSolverWpf
     {
         public GridSizeItem[] GridSizeItems { get; private set; }
         public GridSizeItem SelectedGridSizeItem { get; set; }
-        public Grid Grid { get; private set; }
         private SolvingDialog _solvingDialog;
         private NoSolutionDialog _noSolutionDialog;
 
@@ -59,12 +57,22 @@ namespace FlowFreeSolverWpf
                     _solvingDialog = new SolvingDialog {Owner = this};
                     _solvingDialog.ShowDialog();
                 };
+
+            BoardControl.CellClicked += (_, e) =>
+                {
+                    //System.Windows.MessageBox.Show(string.Format("CellClicked: ({0}, {1})", e.Coords.X, e.Coords.Y));
+                };
         }
 
         private void SolveThePuzzle()
         {
+            var grid = new Grid(
+                SelectedGridSizeItem.GridSize,
+                SelectedGridSizeItem.GridSize,
+                BoardControl.GetColourPairs().ToArray());
+
             var matrixBuilder = new MatrixBuilder();
-            var matrix = matrixBuilder.BuildMatrixFor(Grid);
+            var matrix = matrixBuilder.BuildMatrixFor(grid);
 
             var dlx = new Dlx();
             var solutions = dlx.Solve(matrix).ToList();
@@ -110,7 +118,7 @@ namespace FlowFreeSolverWpf
             BoardControl.GridSize = SelectedGridSizeItem.GridSize;
             BoardControl.DrawGrid();
 
-            Grid = new Grid(7, 7, new[]
+            var grid = new Grid(7, 7, new[]
                 {
                     new ColourPair(new Coords(6, 6), new Coords(5, 0), "A"),
                     new ColourPair(new Coords(5, 5), new Coords(1, 4), "B"),
@@ -120,7 +128,7 @@ namespace FlowFreeSolverWpf
                     new ColourPair(new Coords(4, 2), new Coords(5, 1), "F")
                 });
 
-            foreach (var colourPair in Grid.ColourPairs)
+            foreach (var colourPair in grid.ColourPairs)
             {
                 BoardControl.AddDot(colourPair.StartCoords, colourPair.Tag);
                 BoardControl.AddDot(colourPair.EndCoords, colourPair.Tag);
