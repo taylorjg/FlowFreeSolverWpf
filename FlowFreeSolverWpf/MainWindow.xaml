@@ -18,12 +18,7 @@
         <DockPanel Margin="0,20,0,0" LastChildFill="False">
             
             <Label Content="Grid size:" />
-            <ComboBox x:Name="GridSizeCombo" Margin="20,0,0,0" DisplayMemberPath="GridSizeName" SelectedValuePath="GridSize">
-                <!--<ComboBoxItem IsSelected="True" >5x5</ComboBoxItem>
-                <ComboBoxItem>6x6</ComboBoxItem>
-                <ComboBoxItem>7x7</ComboBoxItem>
-                <ComboBoxItem>8x8</ComboBoxItem>
-                <ComboBoxItem>9x9</ComboBoxItem>-->
+            <ComboBox x:Name="GridSizeCombo" Margin="20,0,0,0" Width="100" DisplayMemberPath="GridSizeName" SelectedValuePath="GridSize">
                 <ComboBox.ItemsSource>
                     <Binding Path="GridSizeItems" Mode="OneWay" />
                 </ComboBox.ItemsSource>
@@ -31,7 +26,9 @@
                     <Binding Path="SelectedGridSizeItem" Mode="TwoWay" />
                 </ComboBox.SelectedItem>
             </ComboBox>
-            
+
+            <Button x:Name="Solve" Content="Solve" Margin="20,0,0,0" Width="100" />
+
         </DockPanel>
 
     </StackPanel>
