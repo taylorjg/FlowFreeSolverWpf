@@ -1,4 +1,5 @@
 ﻿using System.Windows.Media;
+using FlowFreeSolverWpf.Model;
 
 namespace FlowFreeSolverWpf
 {
@@ -34,10 +35,13 @@ namespace FlowFreeSolverWpf
                     new GridSizeItem(9),
                     new GridSizeItem(10)
                 };
-            SelectedGridSizeItem = GridSizeItems[0];
+            SelectedGridSizeItem = GridSizeItems[2];
 
             ContentRendered += (_, __) => ChangeGridSize();
-            GridSizeCombo.SelectionChanged += (_, __) => ChangeGridSize();
+            GridSizeCombo.SelectionChanged += (_, __) =>
+                {
+                    //ChangeGridSize()
+                };
         }
 
         private void ChangeGridSize()
@@ -45,8 +49,22 @@ namespace FlowFreeSolverWpf
             BoardControl.Clear();
             BoardControl.GridSize = SelectedGridSizeItem.GridSize;
             BoardControl.DrawGrid();
-            BoardControl.AddDot(Colors.Blue, 3, 4);
-            BoardControl.AddDot(Colors.Red, 4, 4);
+
+            var grid = new Grid(7, 7, new[]
+                {
+                    new ColourPair(new Coords(6, 6), new Coords(5, 0), "A"),
+                    new ColourPair(new Coords(5, 5), new Coords(1, 4), "B"),
+                    new ColourPair(new Coords(6, 5), new Coords(4, 1), "C"),
+                    new ColourPair(new Coords(3, 3), new Coords(2, 2), "D"),
+                    new ColourPair(new Coords(4, 3), new Coords(6, 0), "E"),
+                    new ColourPair(new Coords(4, 2), new Coords(5, 1), "F")
+                });
+
+            foreach (var colourPair in grid.ColourPairs)
+            {
+                BoardControl.AddDot(colourPair.StartCoords, colourPair.Tag);
+                BoardControl.AddDot(colourPair.EndCoords, colourPair.Tag);
+            }
         }
     }
 }

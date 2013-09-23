@@ -1,7 +1,9 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using FlowFreeSolverWpf.Model;
 
 namespace FlowFreeSolverWpf
 {
@@ -28,7 +30,7 @@ namespace FlowFreeSolverWpf
             BoardCanvas.Children.Clear();
         }
 
-        public void AddDot(Color fillColour, int x, int y)
+        public void AddDot(Coords coords, string tag)
         {
             var aw = ActualWidth;
             var ah = ActualHeight;
@@ -39,11 +41,12 @@ namespace FlowFreeSolverWpf
                 {
                     Width = sw * 6 / 8,
                     Height = sh * 6 / 8,
-                    Fill = new SolidColorBrush(fillColour)
+                    Fill = new SolidColorBrush(MapTagToColour(tag))
                 };
 
-            var rect = new Rect(x * sw + GridLineHalfThickness, y * sh + GridLineHalfThickness, sw, sh);
+            var rect = new Rect(coords.X * sw + GridLineHalfThickness, (GridSize - coords.Y - 1) * sh + GridLineHalfThickness, sw, sh);
             rect.Inflate(-sw/8, -sh/8);
+
             Canvas.SetLeft(dot, rect.Left);
             Canvas.SetTop(dot, rect.Top);
 
@@ -87,6 +90,33 @@ namespace FlowFreeSolverWpf
                     Y2 = ah
                 };
                 BoardCanvas.Children.Add(line);
+            }
+        }
+
+        private static Color MapTagToColour(string tag)
+        {
+            switch (tag)
+            {
+                case "A":
+                    return Colors.Blue;
+
+                case "B":
+                    return Colors.Orange;
+
+                case "C":
+                    return Colors.Red;
+
+                case "D":
+                    return Colors.Green;
+
+                case "E":
+                    return Colors.Cyan;
+
+                case "F":
+                    return Colors.Yellow;
+
+                default:
+                    throw new InvalidOperationException(string.Format("Unknown tag, '{0}'.", tag));
             }
         }
     }
