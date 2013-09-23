@@ -27,7 +27,7 @@
                 </ComboBox.SelectedItem>
             </ComboBox>
 
-            <Button x:Name="Solve" Content="Solve" Margin="20,0,0,0" Width="100" />
+            <Button x:Name="SolveButton" Content="Solve" Margin="20,0,0,0" Width="100" />
 
         </DockPanel>
 

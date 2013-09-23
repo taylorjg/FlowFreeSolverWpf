@@ -1,5 +1,8 @@
-﻿using System.Linq;
-using System.Windows.Media;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Windows;
 using DlxLib;
 using FlowFreeSolverWpf.Model;
 
@@ -22,6 +25,8 @@ namespace FlowFreeSolverWpf
         public GridSizeItem[] GridSizeItems { get; private set; }
         public GridSizeItem SelectedGridSizeItem { get; set; }
         public Grid Grid { get; private set; }
+        private SolvingDialog _solvingDialog;
+        private NoSolutionDialog _noSolutionDialog;
 
         public MainWindow()
         {
@@ -46,25 +51,57 @@ namespace FlowFreeSolverWpf
                     //ChangeGridSize()
                 };
 
-            Solve.Click += (_, __) =>
+            SolveButton.Click += (_, __) =>
                 {
-                    var matrixBuilder = new MatrixBuilder();
-                    var matrix = matrixBuilder.BuildMatrixFor(Grid);
-
-                    var dlx = new Dlx();
-                    var solutions = dlx.Solve(matrix).ToList();
-
-                    if (solutions.Any())
-                    {
-                        var colourPairPaths = solutions.First().RowIndexes.Select(matrixBuilder.GetColourPairAndPathForRowIndex);
-                        foreach (var colourPairPath in colourPairPaths)
-                        {
-                            var colourPair = colourPairPath.Item1;
-                            var path = colourPairPath.Item2;
-                            BoardControl.DrawPath(colourPair, path);
-                        }
-                    }
+                    GridSizeCombo.IsEnabled = false;
+                    SolveButton.IsEnabled = false;
+                    ThreadPool.QueueUserWorkItem(state => SolveThePuzzle());
+                    _solvingDialog = new SolvingDialog {Owner = this};
+                    _solvingDialog.ShowDialog();
                 };
+        }
+
+        private void SolveThePuzzle()
+        {
+            var matrixBuilder = new MatrixBuilder();
+            var matrix = matrixBuilder.BuildMatrixFor(Grid);
+
+            var dlx = new Dlx();
+            var solutions = dlx.Solve(matrix).ToList();
+
+            if (solutions.Any())
+            {
+                var colourPairPaths = solutions.First().RowIndexes.Select(matrixBuilder.GetColourPairAndPathForRowIndex);
+                Dispatcher.Invoke(new WaitCallback(DrawTheSolution), colourPairPaths);
+            }
+            else
+            {
+                Dispatcher.Invoke(new WaitCallback(HandleNoSolutionFound), Enumerable.Empty<Tuple<ColourPair, Path>>());
+            }
+        }
+
+        private void DrawTheSolution(object state)
+        {
+            var colourPairPaths = (IEnumerable<Tuple<ColourPair, Path>>)state;
+
+            foreach (var colourPairPath in colourPairPaths)
+            {
+                var colourPair = colourPairPath.Item1;
+                var path = colourPairPath.Item2;
+                BoardControl.DrawPath(colourPair, path);
+            }
+
+            GridSizeCombo.IsEnabled = true;
+            _solvingDialog.Close();
+        }
+
+        private void HandleNoSolutionFound(object state)
+        {
+            GridSizeCombo.IsEnabled = true;
+            SolveButton.IsEnabled = true;
+            _solvingDialog.Close();
+            _noSolutionDialog = new NoSolutionDialog {Owner = this};
+            _noSolutionDialog.ShowDialog();
         }
 
         private void ChangeGridSize()

@@ -24,6 +24,14 @@ namespace FlowFreeSolverWpf
 
         public int GridSize { get; set; }
 
+        public IList<ColourPair> GetColourPairs()
+        {
+            var colourPairs = new List<ColourPair>();
+            // TODO: find a smart arse way to extract the colour pairs from _coordsToTagsAndDots
+            // throw an exception if there are validation errors
+            return colourPairs;
+        }
+
         public void DrawGrid()
         {
             DrawGridLines();

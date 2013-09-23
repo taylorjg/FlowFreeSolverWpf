@@ -1,0 +1,25 @@
+﻿<Window x:Class="FlowFreeSolverWpf.NoSolutionDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Flow Free Solver"
+        Height="170"
+        Width="300"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        >
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Vertical">
+            <Label Content="Sorry - no solution was found!" Margin="10" />
+        </StackPanel>
+
+        <Button Grid.Row="1" x:Name="OkButton" Content="Ok" Margin="10" Width="50" HorizontalAlignment="Right" VerticalAlignment="Bottom" />
+
+    </Grid>
+
+</Window>
