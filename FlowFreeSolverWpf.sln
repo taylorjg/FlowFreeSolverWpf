@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlowFreeSolverWpf", "FlowFreeSolverWpf\FlowFreeSolverWpf.csproj", "{C1B5978F-81C6-421E-B813-CC1DF585B141}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{53D9CF1C-CA60-497D-97C2-08325DFED873}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C1B5978F-81C6-421E-B813-CC1DF585B141}.Debug|x86.ActiveCfg = Debug|x86
+		{C1B5978F-81C6-421E-B813-CC1DF585B141}.Debug|x86.Build.0 = Debug|x86
+		{C1B5978F-81C6-421E-B813-CC1DF585B141}.Release|x86.ActiveCfg = Release|x86
+		{C1B5978F-81C6-421E-B813-CC1DF585B141}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
