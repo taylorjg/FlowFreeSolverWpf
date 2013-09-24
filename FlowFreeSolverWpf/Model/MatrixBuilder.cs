@@ -11,11 +11,11 @@ namespace FlowFreeSolverWpf.Model
         private int _numColourPairs;
         private int _numColumns;
         private IDictionary<int, Tuple<ColourPair, Path>> _rowIndexToColourPairAndPath;
-        private readonly ManualResetEventSlim _cancelEvent = new ManualResetEventSlim(false);
+        private CancellationToken _cancellationToken;
 
-        public bool[,] BuildMatrixFor(Grid grid)
+        public bool[,] BuildMatrixFor(Grid grid, CancellationToken cancellationToken)
         {
-            _cancelEvent.Reset();
+            _cancellationToken = cancellationToken;
             _grid = grid;
             _numColourPairs = _grid.ColourPairs.Count();
             _numColumns = _numColourPairs + (_grid.Width * _grid.Height);
@@ -42,11 +42,6 @@ namespace FlowFreeSolverWpf.Model
             return matrix;
         }
 
-        public void Cancel()
-        {
-            _cancelEvent.Set();
-        }
-
         public Tuple<ColourPair, Path> GetColourPairAndPathForRowIndex(int rowIndex)
         {
             return _rowIndexToColourPairAndPath[rowIndex];
@@ -54,7 +49,8 @@ namespace FlowFreeSolverWpf.Model
 
         private void AddInternalDataRowsForColourPair(List<IList<bool>> internalData, ColourPair colourPair, int colourPairIndex)
         {
-            var paths = PathFinder.FindAllPaths(_grid, colourPair.StartCoords, colourPair.EndCoords);
+            var pathFinder = new PathFinder(_cancellationToken);
+            var paths = pathFinder.FindAllPaths(_grid, colourPair.StartCoords, colourPair.EndCoords);
 
             foreach (var path in paths.PathList)
             {

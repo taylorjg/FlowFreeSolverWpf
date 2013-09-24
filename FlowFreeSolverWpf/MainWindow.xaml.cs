@@ -16,6 +16,7 @@ namespace FlowFreeSolverWpf
         private SolvingDialog _solvingDialog;
         private MatrixBuilder _matrixBuilder;
         private Dlx _dlx;
+        private CancellationTokenSource _cancellationTokenSource;
 
         public MainWindow()
         {
@@ -40,22 +41,6 @@ namespace FlowFreeSolverWpf
             ContentRendered += (_, __) =>
                 {
                     ChangeGridSize();
-
-                    var grid = new Grid(7, 7, new[]
-                        {
-                            new ColourPair(new Coords(6, 6), new Coords(5, 0), "A"),
-                            new ColourPair(new Coords(5, 5), new Coords(1, 4), "B"),
-                            new ColourPair(new Coords(6, 5), new Coords(4, 1), "C"),
-                            new ColourPair(new Coords(3, 3), new Coords(2, 2), "D"),
-                            new ColourPair(new Coords(4, 3), new Coords(6, 0), "E"),
-                            new ColourPair(new Coords(4, 2), new Coords(5, 1), "F")
-                        });
-
-                    foreach (var colourPair in grid.ColourPairs)
-                    {
-                        BoardControl.AddDot(colourPair.StartCoords, colourPair.Tag);
-                        BoardControl.AddDot(colourPair.EndCoords, colourPair.Tag);
-                    }
                 };
 
             GridSizeCombo.SelectionChanged += (_, __) => ChangeGridSize();
@@ -77,13 +62,24 @@ namespace FlowFreeSolverWpf
                     GridSizeCombo.IsEnabled = false;
                     SolveButton.IsEnabled = false;
                     ClearButton.IsEnabled = false;
+
+                    _cancellationTokenSource = new CancellationTokenSource();
+
                     ThreadPool.QueueUserWorkItem(state => SolveThePuzzle(colourPairs));
+
                     _solvingDialog = new SolvingDialog {Owner = this};
                     var dialogResult = _solvingDialog.ShowDialog();
                     if (dialogResult.HasValue && !dialogResult.Value)
                     {
-                        System.Windows.MessageBox.Show("Cancelled!");
+                        _cancellationTokenSource.Cancel();
+                        if (_dlx != null)
+                        {
+                            _dlx.Cancel();
+                        }
+                        //System.Windows.MessageBox.Show("Cancelled!");
                     }
+
+                    // TODO: when should we clean up _cancellationTokenSource ?
                 };
 
             ClearButton.Click += (_, __) =>
@@ -105,6 +101,25 @@ namespace FlowFreeSolverWpf
                 };
         }
 
+        private void PreLoad7X7Puzzle()
+        {
+            var grid = new Grid(7, 7, new[]
+                {
+                    new ColourPair(new Coords(6, 6), new Coords(5, 0), "A"),
+                    new ColourPair(new Coords(5, 5), new Coords(1, 4), "B"),
+                    new ColourPair(new Coords(6, 5), new Coords(4, 1), "C"),
+                    new ColourPair(new Coords(3, 3), new Coords(2, 2), "D"),
+                    new ColourPair(new Coords(4, 3), new Coords(6, 0), "E"),
+                    new ColourPair(new Coords(4, 2), new Coords(5, 1), "F")
+                });
+
+            foreach (var colourPair in grid.ColourPairs)
+            {
+                BoardControl.AddDot(colourPair.StartCoords, colourPair.Tag);
+                BoardControl.AddDot(colourPair.EndCoords, colourPair.Tag);
+            }
+        }
+
         private void SolveThePuzzle(IEnumerable<ColourPair> colourPairs)
         {
             var grid = new Grid(
@@ -113,19 +128,26 @@ namespace FlowFreeSolverWpf
                 colourPairs.ToArray());
 
             _matrixBuilder = new MatrixBuilder();
-            var matrix = _matrixBuilder.BuildMatrixFor(grid);
+            var matrix = _matrixBuilder.BuildMatrixFor(grid, _cancellationTokenSource.Token);
 
             _dlx = new Dlx();
             var solutions = _dlx.Solve(matrix).ToList();
 
-            if (solutions.Any())
+            if (_cancellationTokenSource.IsCancellationRequested)
             {
-                var colourPairPaths = solutions.First().RowIndexes.Select(_matrixBuilder.GetColourPairAndPathForRowIndex);
-                Dispatcher.Invoke(new WaitCallback(DrawTheSolution), colourPairPaths);
+                Dispatcher.Invoke(new WaitCallback(HandleCancellation), Enumerable.Empty<Tuple<ColourPair, Path>>());
             }
             else
             {
-                Dispatcher.Invoke(new WaitCallback(HandleNoSolutionFound), Enumerable.Empty<Tuple<ColourPair, Path>>());
+                if (solutions.Any())
+                {
+                    var colourPairPaths = solutions.First().RowIndexes.Select(_matrixBuilder.GetColourPairAndPathForRowIndex);
+                    Dispatcher.Invoke(new WaitCallback(DrawTheSolution), colourPairPaths);
+                }
+                else
+                {
+                    Dispatcher.Invoke(new WaitCallback(HandleNoSolutionFound), Enumerable.Empty<Tuple<ColourPair, Path>>());
+                }
             }
         }
 
@@ -159,11 +181,26 @@ namespace FlowFreeSolverWpf
             myMessageBox.ShowDialog();
         }
 
+        private void HandleCancellation(object state)
+        {
+            GridSizeCombo.IsEnabled = true;
+            SolveButton.IsEnabled = true;
+            ClearButton.IsEnabled = true;
+
+            var myMessageBox = new MyMessageBox { Owner = this, MessageText = "You cancelled the solving process before completion!" };
+            myMessageBox.ShowDialog();
+        }
+
         private void ChangeGridSize()
         {
             BoardControl.Clear();
             BoardControl.GridSize = SelectedGridSizeItem.GridSize;
             BoardControl.DrawGrid();
+
+            if (SelectedGridSizeItem.GridSize == 7)
+            {
+                PreLoad7X7Puzzle();
+            }
         }
     }
 }

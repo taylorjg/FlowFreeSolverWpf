@@ -15,11 +15,16 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Vertical">
-            <Label Margin="10">
+            <TextBlock Margin="10" TextWrapping="Wrap">
+                <TextBlock.Text>
+                    <Binding Path="MessageText" />
+                </TextBlock.Text>
+            </TextBlock>
+            <!--<Label Margin="10" >
                 <Label.Content>
                     <Binding Path="MessageText" Mode="OneWay" />
                 </Label.Content>
-            </Label>
+            </Label>-->
         </StackPanel>
 
         <Button Grid.Row="1" x:Name="OkButton" Content="OK" Margin="10" Width="50" HorizontalAlignment="Right" VerticalAlignment="Bottom" />

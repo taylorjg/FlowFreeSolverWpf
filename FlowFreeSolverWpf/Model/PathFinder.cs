@@ -1,24 +1,37 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 
 namespace FlowFreeSolverWpf.Model
 {
     public class PathFinder
     {
-        public static Paths FindAllPaths(Grid grid, Coords startCoords, Coords endCoords)
+        private CancellationToken _cancellationToken;
+
+        public PathFinder(CancellationToken cancellationToken)
+        {
+            _cancellationToken = cancellationToken;
+        }
+
+        public Paths FindAllPaths(Grid grid, Coords startCoords, Coords endCoords)
         {
             var paths = new Paths();
 
             FollowPath(grid, paths, Path.PathWithStartingPoint(startCoords), endCoords, Direction.Up, 0);
+            if (_cancellationToken.IsCancellationRequested) return paths;
             FollowPath(grid, paths, Path.PathWithStartingPoint(startCoords), endCoords, Direction.Down, 0);
+            if (_cancellationToken.IsCancellationRequested) return paths;
             FollowPath(grid, paths, Path.PathWithStartingPoint(startCoords), endCoords, Direction.Left, 0);
+            if (_cancellationToken.IsCancellationRequested) return paths;
             FollowPath(grid, paths, Path.PathWithStartingPoint(startCoords), endCoords, Direction.Right, 0);
 
             return paths;
         }
 
-        private static void FollowPath(Grid grid, Paths paths, Path currentPath, Coords endCoords, Direction direction, int numDirectionChanges)
+        private void FollowPath(Grid grid, Paths paths, Path currentPath, Coords endCoords, Direction direction, int numDirectionChanges)
         {
+            if (_cancellationToken.IsCancellationRequested) return;
+
             var nextCoords = currentPath.GetNextCoords(direction);
 
             if (nextCoords.Equals(endCoords))
