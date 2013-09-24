@@ -20,7 +20,7 @@
             <local:BoardControl x:Name="BoardControl" Width="644" Height="644" />
         </Grid>
 
-        <DockPanel Grid.Row="1" Margin="20,10,20,20" LastChildFill="False">
+        <StackPanel Grid.Row="1" Margin="20,10,20,20" Orientation="Horizontal">
 
             <Label Content="Grid size:" Margin="0" VerticalAlignment="Center" />
             <ComboBox x:Name="GridSizeCombo" Margin="5,0,0,0" VerticalAlignment="Center" Width="100">
@@ -70,10 +70,17 @@
             <Button x:Name="SolveButton" Content="Solve" Margin="20,0,0,0" VerticalAlignment="Center" Width="50" />
             <Button x:Name="ClearButton" Content="Clear" Margin="20,0,0,0" VerticalAlignment="Center" Width="50" />
 
-        </DockPanel>
+        </StackPanel>
 
         <StatusBar Grid.Row="2" Margin="0">
             <StatusBarItem>
+                <TextBlock>
+                    <TextBlock.Text>
+                        <Binding Path="StatusMessage" />
+                    </TextBlock.Text>
+                </TextBlock>
+            </StatusBarItem>
+            <!--<StatusBarItem>
                 <TextBlock>Matrix: NNN rows x MMM cols</TextBlock>
             </StatusBarItem>
             <Separator Margin="10,0,10,0" />
@@ -83,7 +90,7 @@
             <Separator Margin="10,0,10,0" />
             <StatusBarItem>
                 <TextBlock>Dlx solve time: XXs</TextBlock>
-            </StatusBarItem>
+            </StatusBarItem>-->
         </StatusBar>
 
     </Grid>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using DlxLib;
@@ -7,12 +8,32 @@ using FlowFreeSolverWpf.Model;
 
 namespace FlowFreeSolverWpf
 {
-    public partial class MainWindow
+    public partial class MainWindow : INotifyPropertyChanged
     {
         public GridSizeItem[] GridSizeItems { get; private set; }
         public GridSizeItem SelectedGridSizeItem { get; set; }
         public DotColour[] DotColours { get; private set; }
         public DotColour SelectedDotColour { get; set; }
+
+        private string _statusMessage;
+        public string StatusMessage
+        {
+            get
+            {
+                return _statusMessage;
+            }
+            private set
+            {
+                if (value == _statusMessage)
+                {
+                    return;
+                }
+
+                _statusMessage = value;
+                RaisePropertyChanged("StatusMessage");
+            }
+        }
+
         private SolvingDialog _solvingDialog;
         private MatrixBuilder _matrixBuilder;
         private Dlx _dlx;
@@ -38,11 +59,9 @@ namespace FlowFreeSolverWpf
             DotColours = ColourMap.DotColours;
             SelectedDotColour = DotColours[0];
 
-            ContentRendered += (_, __) =>
-                {
-                    ChangeGridSize();
-                };
+            StatusMessage = string.Empty;
 
+            ContentRendered += (_, __) => ChangeGridSize();
             GridSizeCombo.SelectionChanged += (_, __) => ChangeGridSize();
 
             SolveButton.Click += (_, __) =>
@@ -76,16 +95,14 @@ namespace FlowFreeSolverWpf
                         {
                             _dlx.Cancel();
                         }
-                        //System.Windows.MessageBox.Show("Cancelled!");
                     }
-
-                    // TODO: when should we clean up _cancellationTokenSource ?
                 };
 
             ClearButton.Click += (_, __) =>
                 {
                     BoardControl.ClearDotsAndPaths();
                     SolveButton.IsEnabled = true;
+                    StatusMessage = string.Empty;
                 };
 
             BoardControl.CellClicked += (_, e) =>
@@ -122,6 +139,8 @@ namespace FlowFreeSolverWpf
 
         private void SolveThePuzzle(IEnumerable<ColourPair> colourPairs)
         {
+            StatusMessage = string.Empty;
+
             var grid = new Grid(
                 SelectedGridSizeItem.GridSize,
                 SelectedGridSizeItem.GridSize,
@@ -189,6 +208,8 @@ namespace FlowFreeSolverWpf
 
             var myMessageBox = new MyMessageBox { Owner = this, MessageText = "You cancelled the solving process before completion!" };
             myMessageBox.ShowDialog();
+
+            StatusMessage = "*** Cancelled by user ***";
         }
 
         private void ChangeGridSize()
@@ -200,6 +221,18 @@ namespace FlowFreeSolverWpf
             if (SelectedGridSizeItem.GridSize == 7)
             {
                 PreLoad7X7Puzzle();
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void RaisePropertyChanged(string propertyName)
+        {
+            var handler = PropertyChanged;
+
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }
