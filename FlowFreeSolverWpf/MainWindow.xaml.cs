@@ -8,6 +8,22 @@ using FlowFreeSolverWpf.Model;
 
 namespace FlowFreeSolverWpf
 {
+    public class SolutionStats
+    {
+        public SolutionStats(int numMatrixRows, int numMatrixCols, TimeSpan? matrixBuildingDuration, TimeSpan? matrixSolvingDuration)
+        {
+            NumMatrixRows = numMatrixRows;
+            NumMatrixCols = numMatrixCols;
+            MatrixBuildingDuration = matrixBuildingDuration;
+            MatrixSolvingDuration = matrixSolvingDuration;
+        }
+
+        public int NumMatrixRows { get; set; }
+        public int NumMatrixCols { get; set; }
+        public TimeSpan? MatrixBuildingDuration { get; set; }
+        public TimeSpan? MatrixSolvingDuration { get; set; }
+    }
+
     public partial class MainWindow : INotifyPropertyChanged
     {
         public GridSizeItem[] GridSizeItems { get; private set; }
@@ -36,6 +52,7 @@ namespace FlowFreeSolverWpf
 
         private SolvingDialog _solvingDialog;
         private MatrixBuilder _matrixBuilder;
+        private SolutionStats _solutionStats;
         private Dlx _dlx;
         private CancellationTokenSource _cancellationTokenSource;
 
@@ -146,11 +163,38 @@ namespace FlowFreeSolverWpf
                 SelectedGridSizeItem.GridSize,
                 colourPairs.ToArray());
 
-            _matrixBuilder = new MatrixBuilder();
-            var matrix = _matrixBuilder.BuildMatrixFor(grid, _cancellationTokenSource.Token);
+            var matrix = new bool[0,0];
+            TimeSpan? matrixBuildingDuration = null;
+            TimeSpan? matrixBuildingSolving = null;
+            var solutions = new List<Solution>();
 
-            _dlx = new Dlx();
-            var solutions = _dlx.Solve(matrix).ToList();
+            if (!_cancellationTokenSource.IsCancellationRequested)
+            {
+                var stopwatch = new System.Diagnostics.Stopwatch();
+
+                _matrixBuilder = new MatrixBuilder();
+                stopwatch.Reset();
+                stopwatch.Start();
+                matrix = _matrixBuilder.BuildMatrixFor(grid, _cancellationTokenSource.Token);
+                stopwatch.Stop();
+                matrixBuildingDuration = stopwatch.Elapsed;
+
+                if (!_cancellationTokenSource.IsCancellationRequested)
+                {
+                    _dlx = new Dlx();
+                    stopwatch.Reset();
+                    stopwatch.Start();
+                    solutions = _dlx.Solve(matrix).ToList();
+                    stopwatch.Stop();
+                    matrixBuildingSolving = stopwatch.Elapsed;
+                }
+            }
+
+            _solutionStats = new SolutionStats(
+                matrix.GetLength(0),
+                matrix.GetLength(1),
+                matrixBuildingDuration,
+                matrixBuildingSolving);
 
             if (_cancellationTokenSource.IsCancellationRequested)
             {
@@ -185,6 +229,8 @@ namespace FlowFreeSolverWpf
             ClearButton.IsEnabled = true;
             _solvingDialog.DialogResult = true;
             _solvingDialog.Close();
+
+            SetStatusMessageFromSolutionStats(_solutionStats);
         }
 
         private void HandleNoSolutionFound(object state)
@@ -198,6 +244,8 @@ namespace FlowFreeSolverWpf
 
             var myMessageBox = new MyMessageBox {Owner = this, MessageText = "Sorry - no solution was found!"};
             myMessageBox.ShowDialog();
+
+            SetStatusMessageFromSolutionStats(_solutionStats, "no solution found");
         }
 
         private void HandleCancellation(object state)
@@ -209,12 +257,41 @@ namespace FlowFreeSolverWpf
             var myMessageBox = new MyMessageBox { Owner = this, MessageText = "You cancelled the solving process before completion!" };
             myMessageBox.ShowDialog();
 
-            StatusMessage = "*** Cancelled by user ***";
+            SetStatusMessageFromSolutionStats(_solutionStats, "cancelled by user");
+        }
+
+        private void SetStatusMessageFromSolutionStats(SolutionStats solutionStats, string extraMessage = null)
+        {
+            var statusMessage = string.Format(
+                "Matrix size: {0} rows x {1} cols",
+                solutionStats.NumMatrixRows,
+                solutionStats.NumMatrixCols);
+
+            const string timeSpanFormat = @"hh\:mm\:ss\.fff";
+
+            if (solutionStats.MatrixBuildingDuration.HasValue)
+            {
+                 statusMessage += string.Format("; Matrix build time: {0}", solutionStats.MatrixBuildingDuration.Value.ToString(timeSpanFormat));
+            }
+
+            if (solutionStats.MatrixSolvingDuration.HasValue)
+            {
+                statusMessage += string.Format("; Matrix solve time: {0}", solutionStats.MatrixSolvingDuration.Value.ToString(timeSpanFormat));
+            }
+
+            if (!string.IsNullOrEmpty(extraMessage))
+            {
+                statusMessage += string.Format(" ({0})", extraMessage);
+            }
+
+            StatusMessage = statusMessage;
         }
 
         private void ChangeGridSize()
         {
             BoardControl.Clear();
+            SolveButton.IsEnabled = true;
+            StatusMessage = string.Empty;
             BoardControl.GridSize = SelectedGridSizeItem.GridSize;
             BoardControl.DrawGrid();
 

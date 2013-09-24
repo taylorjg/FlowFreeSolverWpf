@@ -55,7 +55,7 @@
                             <Label Grid.Column="0" Content="{Binding Path=ColourName}" />
                             <Label Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center">
                                 <Label.Content >
-                                    <Ellipse Width="13" Height="13">
+                                    <Ellipse Width="18" Height="18">
                                         <Ellipse.Fill>
                                             <SolidColorBrush Color="{Binding Path=ColourName}"/>
                                         </Ellipse.Fill>
