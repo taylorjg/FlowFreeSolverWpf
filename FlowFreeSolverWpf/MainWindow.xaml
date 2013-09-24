@@ -9,14 +9,19 @@
         WindowStartupLocation="CenterScreen"
         >
 
-    <StackPanel Margin="20" Orientation="Vertical">
-
-        <Grid>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        
+        <Grid Grid.Row="0">
             <local:BoardControl x:Name="BoardControl" Width="644" Height="644" />
         </Grid>
 
-        <DockPanel Margin="0,20,0,0" LastChildFill="False">
-            
+        <DockPanel Grid.Row="1" Margin="20,10,20,20" LastChildFill="False">
+
             <Label Content="Grid size:" />
             <ComboBox x:Name="GridSizeCombo" Margin="20,0,0,0" Width="100" DisplayMemberPath="GridSizeName" SelectedValuePath="GridSize">
                 <ComboBox.ItemsSource>
@@ -62,6 +67,20 @@
 
         </DockPanel>
 
-    </StackPanel>
+        <StatusBar Grid.Row="2" Margin="0">
+            <StatusBarItem>
+                <TextBlock>Matrix: 36456x55</TextBlock>
+            </StatusBarItem>
+            <Separator Margin="10,0,10,0" />
+            <StatusBarItem>
+                <TextBlock>Matrix build time: 80s</TextBlock>
+            </StatusBarItem>
+            <Separator Margin="10,0,10,0" />
+            <StatusBarItem>
+                <TextBlock>Dlx solve time: 10s</TextBlock>
+            </StatusBarItem>
+        </StatusBar>
+
+    </Grid>
 
 </Window>

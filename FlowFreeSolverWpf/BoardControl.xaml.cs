@@ -84,10 +84,10 @@ namespace FlowFreeSolverWpf
                 throw new InvalidOperationException("Dots must be in pairs!");
             }
 
-            if (!dotsGroupedByTag.Any())
-            {
-                throw new InvalidOperationException("No pairs of dots!");
-            }
+            //if (!dotsGroupedByTag.Any())
+            //{
+            //    throw new InvalidOperationException("No pairs of dots!");
+            //}
 
             return dotsGroupedByTag.Select(x =>
                 {
