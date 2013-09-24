@@ -28,17 +28,37 @@
             </ComboBox>
 
             <Label Content="Colour:" />
-            <ComboBox x:Name="DotColourCombo" Margin="20,0,0,0" Width="100" DisplayMemberPath="ColourName" SelectedValuePath="Colour">
+            <ComboBox x:Name="DotColourCombo" Margin="20,0,0,0">
                 <ComboBox.ItemsSource>
                     <Binding Path="DotColours" Mode="OneWay" />
                 </ComboBox.ItemsSource>
                 <ComboBox.SelectedItem>
                     <Binding Path="SelectedDotColour" Mode="TwoWay" />
                 </ComboBox.SelectedItem>
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="{Binding Path=ColourName}" />
+                            <Label Grid.Column="1">
+                                <Label.Content>
+                                    <Ellipse Width="18" Height="18">
+                                        <Ellipse.Fill>
+                                            <SolidColorBrush Color="{Binding Path=ColourName}"/>
+                                        </Ellipse.Fill>
+                                    </Ellipse>
+                                </Label.Content>
+                            </Label>
+                        </Grid>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
             </ComboBox>
 
-            <Button x:Name="SolveButton" Content="Solve" Margin="20,0,0,0" Width="100" />
-            <Button x:Name="ClearButton" Content="Clear" Margin="20,0,0,0" Width="100" />
+            <Button x:Name="SolveButton" Content="Solve" Margin="20,0,0,0" Width="50" />
+            <Button x:Name="ClearButton" Content="Clear" Margin="20,0,0,0" Width="50" />
 
         </DockPanel>
 

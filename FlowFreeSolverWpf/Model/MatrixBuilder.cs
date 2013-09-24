@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace FlowFreeSolverWpf.Model
 {
@@ -10,9 +11,11 @@ namespace FlowFreeSolverWpf.Model
         private int _numColourPairs;
         private int _numColumns;
         private IDictionary<int, Tuple<ColourPair, Path>> _rowIndexToColourPairAndPath;
+        private readonly ManualResetEventSlim _cancelEvent = new ManualResetEventSlim(false);
 
         public bool[,] BuildMatrixFor(Grid grid)
         {
+            _cancelEvent.Reset();
             _grid = grid;
             _numColourPairs = _grid.ColourPairs.Count();
             _numColumns = _numColourPairs + (_grid.Width * _grid.Height);
@@ -37,6 +40,11 @@ namespace FlowFreeSolverWpf.Model
             } 
             
             return matrix;
+        }
+
+        public void Cancel()
+        {
+            _cancelEvent.Set();
         }
 
         public Tuple<ColourPair, Path> GetColourPairAndPathForRowIndex(int rowIndex)

@@ -14,7 +14,8 @@ namespace FlowFreeSolverWpf
         public DotColour[] DotColours { get; private set; }
         public DotColour SelectedDotColour { get; set; }
         private SolvingDialog _solvingDialog;
-        private NoSolutionDialog _noSolutionDialog;
+        private MatrixBuilder _matrixBuilder;
+        private Dlx _dlx;
 
         public MainWindow()
         {
@@ -61,12 +62,28 @@ namespace FlowFreeSolverWpf
 
             SolveButton.Click += (_, __) =>
                 {
+                    IList<ColourPair> colourPairs;
+                    try
+                    {
+                        colourPairs = BoardControl.GetColourPairs();
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        var myMessageBox = new MyMessageBox { Owner = this, MessageText = ex.Message };
+                        myMessageBox.ShowDialog();
+                        return;
+                    }
+
                     GridSizeCombo.IsEnabled = false;
                     SolveButton.IsEnabled = false;
                     ClearButton.IsEnabled = false;
-                    ThreadPool.QueueUserWorkItem(state => SolveThePuzzle());
+                    ThreadPool.QueueUserWorkItem(state => SolveThePuzzle(colourPairs));
                     _solvingDialog = new SolvingDialog {Owner = this};
-                    _solvingDialog.ShowDialog();
+                    var dialogResult = _solvingDialog.ShowDialog();
+                    if (dialogResult.HasValue && !dialogResult.Value)
+                    {
+                        System.Windows.MessageBox.Show("Cancelled!");
+                    }
                 };
 
             ClearButton.Click += (_, __) =>
@@ -88,22 +105,22 @@ namespace FlowFreeSolverWpf
                 };
         }
 
-        private void SolveThePuzzle()
+        private void SolveThePuzzle(IEnumerable<ColourPair> colourPairs)
         {
             var grid = new Grid(
                 SelectedGridSizeItem.GridSize,
                 SelectedGridSizeItem.GridSize,
-                BoardControl.GetColourPairs().ToArray());
+                colourPairs.ToArray());
 
-            var matrixBuilder = new MatrixBuilder();
-            var matrix = matrixBuilder.BuildMatrixFor(grid);
+            _matrixBuilder = new MatrixBuilder();
+            var matrix = _matrixBuilder.BuildMatrixFor(grid);
 
-            var dlx = new Dlx();
-            var solutions = dlx.Solve(matrix).ToList();
+            _dlx = new Dlx();
+            var solutions = _dlx.Solve(matrix).ToList();
 
             if (solutions.Any())
             {
-                var colourPairPaths = solutions.First().RowIndexes.Select(matrixBuilder.GetColourPairAndPathForRowIndex);
+                var colourPairPaths = solutions.First().RowIndexes.Select(_matrixBuilder.GetColourPairAndPathForRowIndex);
                 Dispatcher.Invoke(new WaitCallback(DrawTheSolution), colourPairPaths);
             }
             else
@@ -125,6 +142,7 @@ namespace FlowFreeSolverWpf
 
             GridSizeCombo.IsEnabled = true;
             ClearButton.IsEnabled = true;
+            _solvingDialog.DialogResult = true;
             _solvingDialog.Close();
         }
 
@@ -133,9 +151,12 @@ namespace FlowFreeSolverWpf
             GridSizeCombo.IsEnabled = true;
             SolveButton.IsEnabled = true;
             ClearButton.IsEnabled = true;
+
+            _solvingDialog.DialogResult = true;
             _solvingDialog.Close();
-            _noSolutionDialog = new NoSolutionDialog {Owner = this};
-            _noSolutionDialog.ShowDialog();
+
+            var myMessageBox = new MyMessageBox {Owner = this, MessageText = "Sorry - no solution was found!"};
+            myMessageBox.ShowDialog();
         }
 
         private void ChangeGridSize()

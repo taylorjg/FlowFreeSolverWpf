@@ -63,8 +63,8 @@
     <Compile Include="ColourMap.cs" />
     <Compile Include="DotColour.cs" />
     <Compile Include="GridSizeItem.cs" />
-    <Compile Include="NoSolutionDialog.xaml.cs">
-      <DependentUpon>NoSolutionDialog.xaml</DependentUpon>
+    <Compile Include="MyMessageBox.xaml.cs">
+      <DependentUpon>MyMessageBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="SolvingDialog.xaml.cs">
       <DependentUpon>SolvingDialog.xaml</DependentUpon>
@@ -88,7 +88,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="NoSolutionDialog.xaml">
+    <Page Include="MyMessageBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
