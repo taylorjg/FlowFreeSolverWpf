@@ -7,22 +7,12 @@ using FlowFreeSolverWpf.Model;
 
 namespace FlowFreeSolverWpf
 {
-    public class GridSizeItem
-    {
-        public GridSizeItem(int gridSize)
-        {
-            GridSize = gridSize;
-            GridSizeName = string.Format("{0}x{0}", gridSize);
-        }
-
-        public int GridSize { get; private set; }
-        public string GridSizeName { get; private set; }
-    }
-
     public partial class MainWindow
     {
         public GridSizeItem[] GridSizeItems { get; private set; }
         public GridSizeItem SelectedGridSizeItem { get; set; }
+        public DotColour[] DotColours { get; private set; }
+        public DotColour SelectedDotColour { get; set; }
         private SolvingDialog _solvingDialog;
         private NoSolutionDialog _noSolutionDialog;
 
@@ -43,24 +33,58 @@ namespace FlowFreeSolverWpf
                 };
             SelectedGridSizeItem = GridSizeItems[2];
 
-            ContentRendered += (_, __) => ChangeGridSize();
-            GridSizeCombo.SelectionChanged += (_, __) =>
+            DotColours = ColourMap.DotColours;
+            SelectedDotColour = DotColours[0];
+
+            ContentRendered += (_, __) =>
                 {
-                    //ChangeGridSize()
+                    ChangeGridSize();
+
+                    var grid = new Grid(7, 7, new[]
+                        {
+                            new ColourPair(new Coords(6, 6), new Coords(5, 0), "A"),
+                            new ColourPair(new Coords(5, 5), new Coords(1, 4), "B"),
+                            new ColourPair(new Coords(6, 5), new Coords(4, 1), "C"),
+                            new ColourPair(new Coords(3, 3), new Coords(2, 2), "D"),
+                            new ColourPair(new Coords(4, 3), new Coords(6, 0), "E"),
+                            new ColourPair(new Coords(4, 2), new Coords(5, 1), "F")
+                        });
+
+                    foreach (var colourPair in grid.ColourPairs)
+                    {
+                        BoardControl.AddDot(colourPair.StartCoords, colourPair.Tag);
+                        BoardControl.AddDot(colourPair.EndCoords, colourPair.Tag);
+                    }
                 };
+
+            GridSizeCombo.SelectionChanged += (_, __) => ChangeGridSize();
 
             SolveButton.Click += (_, __) =>
                 {
                     GridSizeCombo.IsEnabled = false;
                     SolveButton.IsEnabled = false;
+                    ClearButton.IsEnabled = false;
                     ThreadPool.QueueUserWorkItem(state => SolveThePuzzle());
                     _solvingDialog = new SolvingDialog {Owner = this};
                     _solvingDialog.ShowDialog();
                 };
 
+            ClearButton.Click += (_, __) =>
+                {
+                    BoardControl.ClearDotsAndPaths();
+                    SolveButton.IsEnabled = true;
+                };
+
             BoardControl.CellClicked += (_, e) =>
                 {
-                    //System.Windows.MessageBox.Show(string.Format("CellClicked: ({0}, {1})", e.Coords.X, e.Coords.Y));
+                    if (BoardControl.IsDotAt(e.Coords))
+                    {
+                        BoardControl.RemoveDot(e.Coords);
+                    }
+                    else
+                    {
+                        BoardControl.AddDot(e.Coords, SelectedDotColour.Tag);
+                    }
                 };
         }
 
@@ -100,6 +124,7 @@ namespace FlowFreeSolverWpf
             }
 
             GridSizeCombo.IsEnabled = true;
+            ClearButton.IsEnabled = true;
             _solvingDialog.Close();
         }
 
@@ -107,6 +132,7 @@ namespace FlowFreeSolverWpf
         {
             GridSizeCombo.IsEnabled = true;
             SolveButton.IsEnabled = true;
+            ClearButton.IsEnabled = true;
             _solvingDialog.Close();
             _noSolutionDialog = new NoSolutionDialog {Owner = this};
             _noSolutionDialog.ShowDialog();
@@ -117,22 +143,6 @@ namespace FlowFreeSolverWpf
             BoardControl.Clear();
             BoardControl.GridSize = SelectedGridSizeItem.GridSize;
             BoardControl.DrawGrid();
-
-            var grid = new Grid(7, 7, new[]
-                {
-                    new ColourPair(new Coords(6, 6), new Coords(5, 0), "A"),
-                    new ColourPair(new Coords(5, 5), new Coords(1, 4), "B"),
-                    new ColourPair(new Coords(6, 5), new Coords(4, 1), "C"),
-                    new ColourPair(new Coords(3, 3), new Coords(2, 2), "D"),
-                    new ColourPair(new Coords(4, 3), new Coords(6, 0), "E"),
-                    new ColourPair(new Coords(4, 2), new Coords(5, 1), "F")
-                });
-
-            foreach (var colourPair in grid.ColourPairs)
-            {
-                BoardControl.AddDot(colourPair.StartCoords, colourPair.Tag);
-                BoardControl.AddDot(colourPair.EndCoords, colourPair.Tag);
-            }
         }
     }
 }

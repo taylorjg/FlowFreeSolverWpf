@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using FlowFreeSolverWpf.Model;
+using Path = System.Windows.Shapes.Path;
 
 namespace FlowFreeSolverWpf
 {
@@ -26,6 +27,8 @@ namespace FlowFreeSolverWpf
         private const double GridLineThickness = 1;
         private const double GridLineHalfThickness = GridLineThickness / 2;
         private readonly IDictionary<Coords, Tuple<string, Ellipse>> _coordsToTagsAndDots = new Dictionary<Coords, Tuple<string, Ellipse>>();
+        private readonly IList<Path> _paths = new List<Path>();
+        private readonly IList<Rectangle> _highlightRectangles = new List<Rectangle>();
 
         public BoardControl()
         {
@@ -48,8 +51,8 @@ namespace FlowFreeSolverWpf
             {
                 for (var y = 0; y < GridSize; y++)
                 {
-                    var rect = new Rect(x * sw + GridLineHalfThickness, (GridSize - y - 1) * sh + GridLineHalfThickness, sw, sh);
-                    if (rect.Contains(pt))
+                    var cellRect = new Rect(x * sw + GridLineHalfThickness, (GridSize - y - 1) * sh + GridLineHalfThickness, sw, sh);
+                    if (cellRect.Contains(pt))
                     {
                         RaiseCellClicked(new Coords(x, y));
                         return;
@@ -102,12 +105,45 @@ namespace FlowFreeSolverWpf
 
         public void Clear()
         {
+            ClearDotsAndPaths();
             BoardCanvas.Children.Clear();
+        }
+
+        public void ClearDotsAndPaths()
+        {
+            // ReSharper disable ReturnValueOfPureMethodIsNotUsed
+            _coordsToTagsAndDots.Select(kvp =>
+                {
+                    var ellipse = kvp.Value.Item2;
+                    BoardCanvas.Children.Remove(ellipse);
+                    return 0;
+                }).ToList();
+            // ReSharper restore ReturnValueOfPureMethodIsNotUsed
+
+            // ReSharper disable ReturnValueOfPureMethodIsNotUsed
+            _paths.Select(path =>
+                {
+                    BoardCanvas.Children.Remove(path);
+                    return 0;
+                }).ToList();
+            // ReSharper restore ReturnValueOfPureMethodIsNotUsed
+
+            // ReSharper disable ReturnValueOfPureMethodIsNotUsed
+            _highlightRectangles.Select(path =>
+            {
+                BoardCanvas.Children.Remove(path);
+                return 0;
+            }).ToList();
+            // ReSharper restore ReturnValueOfPureMethodIsNotUsed
+
+            _coordsToTagsAndDots.Clear();
+            _paths.Clear();
+            _highlightRectangles.Clear();
         }
 
         public void AddDot(Coords coords, string tag)
         {
-            if (_coordsToTagsAndDots.ContainsKey(coords))
+            if (IsDotAt(coords))
             {
                 return;
             }
@@ -124,11 +160,11 @@ namespace FlowFreeSolverWpf
                     Fill = new SolidColorBrush(MapTagToColour(tag))
                 };
 
-            var rect = new Rect(coords.X * sw + GridLineHalfThickness, (GridSize - coords.Y - 1) * sh + GridLineHalfThickness, sw, sh);
-            rect.Inflate(-sw/8, -sh/8);
+            var cellRect = new Rect(coords.X * sw + GridLineHalfThickness, (GridSize - coords.Y - 1) * sh + GridLineHalfThickness, sw, sh);
+            cellRect.Inflate(-sw/8, -sh/8);
 
-            Canvas.SetLeft(dot, rect.Left);
-            Canvas.SetTop(dot, rect.Top);
+            Canvas.SetLeft(dot, cellRect.Left);
+            Canvas.SetTop(dot, cellRect.Top);
 
             BoardCanvas.Children.Add(dot);
             _coordsToTagsAndDots.Add(coords, Tuple.Create(tag, dot));
@@ -141,6 +177,11 @@ namespace FlowFreeSolverWpf
                 BoardCanvas.Children.Remove(_coordsToTagsAndDots[coords].Item2);
                 _coordsToTagsAndDots.Remove(coords);
             }
+        }
+
+        public bool IsDotAt(Coords coords)
+        {
+            return _coordsToTagsAndDots.ContainsKey(coords);
         }
 
         public void DrawPath(ColourPair colourPair, Model.Path path)
@@ -166,7 +207,7 @@ namespace FlowFreeSolverWpf
             pathFigure.Segments.Add(polyLineSegment);
             var pathGeometry = new PathGeometry();
             pathGeometry.Figures.Add(pathFigure);
-            var polyLinePath = new System.Windows.Shapes.Path
+            var polyLinePath = new Path
             {
                 Stroke = new SolidColorBrush(MapTagToColour(colourPair.Tag)),
                 StrokeThickness = sw / 4,
@@ -176,22 +217,24 @@ namespace FlowFreeSolverWpf
             };
 
             BoardCanvas.Children.Add(polyLinePath);
+            _paths.Add(polyLinePath);
 
             var fillColour = MapTagToColour(colourPair.Tag);
 
             // ReSharper disable LoopCanBeConvertedToQuery
             foreach (var coords in path.CoordsList)
             {
-                var rect = new Rect(coords.X * sw + GridLineHalfThickness, (GridSize - coords.Y - 1) * sh + GridLineHalfThickness, sw, sh);
-                var rectangle = new Rectangle
+                var cellRect = new Rect(coords.X * sw + GridLineHalfThickness, (GridSize - coords.Y - 1) * sh + GridLineHalfThickness, sw, sh);
+                var highlightRectangle = new Rectangle
                     {
-                        Width = rect.Width,
-                        Height = rect.Height,
+                        Width = cellRect.Width,
+                        Height = cellRect.Height,
                         Fill = new SolidColorBrush(Color.FromArgb(0x60, fillColour.R, fillColour.G, fillColour.B))
                     };
-                Canvas.SetLeft(rectangle, rect.Left);
-                Canvas.SetTop(rectangle, rect.Top);
-                BoardCanvas.Children.Add(rectangle);
+                Canvas.SetLeft(highlightRectangle, cellRect.Left);
+                Canvas.SetTop(highlightRectangle, cellRect.Top);
+                BoardCanvas.Children.Add(highlightRectangle);
+                _highlightRectangles.Add(highlightRectangle);
             }
             // ReSharper restore LoopCanBeConvertedToQuery
         }
@@ -238,29 +281,7 @@ namespace FlowFreeSolverWpf
 
         private static Color MapTagToColour(string tag)
         {
-            switch (tag)
-            {
-                case "A":
-                    return Colors.Blue;
-
-                case "B":
-                    return Colors.Orange;
-
-                case "C":
-                    return Colors.Red;
-
-                case "D":
-                    return Colors.Green;
-
-                case "E":
-                    return Colors.Cyan;
-
-                case "F":
-                    return Colors.Yellow;
-
-                default:
-                    throw new InvalidOperationException(string.Format("Unknown tag, '{0}'.", tag));
-            }
+            return ColourMap.MapTagToColour(tag);
         }
     }
 }

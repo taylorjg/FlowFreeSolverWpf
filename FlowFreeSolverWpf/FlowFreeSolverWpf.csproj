@@ -60,6 +60,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ColourMap.cs" />
+    <Compile Include="DotColour.cs" />
+    <Compile Include="GridSizeItem.cs" />
     <Compile Include="NoSolutionDialog.xaml.cs">
       <DependentUpon>NoSolutionDialog.xaml</DependentUpon>
     </Compile>

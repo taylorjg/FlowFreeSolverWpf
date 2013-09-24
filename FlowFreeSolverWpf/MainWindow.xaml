@@ -27,7 +27,18 @@
                 </ComboBox.SelectedItem>
             </ComboBox>
 
+            <Label Content="Colour:" />
+            <ComboBox x:Name="DotColourCombo" Margin="20,0,0,0" Width="100" DisplayMemberPath="ColourName" SelectedValuePath="Colour">
+                <ComboBox.ItemsSource>
+                    <Binding Path="DotColours" Mode="OneWay" />
+                </ComboBox.ItemsSource>
+                <ComboBox.SelectedItem>
+                    <Binding Path="SelectedDotColour" Mode="TwoWay" />
+                </ComboBox.SelectedItem>
+            </ComboBox>
+
             <Button x:Name="SolveButton" Content="Solve" Margin="20,0,0,0" Width="100" />
+            <Button x:Name="ClearButton" Content="Clear" Margin="20,0,0,0" Width="100" />
 
         </DockPanel>
 

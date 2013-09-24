@@ -49,8 +49,29 @@ namespace FlowFreeSolverWpf.Model
             var oppositeDirection = direction.Opposite();
             var directionsToTry = allDirections.Where(d => d != oppositeDirection);
 
-            var numEmptyCells = (grid.Width * grid.Height) - (grid.ColourPairs.Count() * 2);
-            var maxDirectionChanges = numEmptyCells / 3;
+            var maxDirectionChanges = 10;
+
+            switch (grid.Width * grid.Height)
+            {
+                case 25:
+                    maxDirectionChanges = 5;
+                    break;
+                case 36:
+                    maxDirectionChanges = 6;
+                    break;
+                case 49:
+                    maxDirectionChanges = 7;
+                    break;
+                case 64:
+                    maxDirectionChanges = 8;
+                    break;
+                case 81:
+                    maxDirectionChanges = 9;
+                    break;
+                case 100:
+                    maxDirectionChanges = 10;
+                    break;
+            }
 
             foreach (var directionToTry in directionsToTry)
             {
