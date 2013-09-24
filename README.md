@@ -45,7 +45,7 @@ This project is a WPF version of my earlier [FlowFreeDlx](https://github.com/tay
 * enhance the validation messages (identify the exact problem)
     * indicate minimum number of pairs if too few
     * indicate maximum number of pairs if too many
-    * indicate which olours that are not exact pairs
+    * indicate which colours are not exact pairs
     * any others ?
 * apply the MVVM design pattern (MVVM Light Toolkit ?)
     * sub-steps ?
