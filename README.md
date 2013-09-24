@@ -20,7 +20,7 @@ This project is a WPF version of my earlier [FlowFreeDlx](https://github.com/tay
 * ~~solve (on UI thread!) + draw solution paths~~
 * ~~add highlight to paths~~
 * ~~do solve on background thread~~
-* ~~display modal dialog box with external progress bar during solving~~
+* ~~display modal dialog box with indeterminate progress bar during solving~~
 * ~~add a cancel button to the modal dialog box~~
 * ~~add ability to cancel the solve process~~
 * ~~add status bar to display stats~~
@@ -35,17 +35,17 @@ This project is a WPF version of my earlier [FlowFreeDlx](https://github.com/tay
 * ~~un-add a dot when clicking on an existing dot~~
 * ~~display the colour in the dropdown items (use an item template ?)~~
 * add validation of colour pairs on the grid
-** ~~must be exact pairs~~
-** minimum number of pairs for the selected grid size
-** maximum number of pairs for the selected grid size
+    * ~~must be exact pairs~~
+    * minimum number of pairs for the selected grid size
+    * maximum number of pairs for the selected grid size
 * ~~add a clear/reset button~~
 * pass maxDirectionChanges into BuildMatrixFor()
 * add ability to change maxDirectionChanges from the UI
 * add an app icon
 * enhance the validation messages (identify the exact problem)
-** indicate minimum number of pairs if too few
-** indicate maximum number of pairs if too many
-** indicate which olours that are not exact pairs
-** any others ?
+    * indicate minimum number of pairs if too few
+    * indicate maximum number of pairs if too many
+    * indicate which olours that are not exact pairs
+    * any others ?
 * apply the MVVM design pattern (MVVM Light Toolkit ?)
-** sub-steps ?
+    * sub-steps ?
