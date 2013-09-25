@@ -99,6 +99,8 @@ namespace FlowFreeSolverWpf
                     SolveButton.IsEnabled = false;
                     ClearButton.IsEnabled = false;
 
+                    BoardControl.ClearPaths();
+
                     _cancellationTokenSource = new CancellationTokenSource();
 
                     ThreadPool.QueueUserWorkItem(state => SolveThePuzzle(colourPairs));
@@ -117,7 +119,8 @@ namespace FlowFreeSolverWpf
 
             ClearButton.Click += (_, __) =>
                 {
-                    BoardControl.ClearDotsAndPaths();
+                    BoardControl.ClearDots();
+                    BoardControl.ClearPaths();
                     SolveButton.IsEnabled = true;
                     StatusMessage = string.Empty;
                 };
@@ -182,6 +185,10 @@ namespace FlowFreeSolverWpf
                 if (!_cancellationTokenSource.IsCancellationRequested)
                 {
                     _dlx = new Dlx();
+
+                    // We only want the first solution - don't waste time trying to find further solutions.
+                    _dlx.SolutionFound += (_, __) => _dlx.Cancel();
+
                     stopwatch.Reset();
                     stopwatch.Start();
                     solutions = _dlx.Solve(matrix).ToList();
@@ -226,6 +233,7 @@ namespace FlowFreeSolverWpf
             }
 
             GridSizeCombo.IsEnabled = true;
+            SolveButton.IsEnabled = true;
             ClearButton.IsEnabled = true;
             _solvingDialog.DialogResult = true;
             _solvingDialog.Close();
@@ -289,7 +297,7 @@ namespace FlowFreeSolverWpf
 
         private void ChangeGridSize()
         {
-            BoardControl.Clear();
+            BoardControl.ClearAll();
             SolveButton.IsEnabled = true;
             StatusMessage = string.Empty;
             BoardControl.GridSize = SelectedGridSizeItem.GridSize;

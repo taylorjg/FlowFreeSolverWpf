@@ -47,5 +47,6 @@ This project is a WPF version of my earlier [FlowFreeDlx](https://github.com/tay
     * indicate maximum number of pairs if too many
     * indicate which colours are not exact pairs
     * any others ?
+* ~~use TPL to try to speed up the creation of the matrix ?~~
 * apply the MVVM design pattern (MVVM Light Toolkit ?)
     * sub-steps ?

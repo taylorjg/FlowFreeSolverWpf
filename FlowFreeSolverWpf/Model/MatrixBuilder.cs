@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace FlowFreeSolverWpf.Model
 {
@@ -22,13 +23,8 @@ namespace FlowFreeSolverWpf.Model
             var internalData = new List<IList<bool>>();
             _rowIndexToColourPairAndPath = new Dictionary<int, Tuple<ColourPair, Path>>();
 
-            // ReSharper disable ReturnValueOfPureMethodIsNotUsed
-            _grid.ColourPairs.Select((colourPair, colourPairIndex) =>
-                {
-                    AddInternalDataRowsForColourPair(internalData, colourPair, colourPairIndex);
-                    return 0;
-                }).ToList();
-            // ReSharper restore ReturnValueOfPureMethodIsNotUsed
+            var colourPairsWithIndexes = _grid.ColourPairs.Select((colourPair, colourPairIndex) => new { ColourPair = colourPair, ColourPairIndex = colourPairIndex });
+            Parallel.ForEach(colourPairsWithIndexes, cpwi => AddInternalDataRowsForColourPair(internalData, cpwi.ColourPair, cpwi.ColourPairIndex));
 
             var matrix = new bool[internalData.Count, _numColumns];
             for (var row = 0; row < internalData.Count; row++)

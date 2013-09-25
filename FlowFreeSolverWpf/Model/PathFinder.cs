@@ -62,29 +62,7 @@ namespace FlowFreeSolverWpf.Model
             var oppositeDirection = direction.Opposite();
             var directionsToTry = allDirections.Where(d => d != oppositeDirection);
 
-            var maxDirectionChanges = 10;
-
-            switch (grid.Width * grid.Height)
-            {
-                case 25:
-                    maxDirectionChanges = 5;
-                    break;
-                case 36:
-                    maxDirectionChanges = 6;
-                    break;
-                case 49:
-                    maxDirectionChanges = 7;
-                    break;
-                case 64:
-                    maxDirectionChanges = 8;
-                    break;
-                case 81:
-                    maxDirectionChanges = 9;
-                    break;
-                case 100:
-                    maxDirectionChanges = 10;
-                    break;
-            }
+            var maxDirectionChanges = GetMaxDirectionChanges(grid);
 
             foreach (var directionToTry in directionsToTry)
             {
@@ -94,6 +72,37 @@ namespace FlowFreeSolverWpf.Model
                     FollowPath(grid, paths, Path.CopyOfPath(currentPath), endCoords, directionToTry, newNumDirectionChanges);
                 }
             }
+        }
+
+        private static int GetMaxDirectionChanges(Grid grid)
+        {
+            var maxDirectionChanges = 10;
+
+            const int Base = 4;
+
+            switch (grid.Width * grid.Height)
+            {
+                case 25:
+                    maxDirectionChanges = Base + 0;
+                    break;
+                case 36:
+                    maxDirectionChanges = Base + 1;
+                    break;
+                case 49:
+                    maxDirectionChanges = Base + 2;
+                    break;
+                case 64:
+                    maxDirectionChanges = Base + 3;
+                    break;
+                case 81:
+                    maxDirectionChanges = Base + 4;
+                    break;
+                case 100:
+                    maxDirectionChanges = Base + 5;
+                    break;
+            }
+
+            return maxDirectionChanges;
         }
     }
 }
