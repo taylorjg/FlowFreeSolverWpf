@@ -9,17 +9,19 @@ namespace FlowFreeSolverWpf.Model
     public class MatrixBuilder
     {
         private Grid _grid;
+        private int _maxDirectionChanges;
+        private CancellationToken _cancellationToken;
         private int _numColourPairs;
         private int _numColumns;
         private IDictionary<int, Tuple<ColourPair, Path>> _rowIndexToColourPairAndPath;
-        private CancellationToken _cancellationToken;
 
-        public bool[,] BuildMatrixFor(Grid grid, CancellationToken cancellationToken)
+        public bool[,] BuildMatrixFor(Grid grid, int maxDirectionChanges, CancellationToken cancellationToken)
         {
-            _cancellationToken = cancellationToken;
             _grid = grid;
+            _maxDirectionChanges = maxDirectionChanges;
+            _cancellationToken = cancellationToken;
             _numColourPairs = _grid.ColourPairs.Count();
-            _numColumns = _numColourPairs + (_grid.Width * _grid.Height);
+            _numColumns = _numColourPairs + (_grid.GridSize * grid.GridSize);
             var internalData = new List<IList<bool>>();
             _rowIndexToColourPairAndPath = new Dictionary<int, Tuple<ColourPair, Path>>();
 
@@ -46,7 +48,7 @@ namespace FlowFreeSolverWpf.Model
         private void AddInternalDataRowsForColourPair(List<IList<bool>> internalData, ColourPair colourPair, int colourPairIndex)
         {
             var pathFinder = new PathFinder(_cancellationToken);
-            var paths = pathFinder.FindAllPaths(_grid, colourPair.StartCoords, colourPair.EndCoords);
+            var paths = pathFinder.FindAllPaths(_grid, colourPair.StartCoords, colourPair.EndCoords, _maxDirectionChanges);
 
             foreach (var path in paths.PathList)
             {
@@ -65,7 +67,7 @@ namespace FlowFreeSolverWpf.Model
 
             foreach (var coords in path.CoordsList)
             {
-                var gridLocationColumnIndex = _numColourPairs + (_grid.Width * coords.X) + coords.Y;
+                var gridLocationColumnIndex = _numColourPairs + (_grid.GridSize * coords.X) + coords.Y;
                 internalDataRow[gridLocationColumnIndex] = true;
             }
 

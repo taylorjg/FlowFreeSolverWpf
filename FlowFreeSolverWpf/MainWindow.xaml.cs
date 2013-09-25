@@ -140,7 +140,7 @@ namespace FlowFreeSolverWpf
 
         private void PreLoad7X7Puzzle()
         {
-            var grid = new Grid(7, 7, new[]
+            var grid = new Grid(7, new[]
                 {
                     new ColourPair(new Coords(6, 6), new Coords(5, 0), "A"),
                     new ColourPair(new Coords(5, 5), new Coords(1, 4), "B"),
@@ -161,10 +161,7 @@ namespace FlowFreeSolverWpf
         {
             StatusMessage = string.Empty;
 
-            var grid = new Grid(
-                SelectedGridSizeItem.GridSize,
-                SelectedGridSizeItem.GridSize,
-                colourPairs.ToArray());
+            var grid = new Grid(SelectedGridSizeItem.GridSize, colourPairs.ToArray());
 
             var matrix = new bool[0,0];
             TimeSpan? matrixBuildingDuration = null;
@@ -178,7 +175,8 @@ namespace FlowFreeSolverWpf
                 _matrixBuilder = new MatrixBuilder();
                 stopwatch.Reset();
                 stopwatch.Start();
-                matrix = _matrixBuilder.BuildMatrixFor(grid, _cancellationTokenSource.Token);
+                var maxDirectionChanges = GetMaxDirectionChanges(grid);
+                matrix = _matrixBuilder.BuildMatrixFor(grid, maxDirectionChanges, _cancellationTokenSource.Token);
                 stopwatch.Stop();
                 matrixBuildingDuration = stopwatch.Elapsed;
 
@@ -307,6 +305,37 @@ namespace FlowFreeSolverWpf
             {
                 PreLoad7X7Puzzle();
             }
+        }
+
+        private static int GetMaxDirectionChanges(Grid grid)
+        {
+            var maxDirectionChanges = 10;
+
+            const int Base = 4;
+
+            switch (grid.GridSize * grid.GridSize)
+            {
+                case 25:
+                    maxDirectionChanges = Base + 0;
+                    break;
+                case 36:
+                    maxDirectionChanges = Base + 1;
+                    break;
+                case 49:
+                    maxDirectionChanges = Base + 2;
+                    break;
+                case 64:
+                    maxDirectionChanges = Base + 3;
+                    break;
+                case 81:
+                    maxDirectionChanges = Base + 4;
+                    break;
+                case 100:
+                    maxDirectionChanges = Base + 5;
+                    break;
+            }
+
+            return maxDirectionChanges;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
