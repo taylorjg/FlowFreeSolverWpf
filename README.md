@@ -40,8 +40,7 @@ This project is a WPF version of my earlier [FlowFreeDlx](https://github.com/tay
     * maximum number of pairs for the selected grid size
 * ~~add a clear/reset button~~
 * ~~pass maxDirectionChanges into BuildMatrixFor()~~
-* try different values of maxDirectionChanges until a solution is found - by extending the matrix
-* add ability to change maxDirectionChanges from the UI
+* increase maxDirectionChanges (extending the matrix) until a solution is found
 * add an app icon
 * enhance the validation messages (identify the exact problem)
     * indicate minimum number of pairs if too few
@@ -49,21 +48,6 @@ This project is a WPF version of my earlier [FlowFreeDlx](https://github.com/tay
     * indicate which colours are not exact pairs
     * any others ?
 * ~~use TPL to try to speed up the creation of the matrix ?~~
-* ~~Fix the bug introduced by using Parallel.ForEach() (see below)~~
+* ~~Fix the bug introduced by using Parallel.ForEach()~~
 * apply the MVVM design pattern (MVVM Light Toolkit ?)
     * sub-steps ?
-
-### Bugs
-
-~~In <code>BuildMatrixFor</code>, we now use <code>Parallel.ForEach</code> to invoke <code>AddInternalDataRowsForColourPair</code> in parallel to speed up the building of the matrix. However, <code>AddInternalDataRowsForColourPair</code> adds items to the <code>internalData</code> list and the <code>_rowIndexToColourPairAndPath</code dictionary. Currently, we do not have any synchronisation around these collections so occassionally the program borks.
-
-Possible solutions:
-
-* Use concurrent collections
-* Modify the code so that <code>AddInternalDataRowsForColourPair</code> returns the new items rather than adding them to the collections
-
-I prefer the second option because:
-
-* it feels cleaner
-* it should be faster because there is no need to synchronize access to shared resources~~
-
