@@ -15,6 +15,20 @@ namespace FlowFreeSolverWpf.Model
         private int _numColumns;
         private IDictionary<int, Tuple<ColourPair, Path>> _rowIndexToColourPairAndPath;
 
+        private class InternalDataRow
+        {
+            public InternalDataRow(ColourPair colourPair, Path path, IList<bool> matrixRow)
+            {
+                ColourPair = colourPair;
+                Path = path;
+                MatrixRow = matrixRow;
+            }
+
+            public ColourPair ColourPair { get; private set; }
+            public Path Path { get; private set; }
+            public IList<bool> MatrixRow { get; private set; }
+        }
+
         public bool[,] BuildMatrixFor(Grid grid, int maxDirectionChanges, CancellationToken cancellationToken)
         {
             _grid = grid;
@@ -22,10 +36,9 @@ namespace FlowFreeSolverWpf.Model
             _cancellationToken = cancellationToken;
             _numColourPairs = _grid.ColourPairs.Count();
             _numColumns = _numColourPairs + (_grid.GridSize * grid.GridSize);
-            var internalData = new List<IList<bool>>();
             _rowIndexToColourPairAndPath = new Dictionary<int, Tuple<ColourPair, Path>>();
 
-            var tasks = new List<Task<IList<Tuple<ColourPair, Path, IList<bool>>>>>();
+            var tasks = new List<Task<IList<InternalDataRow>>>();
             var colourPairsWithIndexes = _grid.ColourPairs.Select((colourPair, colourPairIndex) => new { ColourPair = colourPair, ColourPairIndex = colourPairIndex });
 
             // ReSharper disable LoopCanBeConvertedToQuery
@@ -33,7 +46,7 @@ namespace FlowFreeSolverWpf.Model
             {
                 var copyOfitem = item;
                 var task =
-                    Task<IList<Tuple<ColourPair, Path, IList<bool>>>>.Factory.StartNew(
+                    Task<IList<InternalDataRow>>.Factory.StartNew(
                         () =>
                         BuildInternalDataRowsForColourPair(copyOfitem.ColourPair, copyOfitem.ColourPairIndex));
                 tasks.Add(task);
@@ -42,29 +55,33 @@ namespace FlowFreeSolverWpf.Model
 
             Task.WaitAll(tasks.Cast<Task>().ToArray());
 
+            var combinedMatrixRows = new List<IList<bool>>();
             foreach (var task in tasks)
             {
-                var result = task.Result;
-                foreach (var resultItem in result)
+                var internalDataRows = task.Result;
+                foreach (var internalDataRow in internalDataRows)
                 {
-                    var colourPair = resultItem.Item1;
-                    var path = resultItem.Item2;
-                    var internalDataRow = resultItem.Item3;
-                    internalData.Add(internalDataRow);
-                    var rowIndex = internalData.Count - 1;
-                    _rowIndexToColourPairAndPath[rowIndex] = Tuple.Create(colourPair, path);
+                    combinedMatrixRows.Add(internalDataRow.MatrixRow);
+                    var rowIndex = combinedMatrixRows.Count - 1;
+                    _rowIndexToColourPairAndPath[rowIndex] = Tuple.Create(internalDataRow.ColourPair, internalDataRow.Path);
                 }
             }
 
-            var matrix = new bool[internalData.Count, _numColumns];
-            for (var row = 0; row < internalData.Count; row++)
+            return ConvertCombinedMatrixRowsToDlxMatrix(combinedMatrixRows);
+        }
+
+        private bool[,] ConvertCombinedMatrixRowsToDlxMatrix(List<IList<bool>> combinedMatrixRows)
+        {
+            var matrix = new bool[combinedMatrixRows.Count,_numColumns];
+
+            for (var row = 0; row < combinedMatrixRows.Count; row++)
             {
                 for (var col = 0; col < _numColumns; col++)
                 {
-                    matrix[row, col] = internalData[row][col];
+                    matrix[row, col] = combinedMatrixRows[row][col];
                 }
-            } 
-            
+            }
+
             return matrix;
         }
 
@@ -73,9 +90,9 @@ namespace FlowFreeSolverWpf.Model
             return _rowIndexToColourPairAndPath[rowIndex];
         }
 
-        private IList<Tuple<ColourPair, Path, IList<bool>>> BuildInternalDataRowsForColourPair(ColourPair colourPair, int colourPairIndex)
+        private IList<InternalDataRow> BuildInternalDataRowsForColourPair(ColourPair colourPair, int colourPairIndex)
         {
-            var result = new List<Tuple<ColourPair, Path, IList<bool>>>();
+            var internalDataRows = new List<InternalDataRow>();
 
             var pathFinder = new PathFinder(_cancellationToken);
             var paths = pathFinder.FindAllPaths(_grid, colourPair.StartCoords, colourPair.EndCoords, _maxDirectionChanges);
@@ -83,27 +100,27 @@ namespace FlowFreeSolverWpf.Model
             // ReSharper disable LoopCanBeConvertedToQuery
             foreach (var path in paths.PathList)
             {
-                var internalDataRow = BuildInternalDataRowForColourPairPath(colourPairIndex, path);
-                result.Add(Tuple.Create(colourPair, path, internalDataRow));
+                var matrixRow = BuildMatrixRowForColourPairPath(colourPairIndex, path);
+                internalDataRows.Add(new InternalDataRow(colourPair, path, matrixRow));
             }
             // ReSharper restore LoopCanBeConvertedToQuery
 
-            return result;
+            return internalDataRows;
         }
 
-        private IList<bool> BuildInternalDataRowForColourPairPath(int colourPairIndex, Path path)
+        private IList<bool> BuildMatrixRowForColourPairPath(int colourPairIndex, Path path)
         {
-            var internalDataRow = new bool[_numColumns];
+            var matrixRow = new bool[_numColumns];
 
-            internalDataRow[colourPairIndex] = true;
+            matrixRow[colourPairIndex] = true;
 
             foreach (var coords in path.CoordsList)
             {
                 var gridLocationColumnIndex = _numColourPairs + (_grid.GridSize * coords.X) + coords.Y;
-                internalDataRow[gridLocationColumnIndex] = true;
+                matrixRow[gridLocationColumnIndex] = true;
             }
 
-            return internalDataRow;
+            return matrixRow;
         }
     }
 }
