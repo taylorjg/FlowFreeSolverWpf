@@ -25,8 +25,36 @@ namespace FlowFreeSolverWpf.Model
             var internalData = new List<IList<bool>>();
             _rowIndexToColourPairAndPath = new Dictionary<int, Tuple<ColourPair, Path>>();
 
+            var tasks = new List<Task<IList<Tuple<ColourPair, Path, IList<bool>>>>>();
             var colourPairsWithIndexes = _grid.ColourPairs.Select((colourPair, colourPairIndex) => new { ColourPair = colourPair, ColourPairIndex = colourPairIndex });
-            Parallel.ForEach(colourPairsWithIndexes, cpwi => AddInternalDataRowsForColourPair(internalData, cpwi.ColourPair, cpwi.ColourPairIndex));
+
+            // ReSharper disable LoopCanBeConvertedToQuery
+            foreach (var item in colourPairsWithIndexes)
+            {
+                var copyOfitem = item;
+                var task =
+                    Task<IList<Tuple<ColourPair, Path, IList<bool>>>>.Factory.StartNew(
+                        () =>
+                        BuildInternalDataRowsForColourPair(copyOfitem.ColourPair, copyOfitem.ColourPairIndex));
+                tasks.Add(task);
+            }
+            // ReSharper restore LoopCanBeConvertedToQuery
+
+            Task.WaitAll(tasks.Cast<Task>().ToArray());
+
+            foreach (var task in tasks)
+            {
+                var result = task.Result;
+                foreach (var resultItem in result)
+                {
+                    var colourPair = resultItem.Item1;
+                    var path = resultItem.Item2;
+                    var internalDataRow = resultItem.Item3;
+                    internalData.Add(internalDataRow);
+                    var rowIndex = internalData.Count - 1;
+                    _rowIndexToColourPairAndPath[rowIndex] = Tuple.Create(colourPair, path);
+                }
+            }
 
             var matrix = new bool[internalData.Count, _numColumns];
             for (var row = 0; row < internalData.Count; row++)
@@ -45,18 +73,22 @@ namespace FlowFreeSolverWpf.Model
             return _rowIndexToColourPairAndPath[rowIndex];
         }
 
-        private void AddInternalDataRowsForColourPair(List<IList<bool>> internalData, ColourPair colourPair, int colourPairIndex)
+        private IList<Tuple<ColourPair, Path, IList<bool>>> BuildInternalDataRowsForColourPair(ColourPair colourPair, int colourPairIndex)
         {
+            var result = new List<Tuple<ColourPair, Path, IList<bool>>>();
+
             var pathFinder = new PathFinder(_cancellationToken);
             var paths = pathFinder.FindAllPaths(_grid, colourPair.StartCoords, colourPair.EndCoords, _maxDirectionChanges);
 
+            // ReSharper disable LoopCanBeConvertedToQuery
             foreach (var path in paths.PathList)
             {
                 var internalDataRow = BuildInternalDataRowForColourPairPath(colourPairIndex, path);
-                internalData.Add(internalDataRow);
-                var rowIndex = internalData.Count - 1;
-                _rowIndexToColourPairAndPath.Add(rowIndex, Tuple.Create(colourPair, path));
+                result.Add(Tuple.Create(colourPair, path, internalDataRow));
             }
+            // ReSharper restore LoopCanBeConvertedToQuery
+
+            return result;
         }
 
         private IList<bool> BuildInternalDataRowForColourPairPath(int colourPairIndex, Path path)

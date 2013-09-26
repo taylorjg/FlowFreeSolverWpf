@@ -24,7 +24,7 @@ namespace FlowFreeSolverWpf
     public partial class BoardControl
     {
         private readonly Color _gridLineColour = Colors.Yellow;
-        private const double GridLineThickness = 1;
+        private const double GridLineThickness = 0.8;
         private const double GridLineHalfThickness = GridLineThickness / 2;
         private readonly IDictionary<Coords, Tuple<string, Ellipse>> _coordsToTagsAndDots = new Dictionary<Coords, Tuple<string, Ellipse>>();
         private readonly IList<Path> _paths = new List<Path>();
@@ -211,7 +211,7 @@ namespace FlowFreeSolverWpf
             var polyLinePath = new Path
             {
                 Stroke = new SolidColorBrush(ColourMap.MapTagToColour(colourPair.Tag)),
-                StrokeThickness = sw / 4,
+                StrokeThickness = sw / 3,
                 StrokeEndLineCap = PenLineCap.Round,
                 StrokeLineJoin = PenLineJoin.Round,
                 Data = pathGeometry
@@ -254,6 +254,7 @@ namespace FlowFreeSolverWpf
             {
                 var line = new Line
                     {
+                        SnapsToDevicePixels = true,
                         Stroke = gridLineBrush,
                         StrokeThickness = GridLineThickness,
                         X1 = 0,
@@ -270,6 +271,7 @@ namespace FlowFreeSolverWpf
             {
                 var line = new Line
                 {
+                    SnapsToDevicePixels = true,
                     Stroke = gridLineBrush,
                     StrokeThickness = GridLineThickness,
                     X1 = col * sw + GridLineHalfThickness,
