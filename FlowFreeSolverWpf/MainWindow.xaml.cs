@@ -8,22 +8,6 @@ using FlowFreeSolverWpf.Model;
 
 namespace FlowFreeSolverWpf
 {
-    public class SolutionStats
-    {
-        public SolutionStats(int numMatrixRows, int numMatrixCols, TimeSpan? matrixBuildingDuration, TimeSpan? matrixSolvingDuration)
-        {
-            NumMatrixRows = numMatrixRows;
-            NumMatrixCols = numMatrixCols;
-            MatrixBuildingDuration = matrixBuildingDuration;
-            MatrixSolvingDuration = matrixSolvingDuration;
-        }
-
-        public int NumMatrixRows { get; set; }
-        public int NumMatrixCols { get; set; }
-        public TimeSpan? MatrixBuildingDuration { get; set; }
-        public TimeSpan? MatrixSolvingDuration { get; set; }
-    }
-
     public partial class MainWindow : INotifyPropertyChanged
     {
         public GridSizeItem[] GridSizeItems { get; private set; }
@@ -301,9 +285,21 @@ namespace FlowFreeSolverWpf
             BoardControl.GridSize = SelectedGridSizeItem.GridSize;
             BoardControl.DrawGrid();
 
-            if (SelectedGridSizeItem.GridSize == 7)
+            switch (SelectedGridSizeItem.GridSize)
             {
-                PreLoad7X7Puzzle();
+                case 5:
+                    break;
+                case 6:
+                    break;
+                case 7:
+                    PreLoad7X7Puzzle();
+                    break;
+                case 8:
+                    break;
+                case 9:
+                    break;
+                case 10:
+                    break;
             }
         }
 

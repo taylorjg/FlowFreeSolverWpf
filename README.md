@@ -49,5 +49,6 @@ This project is a WPF version of my earlier [FlowFreeDlx](https://github.com/tay
     * any others ?
 * ~~use TPL to try to speed up the creation of the matrix ?~~
 * ~~Fix the bug introduced by using Parallel.ForEach()~~
+* ~~Add an InternalDataRow inner class to simplify the MatrixBuilder code~~
 * apply the MVVM design pattern (MVVM Light Toolkit ?)
     * sub-steps ?
