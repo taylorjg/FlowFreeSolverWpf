@@ -62,7 +62,8 @@
     </ApplicationDefinition>
     <Compile Include="ColourMap.cs" />
     <Compile Include="DotColour.cs" />
-    <Compile Include="GridSizeItem.cs" />
+    <Compile Include="GridDescription.cs" />
+    <Compile Include="Grids.cs" />
     <Compile Include="MyMessageBox.xaml.cs">
       <DependentUpon>MyMessageBox.xaml</DependentUpon>
     </Compile>

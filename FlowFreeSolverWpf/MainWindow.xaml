@@ -25,10 +25,10 @@
             <Label Content="Grid size:" Margin="0" VerticalAlignment="Center" />
             <ComboBox x:Name="GridSizeCombo" Margin="5,0,0,0" VerticalAlignment="Center" Width="100">
                 <ComboBox.ItemsSource>
-                    <Binding Path="GridSizeItems" Mode="OneWay" />
+                    <Binding Path="GridDescriptions" Mode="OneWay" />
                 </ComboBox.ItemsSource>
                 <ComboBox.SelectedItem>
-                    <Binding Path="SelectedGridSizeItem" Mode="TwoWay" />
+                    <Binding Path="SelectedGrid" Mode="TwoWay" />
                 </ComboBox.SelectedItem>
                 <ComboBox.ItemTemplate>
                     <DataTemplate>

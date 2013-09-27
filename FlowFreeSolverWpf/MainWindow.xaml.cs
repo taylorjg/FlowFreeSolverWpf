@@ -10,8 +10,8 @@ namespace FlowFreeSolverWpf
 {
     public partial class MainWindow : INotifyPropertyChanged
     {
-        public GridSizeItem[] GridSizeItems { get; private set; }
-        public GridSizeItem SelectedGridSizeItem { get; set; }
+        public GridDescription[] GridDescriptions { get; private set; }
+        public GridDescription SelectedGrid { get; set; }
         public DotColour[] DotColours { get; private set; }
         public DotColour SelectedDotColour { get; set; }
 
@@ -46,20 +46,8 @@ namespace FlowFreeSolverWpf
 
             DataContext = this;
 
-            GridSizeItems = new[]
-                {
-                    new GridSizeItem(5),
-                    new GridSizeItem(6),
-                    new GridSizeItem(7),
-                    new GridSizeItem(8),
-                    new GridSizeItem(9),
-                    new GridSizeItem(10),
-                    new GridSizeItem(11),
-                    new GridSizeItem(12),
-                    new GridSizeItem(13),
-                    new GridSizeItem(14)
-                };
-            SelectedGridSizeItem = GridSizeItems[2];
+            GridDescriptions = Grids.GridDescriptions;
+            SelectedGrid = GridDescriptions[2];
 
             DotColours = ColourMap.DotColours;
             SelectedDotColour = DotColours[0];
@@ -126,55 +114,11 @@ namespace FlowFreeSolverWpf
                 };
         }
 
-        private void PreLoad7X7Puzzle()
-        {
-            var grid = new Grid(7, new[]
-                {
-                    new ColourPair(new Coords(6, 6), new Coords(5, 0), ColourMap.Blue),
-                    new ColourPair(new Coords(5, 5), new Coords(1, 4), ColourMap.Orange),
-                    new ColourPair(new Coords(6, 5), new Coords(4, 1), ColourMap.Red),
-                    new ColourPair(new Coords(3, 3), new Coords(2, 2), ColourMap.Green),
-                    new ColourPair(new Coords(4, 3), new Coords(6, 0), ColourMap.Cyan),
-                    new ColourPair(new Coords(4, 2), new Coords(5, 1), ColourMap.Yellow)
-                });
-
-            foreach (var colourPair in grid.ColourPairs)
-            {
-                BoardControl.AddDot(colourPair.StartCoords, colourPair.DotColour);
-                BoardControl.AddDot(colourPair.EndCoords, colourPair.DotColour);
-            }
-        }
-
-        private void PreLoad10X10Puzzle()
-        {
-            var grid = new Grid(10, new[]
-                {
-                    new ColourPair(new Coords(5, 9), new Coords(9, 9), ColourMap.Blue),
-                    new ColourPair(new Coords(2, 6), new Coords(6, 6), ColourMap.Orange),
-                    new ColourPair(new Coords(0, 9), new Coords(2, 3), ColourMap.Red),
-                    new ColourPair(new Coords(3, 7), new Coords(8, 5), ColourMap.Green),
-                    new ColourPair(new Coords(1, 6), new Coords(9, 3), ColourMap.Cyan),
-                    new ColourPair(new Coords(0, 2), new Coords(1, 0), ColourMap.Yellow),
-                    new ColourPair(new Coords(5, 3), new Coords(8, 1), ColourMap.Magenta),
-                    new ColourPair(new Coords(1, 1), new Coords(4, 0), ColourMap.MediumPurple),
-                    new ColourPair(new Coords(3, 6), new Coords(6, 5), ColourMap.Brown),
-                    new ColourPair(new Coords(1, 2), new Coords(8, 4), ColourMap.Gray),
-                    new ColourPair(new Coords(2, 7), new Coords(3, 8), ColourMap.White),
-                    new ColourPair(new Coords(1, 5), new Coords(6, 1), ColourMap.Lime)
-                });
-
-            foreach (var colourPair in grid.ColourPairs)
-            {
-                BoardControl.AddDot(colourPair.StartCoords, colourPair.DotColour);
-                BoardControl.AddDot(colourPair.EndCoords, colourPair.DotColour);
-            }
-        }
-
         private void SolveThePuzzle(IEnumerable<ColourPair> colourPairs)
         {
             StatusMessage = string.Empty;
 
-            var grid = new Grid(SelectedGridSizeItem.GridSize, colourPairs.ToArray());
+            var grid = new Grid(SelectedGrid.GridSize, colourPairs.ToArray());
 
             var matrix = new bool[0,0];
             TimeSpan? matrixBuildingDuration = null;
@@ -188,8 +132,7 @@ namespace FlowFreeSolverWpf
                 _matrixBuilder = new MatrixBuilder();
                 stopwatch.Reset();
                 stopwatch.Start();
-                var maxDirectionChanges = GetMaxDirectionChanges(grid);
-                matrix = _matrixBuilder.BuildMatrixFor(grid, maxDirectionChanges, _cancellationTokenSource.Token);
+                matrix = _matrixBuilder.BuildMatrixFor(grid, SelectedGrid.InitialMaxDirectionChanges, _cancellationTokenSource.Token);
                 stopwatch.Stop();
                 matrixBuildingDuration = stopwatch.Elapsed;
 
@@ -311,42 +254,19 @@ namespace FlowFreeSolverWpf
             BoardControl.ClearAll();
             SolveButton.IsEnabled = true;
             StatusMessage = string.Empty;
-            BoardControl.GridSize = SelectedGridSizeItem.GridSize;
+            BoardControl.GridSize = SelectedGrid.GridSize;
             BoardControl.DrawGrid();
+            PreLoadSamplePuzzle(SelectedGrid);
+        }
 
-            switch (SelectedGridSizeItem.GridSize)
+        private void PreLoadSamplePuzzle(GridDescription gridDescription)
+        {
+            foreach (var colourPair in gridDescription.SamplePuzzle)
             {
-                case 5:
-                    break;
-                case 6:
-                    break;
-                case 7:
-                    PreLoad7X7Puzzle();
-                    break;
-                case 8:
-                    break;
-                case 9:
-                    break;
-                case 10:
-                    PreLoad10X10Puzzle();
-                    break;
-                case 11:
-                    break;
-                case 12:
-                    break;
-                case 13:
-                    break;
-                case 14:
-                    break;
+                BoardControl.AddDot(colourPair.StartCoords, colourPair.DotColour);
+                BoardControl.AddDot(colourPair.EndCoords, colourPair.DotColour);
             }
         }
-
-        // ReSharper disable UnusedParameter.Local
-        private static int GetMaxDirectionChanges(Grid grid)
-        {
-            return 7;
-        }
-        // ReSharper restore UnusedParameter.Local
 
         public event PropertyChangedEventHandler PropertyChanged;
 
