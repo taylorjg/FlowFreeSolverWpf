@@ -121,7 +121,7 @@ namespace FlowFreeSolverWpf
                     }
                     else
                     {
-                        BoardControl.AddDot(e.Coords, SelectedDotColour.Tag);
+                        BoardControl.AddDot(e.Coords, SelectedDotColour);
                     }
                 };
         }
@@ -130,18 +130,18 @@ namespace FlowFreeSolverWpf
         {
             var grid = new Grid(7, new[]
                 {
-                    new ColourPair(new Coords(6, 6), new Coords(5, 0), "A"),
-                    new ColourPair(new Coords(5, 5), new Coords(1, 4), "B"),
-                    new ColourPair(new Coords(6, 5), new Coords(4, 1), "C"),
-                    new ColourPair(new Coords(3, 3), new Coords(2, 2), "D"),
-                    new ColourPair(new Coords(4, 3), new Coords(6, 0), "E"),
-                    new ColourPair(new Coords(4, 2), new Coords(5, 1), "F")
+                    new ColourPair(new Coords(6, 6), new Coords(5, 0), ColourMap.Blue),
+                    new ColourPair(new Coords(5, 5), new Coords(1, 4), ColourMap.Orange),
+                    new ColourPair(new Coords(6, 5), new Coords(4, 1), ColourMap.Red),
+                    new ColourPair(new Coords(3, 3), new Coords(2, 2), ColourMap.Green),
+                    new ColourPair(new Coords(4, 3), new Coords(6, 0), ColourMap.Cyan),
+                    new ColourPair(new Coords(4, 2), new Coords(5, 1), ColourMap.Yellow)
                 });
 
             foreach (var colourPair in grid.ColourPairs)
             {
-                BoardControl.AddDot(colourPair.StartCoords, colourPair.Tag);
-                BoardControl.AddDot(colourPair.EndCoords, colourPair.Tag);
+                BoardControl.AddDot(colourPair.StartCoords, colourPair.DotColour);
+                BoardControl.AddDot(colourPair.EndCoords, colourPair.DotColour);
             }
         }
 
@@ -149,24 +149,24 @@ namespace FlowFreeSolverWpf
         {
             var grid = new Grid(10, new[]
                 {
-                    new ColourPair(new Coords(5, 9), new Coords(9, 9), "A"),
-                    new ColourPair(new Coords(2, 6), new Coords(6, 6), "B"),
-                    new ColourPair(new Coords(0, 9), new Coords(2, 3), "C"),
-                    new ColourPair(new Coords(3, 7), new Coords(8, 5), "D"),
-                    new ColourPair(new Coords(1, 6), new Coords(9, 3), "E"),
-                    new ColourPair(new Coords(0, 2), new Coords(1, 0), "F"),
-                    new ColourPair(new Coords(5, 3), new Coords(8, 1), "G"),
-                    new ColourPair(new Coords(1, 1), new Coords(4, 0), "H"),
-                    new ColourPair(new Coords(3, 6), new Coords(6, 5), "I"),
-                    new ColourPair(new Coords(1, 2), new Coords(8, 4), "J"),
-                    new ColourPair(new Coords(2, 7), new Coords(3, 8), "K"),
-                    new ColourPair(new Coords(1, 5), new Coords(6, 1), "L")
+                    new ColourPair(new Coords(5, 9), new Coords(9, 9), ColourMap.Blue),
+                    new ColourPair(new Coords(2, 6), new Coords(6, 6), ColourMap.Orange),
+                    new ColourPair(new Coords(0, 9), new Coords(2, 3), ColourMap.Red),
+                    new ColourPair(new Coords(3, 7), new Coords(8, 5), ColourMap.Green),
+                    new ColourPair(new Coords(1, 6), new Coords(9, 3), ColourMap.Cyan),
+                    new ColourPair(new Coords(0, 2), new Coords(1, 0), ColourMap.Yellow),
+                    new ColourPair(new Coords(5, 3), new Coords(8, 1), ColourMap.Magenta),
+                    new ColourPair(new Coords(1, 1), new Coords(4, 0), ColourMap.MediumPurple),
+                    new ColourPair(new Coords(3, 6), new Coords(6, 5), ColourMap.Brown),
+                    new ColourPair(new Coords(1, 2), new Coords(8, 4), ColourMap.Gray),
+                    new ColourPair(new Coords(2, 7), new Coords(3, 8), ColourMap.White),
+                    new ColourPair(new Coords(1, 5), new Coords(6, 1), ColourMap.Lime)
                 });
 
             foreach (var colourPair in grid.ColourPairs)
             {
-                BoardControl.AddDot(colourPair.StartCoords, colourPair.Tag);
-                BoardControl.AddDot(colourPair.EndCoords, colourPair.Tag);
+                BoardControl.AddDot(colourPair.StartCoords, colourPair.DotColour);
+                BoardControl.AddDot(colourPair.EndCoords, colourPair.DotColour);
             }
         }
 
@@ -341,10 +341,12 @@ namespace FlowFreeSolverWpf
             }
         }
 
+        // ReSharper disable UnusedParameter.Local
         private static int GetMaxDirectionChanges(Grid grid)
         {
             return 7;
         }
+        // ReSharper restore UnusedParameter.Local
 
         public event PropertyChangedEventHandler PropertyChanged;
 

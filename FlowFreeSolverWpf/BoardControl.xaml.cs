@@ -26,7 +26,7 @@ namespace FlowFreeSolverWpf
         private readonly Color _gridLineColour = Colors.Yellow;
         private const double GridLineThickness = 0.8;
         private const double GridLineHalfThickness = GridLineThickness / 2;
-        private readonly IDictionary<Coords, Tuple<string, Ellipse>> _coordsToTagsAndDots = new Dictionary<Coords, Tuple<string, Ellipse>>();
+        private readonly IDictionary<Coords, Tuple<DotColour, Ellipse>> _coordsToTagsAndDots = new Dictionary<Coords, Tuple<DotColour, Ellipse>>();
         private readonly IList<Path> _paths = new List<Path>();
         private readonly IList<Rectangle> _highlightRectangles = new List<Rectangle>();
         private readonly IList<Line> _gridLines = new List<Line>();
@@ -89,8 +89,8 @@ namespace FlowFreeSolverWpf
                 {
                     var startCoords = x.ElementAt(0).Coords;
                     var endCoords = x.ElementAt(1).Coords;
-                    var tag = x.Key;
-                    return new ColourPair(startCoords, endCoords, tag);
+                    var dotColour = x.Key;
+                    return new ColourPair(startCoords, endCoords, dotColour);
                 }).ToList();
         }
 
@@ -142,7 +142,7 @@ namespace FlowFreeSolverWpf
             list.Clear();
         }
 
-        public void AddDot(Coords coords, string tag)
+        public void AddDot(Coords coords, DotColour dotColour)
         {
             if (IsDotAt(coords))
             {
@@ -158,7 +158,7 @@ namespace FlowFreeSolverWpf
                 {
                     Width = sw * 6 / 8,
                     Height = sh * 6 / 8,
-                    Fill = new SolidColorBrush(ColourMap.MapTagToColour(tag))
+                    Fill = new SolidColorBrush(dotColour.Colour)
                 };
 
             var cellRect = new Rect(coords.X * sw + GridLineHalfThickness, (GridSize - coords.Y - 1) * sh + GridLineHalfThickness, sw, sh);
@@ -168,7 +168,7 @@ namespace FlowFreeSolverWpf
             Canvas.SetTop(dot, cellRect.Top);
 
             BoardCanvas.Children.Add(dot);
-            _coordsToTagsAndDots.Add(coords, Tuple.Create(tag, dot));
+            _coordsToTagsAndDots.Add(coords, Tuple.Create(dotColour, dot));
         }
 
         public void RemoveDot(Coords coords)
@@ -210,7 +210,7 @@ namespace FlowFreeSolverWpf
             pathGeometry.Figures.Add(pathFigure);
             var polyLinePath = new Path
             {
-                Stroke = new SolidColorBrush(ColourMap.MapTagToColour(colourPair.Tag)),
+                Stroke = new SolidColorBrush(colourPair.DotColour.Colour),
                 StrokeThickness = sw / 3,
                 StrokeEndLineCap = PenLineCap.Round,
                 StrokeLineJoin = PenLineJoin.Round,
@@ -220,7 +220,7 @@ namespace FlowFreeSolverWpf
             BoardCanvas.Children.Add(polyLinePath);
             _paths.Add(polyLinePath);
 
-            var fillColour = ColourMap.MapTagToColour(colourPair.Tag);
+            var fillColour = colourPair.DotColour.Colour;
 
             // ReSharper disable LoopCanBeConvertedToQuery
             foreach (var coords in path.CoordsList)

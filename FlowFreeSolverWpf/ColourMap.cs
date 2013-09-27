@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Windows.Media;
+﻿using System.Windows.Media;
 
 namespace FlowFreeSolverWpf
 {
@@ -8,30 +6,31 @@ namespace FlowFreeSolverWpf
     {
         public static DotColour[] DotColours = new[]
             {
-                new DotColour("A", "Blue", Colors.Blue),
-                new DotColour("B", "Orange", Colors.Orange),
-                new DotColour("C", "Red", Colors.Red),
-                new DotColour("D", "Green", Colors.Green),
-                new DotColour("E", "Cyan", Colors.Cyan),
-                new DotColour("F", "Yellow", Colors.Yellow),
-                new DotColour("G", "Magenta", Colors.Magenta),
-                new DotColour("H", "MediumPurple", Colors.MediumPurple),
-                new DotColour("I", "Brown", Colors.Brown),
-                new DotColour("J", "Gray", Colors.Gray),
-                new DotColour("K", "White", Colors.White),
-                new DotColour("L", "Lime", Colors.Lime)
+                new DotColour("Blue", Colors.Blue),
+                new DotColour("Orange", Colors.Orange),
+                new DotColour("Red", Colors.Red),
+                new DotColour("Green", Colors.Green),
+                new DotColour("Cyan", Colors.Cyan),
+                new DotColour("Yellow", Colors.Yellow),
+                new DotColour("Magenta", Colors.Magenta),
+                new DotColour("MediumPurple", Colors.MediumPurple),
+                new DotColour("Brown", Colors.Brown),
+                new DotColour("Gray", Colors.Gray),
+                new DotColour("White", Colors.White),
+                new DotColour("Lime", Colors.Lime)
             };
 
-        public static Color MapTagToColour(string tag)
-        {
-            var dotColour = DotColours.FirstOrDefault(dc => dc.Tag == tag);
-
-            if (dotColour == null)
-            {
-                throw new InvalidOperationException(string.Format("Unknown tag, '{0}'.", tag));
-            }
-
-            return dotColour.Colour;
-        }
+        public static DotColour Blue { get { return DotColours[0]; } }
+        public static DotColour Orange { get { return DotColours[1]; } }
+        public static DotColour Red { get { return DotColours[2]; } }
+        public static DotColour Green { get { return DotColours[3]; } }
+        public static DotColour Cyan { get { return DotColours[4]; } }
+        public static DotColour Yellow { get { return DotColours[5]; } }
+        public static DotColour Magenta { get { return DotColours[6]; } }
+        public static DotColour MediumPurple { get { return DotColours[7]; } }
+        public static DotColour Brown { get { return DotColours[8]; } }
+        public static DotColour Gray { get { return DotColours[9]; } }
+        public static DotColour White { get { return DotColours[10]; } }
+        public static DotColour Lime { get { return DotColours[11]; } }
     }
 }
