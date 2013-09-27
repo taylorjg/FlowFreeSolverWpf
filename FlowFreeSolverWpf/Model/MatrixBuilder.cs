@@ -15,9 +15,18 @@ namespace FlowFreeSolverWpf.Model
         private int _numColumns;
         private IDictionary<int, Tuple<ColourPair, Path>> _rowIndexToColourPairAndPath;
 
+        private class MatrixRow : List<bool>
+        {
+            public MatrixRow(int numColumns)
+            {
+                var bools = new bool[numColumns];
+                AddRange(bools);
+            }
+        }
+
         private class InternalDataRow
         {
-            public InternalDataRow(ColourPair colourPair, Path path, IList<bool> matrixRow)
+            public InternalDataRow(ColourPair colourPair, Path path, MatrixRow matrixRow)
             {
                 ColourPair = colourPair;
                 Path = path;
@@ -26,7 +35,7 @@ namespace FlowFreeSolverWpf.Model
 
             public ColourPair ColourPair { get; private set; }
             public Path Path { get; private set; }
-            public IList<bool> MatrixRow { get; private set; }
+            public MatrixRow MatrixRow { get; private set; }
         }
 
         public bool[,] BuildMatrixFor(Grid grid, int maxDirectionChanges, CancellationToken cancellationToken)
@@ -44,33 +53,29 @@ namespace FlowFreeSolverWpf.Model
             // ReSharper disable LoopCanBeConvertedToQuery
             foreach (var item in colourPairsWithIndexes)
             {
-                var copyOfitem = item;
+                var copyOfitemForCapture = item;
                 var task =
                     Task<IList<InternalDataRow>>.Factory.StartNew(
                         () =>
-                        BuildInternalDataRowsForColourPair(copyOfitem.ColourPair, copyOfitem.ColourPairIndex));
+                        BuildInternalDataRowsForColourPair(copyOfitemForCapture.ColourPair, copyOfitemForCapture.ColourPairIndex));
                 tasks.Add(task);
             }
             // ReSharper restore LoopCanBeConvertedToQuery
 
             Task.WaitAll(tasks.Cast<Task>().ToArray());
 
-            var combinedMatrixRows = new List<IList<bool>>();
-            foreach (var task in tasks)
+            var combinedMatrixRows = new List<MatrixRow>();
+            foreach (var internalDataRow in tasks.Select(task => task.Result).SelectMany(internalDataRows => internalDataRows))
             {
-                var internalDataRows = task.Result;
-                foreach (var internalDataRow in internalDataRows)
-                {
-                    combinedMatrixRows.Add(internalDataRow.MatrixRow);
-                    var rowIndex = combinedMatrixRows.Count - 1;
-                    _rowIndexToColourPairAndPath[rowIndex] = Tuple.Create(internalDataRow.ColourPair, internalDataRow.Path);
-                }
+                combinedMatrixRows.Add(internalDataRow.MatrixRow);
+                var rowIndex = combinedMatrixRows.Count - 1;
+                _rowIndexToColourPairAndPath[rowIndex] = Tuple.Create(internalDataRow.ColourPair, internalDataRow.Path);
             }
 
             return ConvertCombinedMatrixRowsToDlxMatrix(combinedMatrixRows);
         }
 
-        private bool[,] ConvertCombinedMatrixRowsToDlxMatrix(List<IList<bool>> combinedMatrixRows)
+        private bool[,] ConvertCombinedMatrixRowsToDlxMatrix(IList<MatrixRow> combinedMatrixRows)
         {
             var matrix = new bool[combinedMatrixRows.Count,_numColumns];
 
@@ -108,9 +113,9 @@ namespace FlowFreeSolverWpf.Model
             return internalDataRows;
         }
 
-        private IList<bool> BuildMatrixRowForColourPairPath(int colourPairIndex, Path path)
+        private MatrixRow BuildMatrixRowForColourPairPath(int colourPairIndex, Path path)
         {
-            var matrixRow = new bool[_numColumns];
+            var matrixRow = new MatrixRow(_numColumns);
 
             matrixRow[colourPairIndex] = true;
 

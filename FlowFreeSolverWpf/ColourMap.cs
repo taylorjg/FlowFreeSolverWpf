@@ -16,7 +16,10 @@ namespace FlowFreeSolverWpf
                 new DotColour("F", "Yellow", Colors.Yellow),
                 new DotColour("G", "Magenta", Colors.Magenta),
                 new DotColour("H", "MediumPurple", Colors.MediumPurple),
-                new DotColour("I", "Brown", Colors.Brown)
+                new DotColour("I", "Brown", Colors.Brown),
+                new DotColour("J", "Gray", Colors.Gray),
+                new DotColour("K", "White", Colors.White),
+                new DotColour("L", "Lime", Colors.Lime)
             };
 
         public static Color MapTagToColour(string tag)

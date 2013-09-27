@@ -53,7 +53,11 @@ namespace FlowFreeSolverWpf
                     new GridSizeItem(7),
                     new GridSizeItem(8),
                     new GridSizeItem(9),
-                    new GridSizeItem(10)
+                    new GridSizeItem(10),
+                    new GridSizeItem(11),
+                    new GridSizeItem(12),
+                    new GridSizeItem(13),
+                    new GridSizeItem(14)
                 };
             SelectedGridSizeItem = GridSizeItems[2];
 
@@ -132,6 +136,31 @@ namespace FlowFreeSolverWpf
                     new ColourPair(new Coords(3, 3), new Coords(2, 2), "D"),
                     new ColourPair(new Coords(4, 3), new Coords(6, 0), "E"),
                     new ColourPair(new Coords(4, 2), new Coords(5, 1), "F")
+                });
+
+            foreach (var colourPair in grid.ColourPairs)
+            {
+                BoardControl.AddDot(colourPair.StartCoords, colourPair.Tag);
+                BoardControl.AddDot(colourPair.EndCoords, colourPair.Tag);
+            }
+        }
+
+        private void PreLoad10X10Puzzle()
+        {
+            var grid = new Grid(10, new[]
+                {
+                    new ColourPair(new Coords(5, 9), new Coords(9, 9), "A"),
+                    new ColourPair(new Coords(2, 6), new Coords(6, 6), "B"),
+                    new ColourPair(new Coords(0, 9), new Coords(2, 3), "C"),
+                    new ColourPair(new Coords(3, 7), new Coords(8, 5), "D"),
+                    new ColourPair(new Coords(1, 6), new Coords(9, 3), "E"),
+                    new ColourPair(new Coords(0, 2), new Coords(1, 0), "F"),
+                    new ColourPair(new Coords(5, 3), new Coords(8, 1), "G"),
+                    new ColourPair(new Coords(1, 1), new Coords(4, 0), "H"),
+                    new ColourPair(new Coords(3, 6), new Coords(6, 5), "I"),
+                    new ColourPair(new Coords(1, 2), new Coords(8, 4), "J"),
+                    new ColourPair(new Coords(2, 7), new Coords(3, 8), "K"),
+                    new ColourPair(new Coords(1, 5), new Coords(6, 1), "L")
                 });
 
             foreach (var colourPair in grid.ColourPairs)
@@ -299,39 +328,22 @@ namespace FlowFreeSolverWpf
                 case 9:
                     break;
                 case 10:
+                    PreLoad10X10Puzzle();
+                    break;
+                case 11:
+                    break;
+                case 12:
+                    break;
+                case 13:
+                    break;
+                case 14:
                     break;
             }
         }
 
         private static int GetMaxDirectionChanges(Grid grid)
         {
-            var maxDirectionChanges = 10;
-
-            const int Base = 4;
-
-            switch (grid.GridSize * grid.GridSize)
-            {
-                case 25:
-                    maxDirectionChanges = Base + 0;
-                    break;
-                case 36:
-                    maxDirectionChanges = Base + 1;
-                    break;
-                case 49:
-                    maxDirectionChanges = Base + 2;
-                    break;
-                case 64:
-                    maxDirectionChanges = Base + 3;
-                    break;
-                case 81:
-                    maxDirectionChanges = Base + 4;
-                    break;
-                case 100:
-                    maxDirectionChanges = Base + 5;
-                    break;
-            }
-
-            return maxDirectionChanges;
+            return 7;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

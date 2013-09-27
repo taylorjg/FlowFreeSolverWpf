@@ -230,7 +230,7 @@ namespace FlowFreeSolverWpf
                     {
                         Width = cellRect.Width,
                         Height = cellRect.Height,
-                        Fill = new SolidColorBrush(Color.FromArgb(0x60, fillColour.R, fillColour.G, fillColour.B))
+                        Fill = new SolidColorBrush(Color.FromArgb(0x80, fillColour.R, fillColour.G, fillColour.B))
                     };
                 Canvas.SetLeft(highlightRectangle, cellRect.Left);
                 Canvas.SetTop(highlightRectangle, cellRect.Top);
