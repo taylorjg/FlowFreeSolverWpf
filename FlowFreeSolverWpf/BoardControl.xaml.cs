@@ -158,7 +158,7 @@ namespace FlowFreeSolverWpf
                 {
                     Width = sw * 6 / 8,
                     Height = sh * 6 / 8,
-                    Fill = new SolidColorBrush(dotColour.Colour)
+                    Fill = new SolidColorBrush(dotColour.ToWpfColour())
                 };
 
             var cellRect = new Rect(coords.X * sw + GridLineHalfThickness, (GridSize - coords.Y - 1) * sh + GridLineHalfThickness, sw, sh);
@@ -192,6 +192,8 @@ namespace FlowFreeSolverWpf
             var sw = (aw - GridLineThickness) / GridSize;
             var sh = (ah - GridLineThickness) / GridSize;
 
+            var pathColour = colourPair.DotColour.ToWpfColour();
+
             var points = new List<Point>();
 
             // ReSharper disable LoopCanBeConvertedToQuery
@@ -210,7 +212,7 @@ namespace FlowFreeSolverWpf
             pathGeometry.Figures.Add(pathFigure);
             var polyLinePath = new Path
             {
-                Stroke = new SolidColorBrush(colourPair.DotColour.Colour),
+                Stroke = new SolidColorBrush(pathColour),
                 StrokeThickness = sw / 3,
                 StrokeEndLineCap = PenLineCap.Round,
                 StrokeLineJoin = PenLineJoin.Round,
@@ -220,8 +222,6 @@ namespace FlowFreeSolverWpf
             BoardCanvas.Children.Add(polyLinePath);
             _paths.Add(polyLinePath);
 
-            var fillColour = colourPair.DotColour.Colour;
-
             // ReSharper disable LoopCanBeConvertedToQuery
             foreach (var coords in path.CoordsList)
             {
@@ -230,7 +230,7 @@ namespace FlowFreeSolverWpf
                     {
                         Width = cellRect.Width,
                         Height = cellRect.Height,
-                        Fill = new SolidColorBrush(Color.FromArgb(0x80, fillColour.R, fillColour.G, fillColour.B))
+                        Fill = new SolidColorBrush(Color.FromArgb(0x80, pathColour.R, pathColour.G, pathColour.B))
                     };
                 Canvas.SetLeft(highlightRectangle, cellRect.Left);
                 Canvas.SetTop(highlightRectangle, cellRect.Top);

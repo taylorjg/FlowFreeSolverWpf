@@ -16,10 +16,10 @@
         
         <StackPanel Grid.Row="0" Orientation="Vertical">
             <Label Content="Solving..." Margin="10" />
-            <ProgressBar Margin="10, 0, 10, 0" HorizontalAlignment="Stretch" FlowDirection="LeftToRight" IsIndeterminate="True" Height="23" />
+            <ProgressBar Margin="10, 0, 10, 0" HorizontalAlignment="Stretch" FlowDirection="LeftToRight" IsIndeterminate="True" Height="18" />
         </StackPanel>
 
-        <Button Grid.Row="1" x:Name="CancelButton" Content="Cancel" IsCancel="True" Margin="10" Width="50" HorizontalAlignment="Right" VerticalAlignment="Bottom" IsEnabled="True" />
+        <Button Grid.Row="1" x:Name="CancelButton" Content="Cancel" IsCancel="True" Margin="10" Width="50" HorizontalAlignment="Right" VerticalAlignment="Bottom" />
         
     </Grid>
     

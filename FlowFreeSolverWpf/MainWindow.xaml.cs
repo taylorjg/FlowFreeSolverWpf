@@ -49,7 +49,7 @@ namespace FlowFreeSolverWpf
             GridDescriptions = Grids.GridDescriptions;
             SelectedGrid = GridDescriptions[2];
 
-            DotColours = ColourMap.DotColours;
+            DotColours = Model.DotColours.Colours;
             SelectedDotColour = DotColours[0];
 
             StatusMessage = string.Empty;
