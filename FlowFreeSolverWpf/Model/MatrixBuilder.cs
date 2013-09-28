@@ -9,11 +9,12 @@ namespace FlowFreeSolverWpf.Model
     public class MatrixBuilder
     {
         private Grid _grid;
-        private int _maxDirectionChanges;
         private CancellationToken _cancellationToken;
         private int _numColourPairs;
         private int _numColumns;
         private IDictionary<int, Tuple<ColourPair, Path>> _rowIndexToColourPairAndPath;
+        private IList<MatrixRow> _previousCombinedMatrixRows;
+        private IList<InternalDataRow> _allAbandonedPaths;
 
         private class MatrixRow : List<bool>
         {
@@ -41,38 +42,68 @@ namespace FlowFreeSolverWpf.Model
         public bool[,] BuildMatrixFor(Grid grid, int maxDirectionChanges, CancellationToken cancellationToken)
         {
             _grid = grid;
-            _maxDirectionChanges = maxDirectionChanges;
             _cancellationToken = cancellationToken;
+
             _numColourPairs = _grid.ColourPairs.Count();
             _numColumns = _numColourPairs + (_grid.GridSize * grid.GridSize);
-            _rowIndexToColourPairAndPath = new Dictionary<int, Tuple<ColourPair, Path>>();
 
             var tasks = new List<Task<IList<InternalDataRow>>>();
             var colourPairsWithIndexes = _grid.ColourPairs.Select((colourPair, colourPairIndex) => new { ColourPair = colourPair, ColourPairIndex = colourPairIndex });
 
+            if (_rowIndexToColourPairAndPath == null)
+            {
+                _rowIndexToColourPairAndPath = new Dictionary<int, Tuple<ColourPair, Path>>();
+                _previousCombinedMatrixRows = new List<MatrixRow>();
+                _allAbandonedPaths = new List<InternalDataRow>();
+            }
+
             // ReSharper disable LoopCanBeConvertedToQuery
             foreach (var item in colourPairsWithIndexes)
             {
-                var copyOfitemForCapture = item;
+                var copyOfItemForCapture = item;
+                var abandonedPaths = _allAbandonedPaths
+                    .Where(ap => ap.ColourPair == copyOfItemForCapture.ColourPair)
+                    .Select(ap => ap.Path)
+                    .ToList();
                 var task =
                     Task<IList<InternalDataRow>>.Factory.StartNew(
                         () =>
-                        BuildInternalDataRowsForColourPair(copyOfitemForCapture.ColourPair, copyOfitemForCapture.ColourPairIndex));
+                        BuildInternalDataRowsForColourPair(
+                            copyOfItemForCapture.ColourPair,
+                            copyOfItemForCapture.ColourPairIndex,
+                            abandonedPaths,
+                            maxDirectionChanges));
                 tasks.Add(task);
             }
             // ReSharper restore LoopCanBeConvertedToQuery
 
             Task.WaitAll(tasks.Cast<Task>().ToArray());
 
+            _allAbandonedPaths.Clear();
             var combinedMatrixRows = new List<MatrixRow>();
+            combinedMatrixRows.AddRange(_previousCombinedMatrixRows);
             foreach (var internalDataRow in tasks.Select(task => task.Result).SelectMany(internalDataRows => internalDataRows))
             {
-                combinedMatrixRows.Add(internalDataRow.MatrixRow);
-                var rowIndex = combinedMatrixRows.Count - 1;
-                _rowIndexToColourPairAndPath[rowIndex] = Tuple.Create(internalDataRow.ColourPair, internalDataRow.Path);
+                if (internalDataRow.Path.IsAbandoned)
+                {
+                    _allAbandonedPaths.Add(internalDataRow);
+                }
+                else
+                {
+                    combinedMatrixRows.Add(internalDataRow.MatrixRow);
+                    var rowIndex = combinedMatrixRows.Count - 1;
+                    _rowIndexToColourPairAndPath[rowIndex] = Tuple.Create(internalDataRow.ColourPair, internalDataRow.Path);
+                }
             }
 
+            _previousCombinedMatrixRows = combinedMatrixRows;
+
             return ConvertCombinedMatrixRowsToDlxMatrix(combinedMatrixRows);
+        }
+
+        public bool ThereAreStillSomeAbandonedPaths()
+        {
+            return _allAbandonedPaths.Any();
         }
 
         private bool[,] ConvertCombinedMatrixRowsToDlxMatrix(IList<MatrixRow> combinedMatrixRows)
@@ -95,12 +126,16 @@ namespace FlowFreeSolverWpf.Model
             return _rowIndexToColourPairAndPath[rowIndex];
         }
 
-        private IList<InternalDataRow> BuildInternalDataRowsForColourPair(ColourPair colourPair, int colourPairIndex)
+        private IList<InternalDataRow> BuildInternalDataRowsForColourPair(
+            ColourPair colourPair,
+            int colourPairIndex,
+            IList<Path> abandonedPaths,
+            int maxDirectionChanges)
         {
             var internalDataRows = new List<InternalDataRow>();
 
             var pathFinder = new PathFinder(_cancellationToken);
-            var paths = pathFinder.FindAllPaths(_grid, colourPair.StartCoords, colourPair.EndCoords, _maxDirectionChanges);
+            var paths = pathFinder.FindAllPaths(_grid, colourPair.StartCoords, colourPair.EndCoords, abandonedPaths, maxDirectionChanges);
 
             // ReSharper disable LoopCanBeConvertedToQuery
             foreach (var path in paths.PathList)

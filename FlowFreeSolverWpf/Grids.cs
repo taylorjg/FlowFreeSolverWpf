@@ -104,7 +104,7 @@ namespace FlowFreeSolverWpf
 
         public static GridDescription[] GridDescriptions = new[]
             {
-                new GridDescription(5, Sample5X5Puzzle, 4),
+                new GridDescription(5, Sample5X5Puzzle, 1),
                 new GridDescription(6, Sample6X6Puzzle, 4),
                 new GridDescription(7, Sample7X7Puzzle, 5),
                 new GridDescription(8, Sample8X8Puzzle, 6),

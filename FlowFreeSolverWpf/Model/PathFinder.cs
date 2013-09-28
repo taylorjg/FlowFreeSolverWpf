@@ -15,20 +15,44 @@ namespace FlowFreeSolverWpf.Model
             _cancellationToken = cancellationToken;
         }
 
-        public Paths FindAllPaths(Grid grid, Coords startCoords, Coords endCoords, int maxDirectionChanges)
+        public Paths FindAllPaths(
+            Grid grid,
+            Coords startCoords,
+            Coords endCoords,
+            IList<Path> abandonedPaths,
+            int maxDirectionChanges)
         {
             var paths = new Paths();
 
-            foreach (var direction in AllDirections)
+            if (abandonedPaths.Any())
             {
-                if (_cancellationToken.IsCancellationRequested) return paths;
-                FollowPath(grid, paths, Path.PathWithStartingPoint(startCoords), endCoords, direction, maxDirectionChanges, 0);
+                foreach (var abandonedPath in abandonedPaths)
+                {
+                    foreach (var direction in AllDirections)
+                    {
+                        FollowPath(grid, paths, abandonedPath, endCoords, direction, maxDirectionChanges, maxDirectionChanges - 1);
+                    }
+                }
+            }
+            else
+            {
+                foreach (var direction in AllDirections)
+                {
+                    FollowPath(grid, paths, Path.PathWithStartingPoint(startCoords), endCoords, direction, maxDirectionChanges, 0);
+                }
             }
 
             return paths;
         }
 
-        private void FollowPath(Grid grid, Paths paths, Path currentPath, Coords endCoords, Direction direction, int maxDirectionChanges, int numDirectionChanges)
+        private void FollowPath(
+            Grid grid,
+            Paths paths,
+            Path currentPath,
+            Coords endCoords,
+            Direction direction,
+            int maxDirectionChanges,
+            int numDirectionChanges)
         {
             if (_cancellationToken.IsCancellationRequested) return;
 
@@ -37,6 +61,7 @@ namespace FlowFreeSolverWpf.Model
             if (nextCoords.Equals(endCoords))
             {
                 currentPath.AddCoords(nextCoords);
+                currentPath.IsAbandoned = false;
                 paths.AddPath(currentPath);
                 return;
             }
@@ -66,7 +91,19 @@ namespace FlowFreeSolverWpf.Model
                 var newNumDirectionChanges = numDirectionChanges + (directionToTry != direction ? 1 : 0);
                 if (newNumDirectionChanges <= maxDirectionChanges)
                 {
-                    FollowPath(grid, paths, Path.CopyOfPath(currentPath), endCoords, directionToTry, maxDirectionChanges, newNumDirectionChanges);
+                    FollowPath(
+                        grid,
+                        paths,
+                        Path.CopyOfPath(currentPath),
+                        endCoords,
+                        directionToTry,
+                        maxDirectionChanges,
+                        newNumDirectionChanges);
+                }
+                else
+                {
+                    currentPath.IsAbandoned = true;
+                    paths.AddPath(currentPath);
                 }
             }
         }

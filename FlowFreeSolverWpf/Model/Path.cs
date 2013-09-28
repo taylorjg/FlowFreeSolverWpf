@@ -22,6 +22,7 @@ namespace FlowFreeSolverWpf.Model
             {
                 copyOfPath.AddCoords(coords);
             }
+            copyOfPath.IsAbandoned = originalPath.IsAbandoned;
             return copyOfPath;
         }
 
@@ -61,5 +62,7 @@ namespace FlowFreeSolverWpf.Model
                     throw new InvalidOperationException("Unknown direction");
             }
         }
+
+        public bool IsAbandoned { get; set; }
     }
 }

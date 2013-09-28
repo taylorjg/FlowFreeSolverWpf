@@ -125,29 +125,62 @@ namespace FlowFreeSolverWpf
             TimeSpan? matrixBuildingSolving = null;
             var solutions = new List<Solution>();
 
-            if (!_cancellationTokenSource.IsCancellationRequested)
+            _matrixBuilder = new MatrixBuilder();
+            _dlx = new Dlx();
+            _dlx.SolutionFound += (_, __) => _dlx.Cancel();
+
+            var maxDirectionChanges = SelectedGrid.InitialMaxDirectionChanges;
+
+            for (; ; )
             {
+                if (_cancellationTokenSource.IsCancellationRequested)
+                {
+                    break;
+                }
+
                 var stopwatch = new System.Diagnostics.Stopwatch();
 
-                _matrixBuilder = new MatrixBuilder();
                 stopwatch.Reset();
                 stopwatch.Start();
-                matrix = _matrixBuilder.BuildMatrixFor(grid, SelectedGrid.InitialMaxDirectionChanges, _cancellationTokenSource.Token);
+                matrix = _matrixBuilder.BuildMatrixFor(grid, maxDirectionChanges++, _cancellationTokenSource.Token);
                 stopwatch.Stop();
-                matrixBuildingDuration = stopwatch.Elapsed;
 
-                if (!_cancellationTokenSource.IsCancellationRequested)
+                if (!matrixBuildingDuration.HasValue)
                 {
-                    _dlx = new Dlx();
+                    matrixBuildingDuration = stopwatch.Elapsed;
+                }
+                else
+                {
+                    matrixBuildingDuration += stopwatch.Elapsed;
+                }
 
-                    // We only want the first solution - don't waste time trying to find further solutions.
-                    _dlx.SolutionFound += (_, __) => _dlx.Cancel();
+                if (_cancellationTokenSource.IsCancellationRequested)
+                {
+                    break;
+                }
 
-                    stopwatch.Reset();
-                    stopwatch.Start();
-                    solutions = _dlx.Solve(matrix).ToList();
-                    stopwatch.Stop();
+                stopwatch.Reset();
+                stopwatch.Start();
+                solutions = _dlx.Solve(matrix).ToList();
+                stopwatch.Stop();
+
+                if (!matrixBuildingSolving.HasValue)
+                {
                     matrixBuildingSolving = stopwatch.Elapsed;
+                }
+                else
+                {
+                    matrixBuildingSolving += stopwatch.Elapsed;
+                }
+
+                if (solutions.Any())
+                {
+                    break;
+                }
+
+                if (!_matrixBuilder.ThereAreStillSomeAbandonedPaths())
+                {
+                    break;
                 }
             }
 
