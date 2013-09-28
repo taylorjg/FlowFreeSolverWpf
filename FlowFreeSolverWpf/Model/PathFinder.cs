@@ -28,9 +28,15 @@ namespace FlowFreeSolverWpf.Model
             {
                 foreach (var abandonedPath in abandonedPaths)
                 {
-                    foreach (var direction in AllDirections)
+                    if (!abandonedPath.LastDirection.HasValue) continue;
+
+                    var oppositeDirection = abandonedPath.LastDirection.Value.Opposite();
+                    var directionsToTry = AllDirections.Where(d => d != oppositeDirection);
+
+                    foreach (var direction in directionsToTry)
                     {
-                        FollowPath(grid, paths, abandonedPath, endCoords, direction, maxDirectionChanges, maxDirectionChanges - 1);
+                        var copyOfAbandonedPath = Path.CopyOfPath(abandonedPath);
+                        FollowPath(grid, paths, copyOfAbandonedPath, endCoords, direction, maxDirectionChanges, copyOfAbandonedPath.NumDirectionChanges);
                     }
                 }
             }
@@ -103,6 +109,8 @@ namespace FlowFreeSolverWpf.Model
                 else
                 {
                     currentPath.IsAbandoned = true;
+                    currentPath.LastDirection = direction;
+                    currentPath.NumDirectionChanges = newNumDirectionChanges;
                     paths.AddPath(currentPath);
                 }
             }

@@ -142,7 +142,7 @@ namespace FlowFreeSolverWpf
 
                 stopwatch.Reset();
                 stopwatch.Start();
-                matrix = _matrixBuilder.BuildMatrixFor(grid, maxDirectionChanges++, _cancellationTokenSource.Token);
+                matrix = _matrixBuilder.BuildMatrixFor(grid, maxDirectionChanges, _cancellationTokenSource.Token);
                 stopwatch.Stop();
 
                 if (!matrixBuildingDuration.HasValue)
@@ -182,13 +182,16 @@ namespace FlowFreeSolverWpf
                 {
                     break;
                 }
+
+                maxDirectionChanges++;
             }
 
             _solutionStats = new SolutionStats(
                 matrix.GetLength(0),
                 matrix.GetLength(1),
                 matrixBuildingDuration,
-                matrixBuildingSolving);
+                matrixBuildingSolving,
+                maxDirectionChanges);
 
             if (_cancellationTokenSource.IsCancellationRequested)
             {
@@ -278,6 +281,8 @@ namespace FlowFreeSolverWpf
             {
                 statusMessage += string.Format(" ({0})", extraMessage);
             }
+
+            statusMessage += string.Format("; Direction changes: {0}", solutionStats.MaxDirectionChanges);
 
             StatusMessage = statusMessage;
         }

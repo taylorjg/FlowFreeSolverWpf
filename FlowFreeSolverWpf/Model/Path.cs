@@ -23,6 +23,8 @@ namespace FlowFreeSolverWpf.Model
                 copyOfPath.AddCoords(coords);
             }
             copyOfPath.IsAbandoned = originalPath.IsAbandoned;
+            copyOfPath.LastDirection = originalPath.LastDirection;
+            copyOfPath.NumDirectionChanges = originalPath.NumDirectionChanges;
             return copyOfPath;
         }
 
@@ -64,5 +66,7 @@ namespace FlowFreeSolverWpf.Model
         }
 
         public bool IsAbandoned { get; set; }
+        public Direction? LastDirection { get; set; }
+        public int NumDirectionChanges { get; set; }
     }
 }
