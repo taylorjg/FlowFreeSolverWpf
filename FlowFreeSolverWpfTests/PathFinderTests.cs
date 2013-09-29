@@ -279,47 +279,11 @@ namespace FlowFreeSolverWpfTests
                 abandonedPaths = pathFinderResult1.PathList.Where(p => p.IsAbandoned).ToList();
             }
 
-            System.Diagnostics.Debug.WriteLine(string.Empty);
-            System.Diagnostics.Debug.WriteLine(string.Empty);
-            System.Diagnostics.Debug.WriteLine(string.Empty);
-            System.Diagnostics.Debug.WriteLine(string.Empty);
-            System.Diagnostics.Debug.WriteLine(string.Empty);
-
             // Calling FindAllPaths once with maxDirectionChangeLimit.
             var pathFinder2 = new PathFinder(CancellationToken.None);
             var pathFinderResult2 = pathFinder2.FindAllPaths(grid, startCoords, endCoords, new List<Path>(), maxDirectionChangeLimit);
 
-            if (pathFinderResult2.PathList.Count() > completedPaths.Count)
-            {
-                System.Diagnostics.Debug.WriteLine(string.Empty);
-                System.Diagnostics.Debug.WriteLine(string.Empty);
-                System.Diagnostics.Debug.WriteLine(string.Empty);
-                System.Diagnostics.Debug.WriteLine(string.Empty);
-                System.Diagnostics.Debug.WriteLine(string.Empty);
-
-                System.Diagnostics.Debug.WriteLine("Path differences:");
-
-                var pathDifferences = pathFinderResult2.PathList.Except(completedPaths, new PathComparer());
-                foreach (var pathDifference in pathDifferences)
-                {
-                    System.Diagnostics.Debug.WriteLine(pathDifference);
-                }
-            }
-
             Assert.That(completedPaths.Count, Is.EqualTo(pathFinderResult2.PathList.Count()));
-        }
-
-        private class PathComparer : IEqualityComparer<Path>
-        {
-            public bool Equals(Path path1, Path path2)
-            {
-                return path1.CoordsList.SequenceEqual(path2.CoordsList);
-            }
-
-            public int GetHashCode(Path path)
-            {
-                return path.CoordsList.Count().GetHashCode() * 33;
-            }
         }
     }
 }

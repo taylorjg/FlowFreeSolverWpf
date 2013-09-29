@@ -52,38 +52,30 @@ namespace FlowFreeSolverWpf.Model
             Coords endCoords,
             int maxDirectionChanges)
         {
-            System.Diagnostics.Debug.WriteLine("FollowPath - endCoords: {0}; maxDirectionChanges: {1}", endCoords, maxDirectionChanges);
-            DumpPath(activePath);
-
             if (_cancellationToken.IsCancellationRequested) return;
 
             var nextCoords = activePath.GetNextCoords(activePath.Direction);
-            System.Diagnostics.Debug.WriteLine("nextCoords: {0}", nextCoords);
 
             if (nextCoords.Equals(endCoords))
             {
                 activePath.AddCoords(nextCoords);
                 activePath.IsAbandoned = false;
-                System.Diagnostics.Debug.WriteLine("Found a complete path - {0}", activePath);
                 resultantPaths.AddPath(activePath);
                 return;
             }
 
             if (activePath.ContainsCoords(nextCoords))
             {
-                System.Diagnostics.Debug.WriteLine("Returning - path is trying to cross itself");
                 return;
             }
 
             if (grid.CoordsAreOffTheGrid(nextCoords))
             {
-                System.Diagnostics.Debug.WriteLine("Returning - path has gone off the grid");
                 return;
             }
 
             if (grid.IsCellOccupied(nextCoords))
             {
-                System.Diagnostics.Debug.WriteLine("Returning - path has hit an obstacle");
                 return;
             }
 
@@ -109,15 +101,9 @@ namespace FlowFreeSolverWpf.Model
                 else
                 {
                     copyOfActivePath.IsAbandoned = true;
-                    System.Diagnostics.Debug.WriteLine("Abandoning path - direction change limit exceeded: {0}", copyOfActivePath);
                     resultantPaths.AddPath(copyOfActivePath);
                 }
             }
-        }
-
-        private static void DumpPath(Path path)
-        {
-            System.Diagnostics.Debug.WriteLine(path);
         }
     }
 }

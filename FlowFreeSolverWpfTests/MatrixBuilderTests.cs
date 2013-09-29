@@ -38,7 +38,6 @@ namespace FlowFreeSolverWpfTests
             for (; ; )
             {
                 matrix2 = matrixBuilder2.BuildMatrixFor(grid, maxDirectionChanges, CancellationToken.None);
-                DumpMatrix(string.Format("matrix2 - maxDirectionChanges: {0}", maxDirectionChanges), matrix2, matrixBuilder2);
                 //solutions = dlx.Solve(matrix2).ToList();
                 //if (solutions.Any())
                 //{
@@ -51,26 +50,8 @@ namespace FlowFreeSolverWpfTests
                 maxDirectionChanges++;
             }
 
-            DumpMatrix("matrix1", matrix1, matrixBuilder1);
-            DumpMatrix(string.Format("matrix2 - maxDirectionChanges: {0}", maxDirectionChanges), matrix2, matrixBuilder2);
-
             Assert.That(matrix2.GetLength(1), Is.EqualTo(matrix1.GetLength(1)));
             Assert.That(matrix2.GetLength(0), Is.EqualTo(matrix1.GetLength(0)));
-        }
-
-        private static void DumpMatrix(string message, bool[,] matrix, MatrixBuilder matrixBuilder)
-        {
-            System.Diagnostics.Debug.WriteLine(message);
-            for (var rowIndex = 0; rowIndex < matrix.GetLength(0); rowIndex++)
-            {
-                var colourPairAndPath = matrixBuilder.GetColourPairAndPathForRowIndex(rowIndex);
-                System.Diagnostics.Debug.WriteLine(
-                    "{0}: {1} {2}",
-                    rowIndex,
-                    colourPairAndPath.Item1.DotColour.ColourName,
-                    string.Join(", ", colourPairAndPath.Item2.CoordsList.Select(c => c.ToString()).ToArray()));
-            }
-            System.Diagnostics.Debug.WriteLine(string.Empty);
         }
     }
 }
