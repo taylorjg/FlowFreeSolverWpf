@@ -40,7 +40,7 @@ This project is a WPF version of my earlier [FlowFreeDlx](https://github.com/tay
     * maximum number of pairs for the selected grid size
 * ~~add a clear/reset button~~
 * ~~pass maxDirectionChanges into BuildMatrixFor()~~
-* increase maxDirectionChanges (extending the matrix) until a solution is found
+* ~~increase maxDirectionChanges (extending the matrix) until a solution is found~~
 * add an app icon
 * enhance the validation messages (identify the exact problem)
     * indicate minimum number of pairs if too few

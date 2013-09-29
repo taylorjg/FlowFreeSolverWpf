@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-//using System.Threading.Tasks;
+using System.Threading.Tasks;
 
 namespace FlowFreeSolverWpf.Model
 {
@@ -48,7 +48,7 @@ namespace FlowFreeSolverWpf.Model
             _numColourPairs = _grid.ColourPairs.Count();
             _numColumns = _numColourPairs + (_grid.GridSize * grid.GridSize);
 
-            //var tasks = new List<Task<IList<InternalDataRow>>>();
+            var tasks = new List<Task<IList<InternalDataRow>>>();
             var colourPairsWithIndexes = _grid.ColourPairs.Select((colourPair, colourPairIndex) => new { ColourPair = colourPair, ColourPairIndex = colourPairIndex });
             var processAbandonedRowsOnly = true;
 
@@ -61,31 +61,9 @@ namespace FlowFreeSolverWpf.Model
                 processAbandonedRowsOnly = false;
             }
 
-            //var taskFactory = new TaskFactory<IList<InternalDataRow>>();
+            var taskFactory = new TaskFactory<IList<InternalDataRow>>();
 
-            //// ReSharper disable LoopCanBeConvertedToQuery
-            //foreach (var item in colourPairsWithIndexes)
-            //{
-            //    var copyOfItemForCapture = item;
-            //    var abandonedPaths = _allAbandonedPaths
-            //        .Where(ap => ap.ColourPair == copyOfItemForCapture.ColourPair)
-            //        .Select(ap => ap.Path)
-            //        .ToList();
-            //    var task = taskFactory.StartNew(
-            //        () =>
-            //        BuildInternalDataRowsForColourPair(
-            //            copyOfItemForCapture.ColourPair,
-            //            copyOfItemForCapture.ColourPairIndex,
-            //            abandonedPaths,
-            //            maxDirectionChanges));
-            //    tasks.Add(task);
-            //}
-            //// ReSharper restore LoopCanBeConvertedToQuery
-
-            //Task.WaitAll(tasks.Cast<Task>().ToArray());
-
-            var taskResults = new List<InternalDataRow>();
-
+            // ReSharper disable LoopCanBeConvertedToQuery
             foreach (var item in colourPairsWithIndexes)
             {
                 var copyOfItemForCapture = item;
@@ -101,19 +79,23 @@ namespace FlowFreeSolverWpf.Model
                         continue;
                     }
                 }
-                var stuff = BuildInternalDataRowsForColourPair(
-                    copyOfItemForCapture.ColourPair,
-                    copyOfItemForCapture.ColourPairIndex,
-                    paths,
-                    maxDirectionChanges);
-                taskResults.AddRange(stuff);
+                var task = taskFactory.StartNew(
+                    () =>
+                    BuildInternalDataRowsForColourPair(
+                        copyOfItemForCapture.ColourPair,
+                        copyOfItemForCapture.ColourPairIndex,
+                        paths,
+                        maxDirectionChanges));
+                tasks.Add(task);
             }
+            // ReSharper restore LoopCanBeConvertedToQuery
+
+            Task.WaitAll(tasks.Cast<Task>().ToArray());
 
             _allAbandonedPaths.Clear();
             var combinedMatrixRows = new List<MatrixRow>();
             combinedMatrixRows.AddRange(_previousCombinedMatrixRows);
-            foreach (var internalDataRow in taskResults)
-            //foreach (var internalDataRow in tasks.Select(task => task.Result).SelectMany(internalDataRows => internalDataRows))
+            foreach (var internalDataRow in tasks.Select(task => task.Result).SelectMany(internalDataRows => internalDataRows))
             {
                 if (internalDataRow.Path.IsAbandoned)
                 {

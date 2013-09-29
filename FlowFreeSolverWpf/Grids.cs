@@ -109,11 +109,11 @@ namespace FlowFreeSolverWpf
                 new GridDescription(7, Sample7X7Puzzle, 1),
                 new GridDescription(8, Sample8X8Puzzle, 1),
                 new GridDescription(9, Sample9X9Puzzle, 1),
-                new GridDescription(10, Sample10X10Puzzle, 4),
-                new GridDescription(11, Sample11X11Puzzle, 4),
-                new GridDescription(12, Sample12X12Puzzle, 4),
-                new GridDescription(13, Sample13X13Puzzle, 4),
-                new GridDescription(14, Sample14X14Puzzle, 4)
+                new GridDescription(10, Sample10X10Puzzle, 1),
+                new GridDescription(11, Sample11X11Puzzle, 1),
+                new GridDescription(12, Sample12X12Puzzle, 1),
+                new GridDescription(13, Sample13X13Puzzle, 1),
+                new GridDescription(14, Sample14X14Puzzle, 1)
             };
     }
 }
