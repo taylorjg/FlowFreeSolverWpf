@@ -19,101 +19,105 @@ namespace FlowFreeSolverWpf.Model
             Grid grid,
             Coords startCoords,
             Coords endCoords,
-            IList<Path> abandonedPaths,
+            IList<Path> activePaths,
             int maxDirectionChanges)
         {
-            var paths = new Paths();
+            var resultantPaths = new Paths();
 
-            if (abandonedPaths.Any())
+            if (!activePaths.Any())
             {
-                foreach (var abandonedPath in abandonedPaths)
-                {
-                    if (!abandonedPath.LastDirection.HasValue) continue;
-
-                    var oppositeDirection = abandonedPath.LastDirection.Value.Opposite();
-                    var directionsToTry = AllDirections.Where(d => d != oppositeDirection);
-
-                    foreach (var direction in directionsToTry)
-                    {
-                        var copyOfAbandonedPath = Path.CopyOfPath(abandonedPath);
-                        FollowPath(grid, paths, copyOfAbandonedPath, endCoords, direction, maxDirectionChanges, copyOfAbandonedPath.NumDirectionChanges);
-                    }
-                }
-            }
-            else
-            {
-                foreach (var direction in AllDirections)
-                {
-                    FollowPath(grid, paths, Path.PathWithStartingPoint(startCoords), endCoords, direction, maxDirectionChanges, 0);
-                }
+                activePaths.Add(Path.PathWithStartingPointAndDirection(startCoords, Direction.Up));
+                activePaths.Add(Path.PathWithStartingPointAndDirection(startCoords, Direction.Down));
+                activePaths.Add(Path.PathWithStartingPointAndDirection(startCoords, Direction.Left));
+                activePaths.Add(Path.PathWithStartingPointAndDirection(startCoords, Direction.Right));
             }
 
-            return paths;
+            foreach (var activePath in activePaths)
+            {
+                FollowPath(
+                    grid,
+                    resultantPaths,
+                    activePath,
+                    endCoords,
+                    maxDirectionChanges);
+            }
+
+            return resultantPaths;
         }
 
         private void FollowPath(
             Grid grid,
-            Paths paths,
-            Path currentPath,
+            Paths resultantPaths,
+            Path activePath,
             Coords endCoords,
-            Direction direction,
-            int maxDirectionChanges,
-            int numDirectionChanges)
+            int maxDirectionChanges)
         {
+            System.Diagnostics.Debug.WriteLine("FollowPath - endCoords: {0}; maxDirectionChanges: {1}", endCoords, maxDirectionChanges);
+            DumpPath(activePath);
+
             if (_cancellationToken.IsCancellationRequested) return;
 
-            var nextCoords = currentPath.GetNextCoords(direction);
+            var nextCoords = activePath.GetNextCoords(activePath.Direction);
+            System.Diagnostics.Debug.WriteLine("nextCoords: {0}", nextCoords);
 
             if (nextCoords.Equals(endCoords))
             {
-                currentPath.AddCoords(nextCoords);
-                currentPath.IsAbandoned = false;
-                paths.AddPath(currentPath);
+                activePath.AddCoords(nextCoords);
+                activePath.IsAbandoned = false;
+                System.Diagnostics.Debug.WriteLine("Found a complete path - {0}", activePath);
+                resultantPaths.AddPath(activePath);
                 return;
             }
 
-            if (currentPath.ContainsCoords(nextCoords))
+            if (activePath.ContainsCoords(nextCoords))
             {
+                System.Diagnostics.Debug.WriteLine("Returning - path is trying to cross itself");
                 return;
             }
 
             if (grid.CoordsAreOffTheGrid(nextCoords))
             {
+                System.Diagnostics.Debug.WriteLine("Returning - path has gone off the grid");
                 return;
             }
 
             if (grid.IsCellOccupied(nextCoords))
             {
+                System.Diagnostics.Debug.WriteLine("Returning - path has hit an obstacle");
                 return;
             }
 
-            currentPath.AddCoords(nextCoords);
-
-            var oppositeDirection = direction.Opposite();
-            var directionsToTry = AllDirections.Where(d => d != oppositeDirection);
+            var oppositeDirection = activePath.Direction.Opposite();
+            var directionsToTry = AllDirections.Where(direction => direction != oppositeDirection);
 
             foreach (var directionToTry in directionsToTry)
             {
-                var newNumDirectionChanges = numDirectionChanges + (directionToTry != direction ? 1 : 0);
-                if (newNumDirectionChanges <= maxDirectionChanges)
+                var copyOfActivePath = Path.CopyOfPath(activePath);
+                copyOfActivePath.AddCoords(nextCoords);
+                copyOfActivePath.IsAbandoned = false;
+                copyOfActivePath.Direction = directionToTry;
+
+                if (copyOfActivePath.NumDirectionChanges <= maxDirectionChanges)
                 {
                     FollowPath(
                         grid,
-                        paths,
-                        Path.CopyOfPath(currentPath),
+                        resultantPaths,
+                        copyOfActivePath,
                         endCoords,
-                        directionToTry,
-                        maxDirectionChanges,
-                        newNumDirectionChanges);
+                        maxDirectionChanges);
                 }
                 else
                 {
-                    currentPath.IsAbandoned = true;
-                    currentPath.LastDirection = direction;
-                    currentPath.NumDirectionChanges = newNumDirectionChanges;
-                    paths.AddPath(currentPath);
+                    copyOfActivePath.IsAbandoned = true;
+                    System.Diagnostics.Debug.WriteLine("Abandoning path - direction change limit exceeded: {0}", copyOfActivePath);
+                    resultantPaths.AddPath(copyOfActivePath);
                 }
             }
+        }
+
+        private static void DumpPath(Path path)
+        {
+            System.Diagnostics.Debug.WriteLine(path);
         }
     }
 }

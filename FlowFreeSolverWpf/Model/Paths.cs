@@ -9,9 +9,21 @@ namespace FlowFreeSolverWpf.Model
 
         public void AddPath(Path path)
         {
-            if (!ContainsPath(path))
+            // TODO: I think this is where the bug was. Is this a good enough fix ?
+            // When we were only collecting completed paths, it made sense to check
+            // for duplicates. But now we also collect abandoned paths and we don't
+            // want to check abandoned paths for duplicates.
+
+            if (path.IsAbandoned)
             {
                 _pathList.Add(path);
+            }
+            else
+            {
+                if (!ContainsPath(path))
+                {
+                    _pathList.Add(path);
+                }
             }
         }
 
