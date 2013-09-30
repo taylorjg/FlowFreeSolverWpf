@@ -1,6 +1,4 @@
-﻿using FlowFreeSolverWpf.Model;
-
-namespace FlowFreeSolverWpf
+﻿namespace FlowFreeSolverWpf.Model
 {
     public static class Grids
     {
@@ -106,8 +104,22 @@ namespace FlowFreeSolverWpf
                 new ColourPair(new Coords(10, 10), new Coords(10, 8), DotColours.Lime)
             };
 
-        private static readonly ColourPair[] Sample13X13Puzzle = new ColourPair[]
+        private static readonly ColourPair[] Sample13X13Puzzle = new[]
             {
+                new ColourPair(new Coords(1, 1), new Coords(7, 1), DotColours.Blue),
+                new ColourPair(new Coords(2, 4), new Coords(7, 4), DotColours.Orange),
+                new ColourPair(new Coords(0, 12), new Coords(6, 10), DotColours.Red),
+                new ColourPair(new Coords(4, 11), new Coords(12, 3), DotColours.Green),
+                new ColourPair(new Coords(10, 10), new Coords(10, 2), DotColours.Cyan),
+                new ColourPair(new Coords(9, 5), new Coords(11, 1), DotColours.Yellow),
+                new ColourPair(new Coords(1, 9), new Coords(6, 1), DotColours.Magenta),
+                new ColourPair(new Coords(0, 0), new Coords(5, 6), DotColours.MediumPurple),
+                new ColourPair(new Coords(1, 12), new Coords(7, 12), DotColours.Brown),
+                new ColourPair(new Coords(6, 8), new Coords(11, 7), DotColours.Gray),
+                new ColourPair(new Coords(3, 4), new Coords(6, 3), DotColours.White),
+                new ColourPair(new Coords(8, 7), new Coords(12, 9), DotColours.Lime),
+                new ColourPair(new Coords(2, 3), new Coords(7, 3), DotColours.Wheat),
+                new ColourPair(new Coords(4, 8), new Coords(5, 10), DotColours.CornflowerBlue)
             };
 
         private static readonly ColourPair[] Sample14X14Puzzle = new[]
@@ -129,15 +141,15 @@ namespace FlowFreeSolverWpf
 
         public static GridDescription[] GridDescriptions = new[]
             {
-                new GridDescription(5, Sample5X5Puzzle, 1),
-                new GridDescription(6, Sample6X6Puzzle, 1),
+                new GridDescription(5, Sample5X5Puzzle, 1, 4, 5),
+                new GridDescription(6, Sample6X6Puzzle, 1, 4, 6),
                 new GridDescription(7, Sample7X7Puzzle, 1),
                 new GridDescription(8, Sample8X8Puzzle, 1),
                 new GridDescription(9, Sample9X9Puzzle, 1),
                 new GridDescription(10, Sample10X10Puzzle, 1),
                 new GridDescription(11, Sample11X11Puzzle, 1),
                 new GridDescription(12, Sample12X12Puzzle, 8),
-                new GridDescription(13, Sample13X13Puzzle, 1),
+                new GridDescription(13, Sample13X13Puzzle, 1, 10, 14),
                 new GridDescription(14, Sample14X14Puzzle, 1)
             };
     }
