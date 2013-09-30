@@ -15,7 +15,8 @@
                 new DotColour("Brown"),
                 new DotColour("Gray"),
                 new DotColour("White"),
-                new DotColour("Lime")
+                new DotColour("Lime"),
+                new DotColour("Wheat")
             };
 
         public static DotColour Blue { get { return Colours[0]; } }
@@ -30,5 +31,6 @@
         public static DotColour Gray { get { return Colours[9]; } }
         public static DotColour White { get { return Colours[10]; } }
         public static DotColour Lime { get { return Colours[11]; } }
+        public static DotColour Wheat { get { return Colours[12]; } }
     }
 }
