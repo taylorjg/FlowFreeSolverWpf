@@ -8,6 +8,10 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         >
+    
+    <Window.Resources>
+        <local:DotColourValueConverter x:Key="dotColourToColor"></local:DotColourValueConverter>
+    </Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -57,7 +61,8 @@
                                 <Label.Content >
                                     <Ellipse Width="18" Height="18">
                                         <Ellipse.Fill>
-                                            <SolidColorBrush Color="{Binding Path=ColourName}"/>
+                                            <!--<SolidColorBrush Color="{Binding Path=ColourName}" />-->
+                                            <SolidColorBrush Color="{Binding Converter={StaticResource dotColourToColor}}" />
                                         </Ellipse.Fill>
                                     </Ellipse>
                                 </Label.Content>
