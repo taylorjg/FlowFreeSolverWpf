@@ -61,7 +61,6 @@
                                 <Label.Content >
                                     <Ellipse Width="18" Height="18">
                                         <Ellipse.Fill>
-                                            <!--<SolidColorBrush Color="{Binding Path=ColourName}" />-->
                                             <SolidColorBrush Color="{Binding Converter={StaticResource dotColourToColor}}" />
                                         </Ellipse.Fill>
                                     </Ellipse>
@@ -85,17 +84,6 @@
                     </TextBlock.Text>
                 </TextBlock>
             </StatusBarItem>
-            <!--<StatusBarItem>
-                <TextBlock>Matrix: NNN rows x MMM cols</TextBlock>
-            </StatusBarItem>
-            <Separator Margin="10,0,10,0" />
-            <StatusBarItem>
-                <TextBlock>Matrix build time: XXs</TextBlock>
-            </StatusBarItem>
-            <Separator Margin="10,0,10,0" />
-            <StatusBarItem>
-                <TextBlock>Dlx solve time: XXs</TextBlock>
-            </StatusBarItem>-->
         </StatusBar>
 
     </Grid>
