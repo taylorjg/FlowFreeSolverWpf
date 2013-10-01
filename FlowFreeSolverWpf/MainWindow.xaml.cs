@@ -5,11 +5,15 @@
 //using System.Threading;
 //using DlxLib;
 //using FlowFreeSolverWpf.Model;
+
+using System;
+using System.Collections.Generic;
+using FlowFreeSolverWpf.Model;
 using FlowFreeSolverWpf.ViewModel;
 
 namespace FlowFreeSolverWpf
 {
-    public partial class MainWindow /*: INotifyPropertyChanged */
+    public partial class MainWindow : IMainWindow /*: INotifyPropertyChanged */
     {
         ////public GridDescription[] GridDescriptions { get; private set; }
         ////public GridDescription SelectedGrid { get; set; }
@@ -46,7 +50,7 @@ namespace FlowFreeSolverWpf
             InitializeComponent();
 
             //DataContext = this;
-            DataContext = new MainWindowViewModel(BoardControl);
+            DataContext = new MainWindowViewModel(new WpfDispatcher(Dispatcher), this, BoardControl);
 
             ////GridDescriptions = Grids.GridDescriptions;
             ////SelectedGrid = GridDescriptions[2];
@@ -213,25 +217,25 @@ namespace FlowFreeSolverWpf
         //    }
         //}
 
-        //private void DrawTheSolution(object state)
-        //{
-        //    var colourPairPaths = (IEnumerable<Tuple<ColourPair, Path>>)state;
+        private void DrawTheSolution(object state)
+        {
+            //var colourPairPaths = (IEnumerable<Tuple<ColourPair, Path>>)state;
 
-        //    foreach (var colourPairPath in colourPairPaths)
-        //    {
-        //        var colourPair = colourPairPath.Item1;
-        //        var path = colourPairPath.Item2;
-        //        BoardControl.DrawPath(colourPair, path);
-        //    }
+            //foreach (var colourPairPath in colourPairPaths)
+            //{
+            //    var colourPair = colourPairPath.Item1;
+            //    var path = colourPairPath.Item2;
+            //    BoardControl.DrawPath(colourPair, path);
+            //}
 
-        //    GridSizeCombo.IsEnabled = true;
-        //    SolveButton.IsEnabled = true;
-        //    ClearButton.IsEnabled = true;
-        //    _solvingDialog.DialogResult = true;
-        //    _solvingDialog.Close();
+            ////GridSizeCombo.IsEnabled = true;
+            ////SolveButton.IsEnabled = true;
+            ////ClearButton.IsEnabled = true;
+            //_solvingDialog.DialogResult = true;
+            //_solvingDialog.Close();
 
-        //    SetStatusMessageFromSolutionStats(_solutionStats);
-        //}
+            //SetStatusMessageFromSolutionStats(_solutionStats);
+        }
 
         //private void HandleNoSolutionFound(object state)
         //{
@@ -299,14 +303,14 @@ namespace FlowFreeSolverWpf
         ////    PreLoadSamplePuzzle(SelectedGrid);
         ////}
 
-        //private void PreLoadSamplePuzzle(GridDescription gridDescription)
-        //{
-        //    foreach (var colourPair in gridDescription.SamplePuzzle)
-        //    {
-        //        BoardControl.AddDot(colourPair.StartCoords, colourPair.DotColour);
-        //        BoardControl.AddDot(colourPair.EndCoords, colourPair.DotColour);
-        //    }
-        //}
+        ////private void PreLoadSamplePuzzle(GridDescription gridDescription)
+        ////{
+        ////    foreach (var colourPair in gridDescription.SamplePuzzle)
+        ////    {
+        ////        BoardControl.AddDot(colourPair.StartCoords, colourPair.DotColour);
+        ////        BoardControl.AddDot(colourPair.EndCoords, colourPair.DotColour);
+        ////    }
+        ////}
 
         ////public event PropertyChangedEventHandler PropertyChanged;
         //
@@ -319,5 +323,31 @@ namespace FlowFreeSolverWpf
         ////        handler(this, new PropertyChangedEventArgs(propertyName));
         ////    }
         ////}
+        
+        public void OnSolveSolutionFound(SolutionStats solutionStats, IEnumerable<Tuple<ColourPair, Path>> colourPairPaths)
+        {
+            foreach (var colourPairPath in colourPairPaths)
+            {
+                var colourPair = colourPairPath.Item1;
+                var path = colourPairPath.Item2;
+                BoardControl.DrawPath(colourPair, path);
+            }
+
+            ////GridSizeCombo.IsEnabled = true;
+            ////SolveButton.IsEnabled = true;
+            ////ClearButton.IsEnabled = true;
+            //_solvingDialog.DialogResult = true;
+            //_solvingDialog.Close();
+
+            //SetStatusMessageFromSolutionStats(_solutionStats);
+        }
+
+        public void OnSolveNoSolutionFound(SolutionStats solutionStats)
+        {
+        }
+
+        public void OnSolveCancelled(SolutionStats solutionStats)
+        {
+        }
     }
 }

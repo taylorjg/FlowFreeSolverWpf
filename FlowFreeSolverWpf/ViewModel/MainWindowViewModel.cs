@@ -1,4 +1,8 @@
-﻿using System.Windows.Input;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Windows.Input;
 using FlowFreeSolverWpf.Model;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
@@ -7,17 +11,23 @@ namespace FlowFreeSolverWpf.ViewModel
 {
     public class MainWindowViewModel : ViewModelBase
     {
+        private readonly IDispatcher _dispatcher;
+        private readonly IMainWindow _mainWindow;
         private readonly IBoardControl _boardControl;
         private GridDescription _selectedGrid;
         private DotColour _selectedDotColour;
         private string _statusMessage;
-        private ICommand _loadedCommand;
-        private ICommand _solveCommand;
-        private ICommand _clearCommand;
-        private ICommand _selectedGridChangedCommand;
+        private RelayCommand _loadedCommand;
+        private RelayCommand _solveCommand;
+        private RelayCommand _cancelCommand;
+        private RelayCommand _clearCommand;
+        private RelayCommand _selectedGridChangedCommand;
+        private CancellationTokenSource _cancellationTokenSource;
 
-        public MainWindowViewModel(IBoardControl boardControl)
+        public MainWindowViewModel(IDispatcher dispatcher, IMainWindow mainWindow, IBoardControl boardControl)
         {
+            _dispatcher = dispatcher;
+            _mainWindow = mainWindow;
             _boardControl = boardControl;
             _boardControl.CellClicked += (_, e) => CellClicked(e.Coords);
             GridDescriptions = Grids.GridDescriptions;
@@ -75,6 +85,7 @@ namespace FlowFreeSolverWpf.ViewModel
                 _boardControl.RemoveDot(coords);
             else
                 _boardControl.AddDot(coords, SelectedDotColour);
+            BoardControlHasChanged();
         }
 
         public ICommand LoadedCommand
@@ -87,12 +98,15 @@ namespace FlowFreeSolverWpf.ViewModel
             get { return _solveCommand ?? (_solveCommand = new RelayCommand(OnSolve, OnCanSolve)); }
         }
 
+        public ICommand CancelCommand
+        {
+            get { return _cancelCommand ?? (_cancelCommand = new RelayCommand(OnCancel)); }
+        }
+
         public ICommand ClearCommand
         {
             get { return _clearCommand ?? (_clearCommand = new RelayCommand(OnClear)); }
         }
-
-        // http://stackoverflow.com/questions/3131142/mvvm-light-silverlight-using-eventtocommand-with-a-combobox
 
         public ICommand SelectedGridChangedCommand
         {
@@ -106,13 +120,51 @@ namespace FlowFreeSolverWpf.ViewModel
 
         private void OnSolve()
         {
-            System.Windows.MessageBox.Show("OnSolve");
+            var colourPairs = _boardControl.GetColourPairs();
+            var grid = new Grid(SelectedGrid.GridSize, colourPairs.ToArray());
+            _cancellationTokenSource = new CancellationTokenSource();
+            var puzzleSolver = new PuzzleSolver(
+                grid,
+                OnSolveSolutionFound,
+                OnSolveNoSolutionFound,
+                OnSolveCancelled,
+                _dispatcher,
+                _cancellationTokenSource.Token);
+            puzzleSolver.SolvePuzzle();
         }
 
         private bool OnCanSolve()
         {
-            // return _boardControl.GetColourPairs(SelectedGrid) != null;
-            return true;
+            try
+            {
+                var colourPairs = _boardControl.GetColourPairs();
+                var numColourPairs = colourPairs.Count;
+                return (numColourPairs >= SelectedGrid.MinColourPairs && numColourPairs <= SelectedGrid.MaxColourPairs);
+            }
+            catch (InvalidOperationException)
+            {
+                return false;
+            }
+        }
+
+        private void OnCancel()
+        {
+            _cancellationTokenSource.Cancel();
+        }
+
+        private void OnSolveSolutionFound(SolutionStats solutionStats, IEnumerable<Tuple<ColourPair, Path>> colourPairPaths)
+        {
+            _mainWindow.OnSolveSolutionFound(solutionStats, colourPairPaths);
+        }
+
+        private void OnSolveNoSolutionFound(SolutionStats solutionStats)
+        {
+            _mainWindow.OnSolveNoSolutionFound(solutionStats);
+        }
+
+        private void OnSolveCancelled(SolutionStats solutionStats)
+        {
+            _mainWindow.OnSolveCancelled(solutionStats);
         }
 
         private void OnClear()
@@ -120,17 +172,37 @@ namespace FlowFreeSolverWpf.ViewModel
             _boardControl.ClearDots();
             _boardControl.ClearPaths();
             ClearStatusMessage();
+            BoardControlHasChanged();
         }
 
         private void OnSelectedGridChanged()
         {
             _boardControl.GridSize = SelectedGrid.GridSize;
+            PreLoadSamplePuzzle();
             ClearStatusMessage();
+            BoardControlHasChanged();
+        }
+
+        private void PreLoadSamplePuzzle()
+        {
+            foreach (var colourPair in SelectedGrid.SamplePuzzle)
+            {
+                _boardControl.AddDot(colourPair.StartCoords, colourPair.DotColour);
+                _boardControl.AddDot(colourPair.EndCoords, colourPair.DotColour);
+            }
         }
 
         private void ClearStatusMessage()
         {
             StatusMessage = string.Empty;
+        }
+
+        private void BoardControlHasChanged()
+        {
+            if (_solveCommand != null)
+            {
+                _solveCommand.RaiseCanExecuteChanged();
+            }
         }
     }
 }

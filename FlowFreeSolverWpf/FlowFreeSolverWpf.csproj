@@ -76,6 +76,8 @@
     <Compile Include="DotColourValueConverter.cs" />
     <Compile Include="DotColourExtensions.cs" />
     <Compile Include="IBoardControl.cs" />
+    <Compile Include="IDispatcher.cs" />
+    <Compile Include="IMainWindow.cs" />
     <Compile Include="Model\DotColour.cs" />
     <Compile Include="Model\GridDescription.cs" />
     <Compile Include="Model\Grids.cs" />
@@ -83,12 +85,14 @@
     <Compile Include="MyMessageBox.xaml.cs">
       <DependentUpon>MyMessageBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="PuzzleSolver.cs" />
     <Compile Include="SolutionStats.cs" />
     <Compile Include="SolvingDialog.xaml.cs">
       <DependentUpon>SolvingDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\ViewModelLocator.cs" />
+    <Compile Include="WpfDispatcher.cs" />
     <Page Include="BoardControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
