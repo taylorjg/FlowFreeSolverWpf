@@ -11,17 +11,7 @@ using Path = System.Windows.Shapes.Path;
 
 namespace FlowFreeSolverWpf
 {
-    public class CellClickedEventArgs : EventArgs
-    {
-        public CellClickedEventArgs(Coords coords)
-        {
-            Coords = coords;
-        }
-
-        public Coords Coords { get; private set; }
-    }
-
-    public partial class BoardControl
+    public partial class BoardControl : IBoardControl
     {
         private readonly Color _gridLineColour = Colors.Yellow;
         private const double GridLineThickness = 0.8;
@@ -30,6 +20,7 @@ namespace FlowFreeSolverWpf
         private readonly IList<Path> _paths = new List<Path>();
         private readonly IList<Rectangle> _highlightRectangles = new List<Rectangle>();
         private readonly IList<Line> _gridLines = new List<Line>();
+        private int _gridSize;
 
         public BoardControl()
         {
@@ -72,7 +63,19 @@ namespace FlowFreeSolverWpf
             }
         }
 
-        public int GridSize { get; set; }
+        public int GridSize
+        {
+            get
+            {
+                return _gridSize;
+            }
+            set
+            {
+                _gridSize = value;
+                ClearAll();
+                DrawGrid();
+            }
+        }
 
         public IList<ColourPair> GetColourPairs()
         {

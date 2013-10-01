@@ -72,8 +72,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="CellClickedEventArgs.cs" />
     <Compile Include="DotColourValueConverter.cs" />
     <Compile Include="DotColourExtensions.cs" />
+    <Compile Include="IBoardControl.cs" />
     <Compile Include="Model\DotColour.cs" />
     <Compile Include="Model\GridDescription.cs" />
     <Compile Include="Model\Grids.cs" />
