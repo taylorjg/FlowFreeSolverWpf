@@ -13,7 +13,6 @@ namespace FlowFreeSolverWpf.ViewModel
     {
         private readonly IDialogService _dialogService;
         private readonly IDispatcher _dispatcher;
-        private readonly IMainWindow _mainWindow;
         private readonly IBoardControl _boardControl;
         private GridDescription _selectedGrid;
         private DotColour _selectedDotColour;
@@ -25,11 +24,10 @@ namespace FlowFreeSolverWpf.ViewModel
         private RelayCommand _selectedGridChangedCommand;
         private CancellationTokenSource _cancellationTokenSource;
 
-        public MainWindowViewModel(IDialogService dialogService, IDispatcher dispatcher, IMainWindow mainWindow, IBoardControl boardControl)
+        public MainWindowViewModel(IDialogService dialogService, IDispatcher dispatcher, IBoardControl boardControl)
         {
             _dialogService = dialogService;
             _dispatcher = dispatcher;
-            _mainWindow = mainWindow;
             _boardControl = boardControl;
             _boardControl.CellClicked += (_, e) => CellClicked(e.Coords);
             GridDescriptions = Grids.GridDescriptions;
@@ -168,21 +166,32 @@ namespace FlowFreeSolverWpf.ViewModel
 
         private void OnSolveSolutionFound(SolutionStats solutionStats, IEnumerable<Tuple<ColourPair, Path>> colourPairPaths)
         {
-            _mainWindow.OnSolveSolutionFound(colourPairPaths);
+            DrawSolution(colourPairPaths);
+            SetStatusMessageFromSolutionStats(solutionStats);
             _dialogService.CloseSolvingDialog(true);
+        }
+
+        public void DrawSolution(IEnumerable<Tuple<ColourPair, Path>> colourPairPaths)
+        {
+            foreach (var colourPairPath in colourPairPaths)
+            {
+                var colourPair = colourPairPath.Item1;
+                var path = colourPairPath.Item2;
+                _boardControl.DrawPath(colourPair, path);
+            }
         }
 
         private void OnSolveNoSolutionFound(SolutionStats solutionStats)
         {
-            _mainWindow.OnSolveNoSolutionFound();
             _dialogService.CloseSolvingDialog(true);
             _dialogService.ShowMyMessageBox("Sorry - no solution was found!");
+            SetStatusMessageFromSolutionStats(solutionStats, "no solution found");
         }
 
         private void OnSolveCancelled(SolutionStats solutionStats)
         {
-            _mainWindow.OnSolveCancelled();
             _dialogService.ShowMyMessageBox("You cancelled the solving process before completion!");
+            SetStatusMessageFromSolutionStats(solutionStats, "cancelled");
         }
 
         private void OnClear()
@@ -221,6 +230,35 @@ namespace FlowFreeSolverWpf.ViewModel
             {
                 _solveCommand.RaiseCanExecuteChanged();
             }
+        }
+
+        private void SetStatusMessageFromSolutionStats(SolutionStats solutionStats, string extraMessage = null)
+        {
+            var statusMessage = string.Format(
+                "Matrix size: {0} rows x {1} cols",
+                solutionStats.NumMatrixRows,
+                solutionStats.NumMatrixCols);
+
+            const string timeSpanFormat = @"hh\:mm\:ss\.fff";
+
+            if (solutionStats.MatrixBuildingDuration.HasValue)
+            {
+                statusMessage += string.Format("; Matrix build time: {0}", solutionStats.MatrixBuildingDuration.Value.ToString(timeSpanFormat));
+            }
+
+            if (solutionStats.MatrixSolvingDuration.HasValue)
+            {
+                statusMessage += string.Format("; Matrix solve time: {0}", solutionStats.MatrixSolvingDuration.Value.ToString(timeSpanFormat));
+            }
+
+            if (!string.IsNullOrEmpty(extraMessage))
+            {
+                statusMessage += string.Format(" ({0})", extraMessage);
+            }
+
+            statusMessage += string.Format("; Direction changes: {0}", solutionStats.MaxDirectionChanges);
+
+            StatusMessage = statusMessage;
         }
     }
 }

@@ -11,7 +11,6 @@ namespace FlowFreeSolverWpfTests
     {
         private IDialogService _fakeDialogService;
         private IDispatcher _fakeDispatcher;
-        private IMainWindow _fakeMainWindow;
         private IBoardControl _fakeBoardControl;
         private MainWindowViewModel _mainWindowViewModel;
 
@@ -20,9 +19,8 @@ namespace FlowFreeSolverWpfTests
         {
             _fakeDialogService = A.Fake<IDialogService>();
             _fakeDispatcher = A.Fake<IDispatcher>();
-            _fakeMainWindow = A.Fake<IMainWindow>();
             _fakeBoardControl = A.Fake<IBoardControl>();
-            _mainWindowViewModel = new MainWindowViewModel(_fakeDialogService, _fakeDispatcher, _fakeMainWindow, _fakeBoardControl);
+            _mainWindowViewModel = new MainWindowViewModel(_fakeDialogService, _fakeDispatcher, _fakeBoardControl);
         }
 
         [Test]

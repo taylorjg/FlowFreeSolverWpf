@@ -78,7 +78,6 @@
     <Compile Include="IBoardControl.cs" />
     <Compile Include="IDialogService.cs" />
     <Compile Include="IDispatcher.cs" />
-    <Compile Include="IMainWindow.cs" />
     <Compile Include="Model\DotColour.cs" />
     <Compile Include="Model\GridDescription.cs" />
     <Compile Include="Model\Grids.cs" />
