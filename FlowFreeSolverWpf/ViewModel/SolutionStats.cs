@@ -18,10 +18,10 @@ namespace FlowFreeSolverWpf.ViewModel
             MaxDirectionChanges = maxDirectionChanges;
         }
 
-        public int NumMatrixRows { get; set; }
-        public int NumMatrixCols { get; set; }
-        public TimeSpan? MatrixBuildingDuration { get; set; }
-        public TimeSpan? MatrixSolvingDuration { get; set; }
-        public int MaxDirectionChanges { get; set; }
+        public int NumMatrixRows { get; private set; }
+        public int NumMatrixCols { get; private set; }
+        public TimeSpan? MatrixBuildingDuration { get; private set; }
+        public TimeSpan? MatrixSolvingDuration { get; private set; }
+        public int MaxDirectionChanges { get; private set; }
     }
 }
