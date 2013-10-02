@@ -72,12 +72,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="CellClickedEventArgs.cs" />
+    <Compile Include="ViewModel\CellClickedEventArgs.cs" />
     <Compile Include="DotColourValueConverter.cs" />
     <Compile Include="DotColourExtensions.cs" />
-    <Compile Include="IBoardControl.cs" />
-    <Compile Include="IDialogService.cs" />
-    <Compile Include="IDispatcher.cs" />
+    <Compile Include="ViewModel\IBoardControl.cs" />
+    <Compile Include="ViewModel\IDialogService.cs" />
+    <Compile Include="ViewModel\IDispatcher.cs" />
     <Compile Include="Model\DotColour.cs" />
     <Compile Include="Model\GridDescription.cs" />
     <Compile Include="Model\Grids.cs" />
@@ -85,8 +85,8 @@
     <Compile Include="MyMessageBox.xaml.cs">
       <DependentUpon>MyMessageBox.xaml</DependentUpon>
     </Compile>
-    <Compile Include="PuzzleSolver.cs" />
-    <Compile Include="SolutionStats.cs" />
+    <Compile Include="ViewModel\PuzzleSolver.cs" />
+    <Compile Include="ViewModel\SolutionStats.cs" />
     <Compile Include="SolvingDialog.xaml.cs">
       <DependentUpon>SolvingDialog.xaml</DependentUpon>
     </Compile>
@@ -102,10 +102,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="App.xaml.cs">
-      <DependentUpon>App.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="BoardControl.xaml.cs">
       <DependentUpon>BoardControl.xaml</DependentUpon>
     </Compile>

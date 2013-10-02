@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using FlowFreeSolverWpf.Model;
 
-namespace FlowFreeSolverWpf
+namespace FlowFreeSolverWpf.ViewModel
 {
     public interface IBoardControl
     {

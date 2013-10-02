@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using FlowFreeSolverWpf.ViewModel;
 
 namespace FlowFreeSolverWpf
 {

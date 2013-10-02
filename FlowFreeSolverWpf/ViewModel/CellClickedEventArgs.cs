@@ -1,7 +1,7 @@
 ﻿using System;
 using FlowFreeSolverWpf.Model;
 
-namespace FlowFreeSolverWpf
+namespace FlowFreeSolverWpf.ViewModel
 {
     public class CellClickedEventArgs : EventArgs
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Windows.Input;
+using System.Windows.Input; // for ICommand
 using FlowFreeSolverWpf.Model;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;

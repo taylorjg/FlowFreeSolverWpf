@@ -1,4 +1,4 @@
-﻿namespace FlowFreeSolverWpf
+﻿namespace FlowFreeSolverWpf.ViewModel
 {
     public interface IDialogService
     {

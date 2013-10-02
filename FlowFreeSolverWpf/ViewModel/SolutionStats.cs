@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FlowFreeSolverWpf
+namespace FlowFreeSolverWpf.ViewModel
 {
     public class SolutionStats
     {

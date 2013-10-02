@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using FlowFreeSolverWpf.Model;
+using FlowFreeSolverWpf.ViewModel;
 using Path = System.Windows.Shapes.Path;
 
 namespace FlowFreeSolverWpf
