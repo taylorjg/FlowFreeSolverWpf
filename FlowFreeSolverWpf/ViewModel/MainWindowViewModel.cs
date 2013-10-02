@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Windows.Input; // for ICommand
+using System.Windows.Input; // for ICommand only
 using FlowFreeSolverWpf.Model;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
@@ -49,7 +49,7 @@ namespace FlowFreeSolverWpf.ViewModel
             set
             {
                 _selectedGrid = value;
-                RaisePropertyChanged("SelectedGrid");
+                RaisePropertyChanged(() => SelectedGrid);
             }
         }
 
@@ -62,7 +62,7 @@ namespace FlowFreeSolverWpf.ViewModel
             set
             {
                 _selectedDotColour = value;
-                RaisePropertyChanged("SelectedDotColour");
+                RaisePropertyChanged(() => SelectedDotColour);
             }
         }
 
@@ -75,7 +75,7 @@ namespace FlowFreeSolverWpf.ViewModel
             private set
             {
                 _statusMessage = value;
-                RaisePropertyChanged("StatusMessage");
+                RaisePropertyChanged(() => StatusMessage);
             }
         }
 
@@ -138,6 +138,8 @@ namespace FlowFreeSolverWpf.ViewModel
             if (dialogResult.HasValue && !dialogResult.Value)
             {
                 _cancellationTokenSource.Cancel();
+
+                // TODO: also, we should cancel Dlx - via PuzzleSolver ?
                 //if (_dlx != null)
                 //{
                 //    _dlx.Cancel();
