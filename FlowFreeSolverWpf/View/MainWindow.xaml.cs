@@ -1,6 +1,6 @@
 ﻿using FlowFreeSolverWpf.ViewModel;
 
-namespace FlowFreeSolverWpf
+namespace FlowFreeSolverWpf.View
 {
     public partial class MainWindow
     {

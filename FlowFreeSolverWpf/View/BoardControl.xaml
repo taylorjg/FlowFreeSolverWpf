@@ -1,7 +1,9 @@
-﻿<UserControl x:Class="FlowFreeSolverWpf.BoardControl"
+﻿<UserControl x:Class="FlowFreeSolverWpf.View.BoardControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
     <Grid>
         <Canvas x:Name="BoardCanvas" Background="Black"></Canvas>
     </Grid>
+    
 </UserControl>

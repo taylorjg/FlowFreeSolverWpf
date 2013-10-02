@@ -10,7 +10,7 @@ using FlowFreeSolverWpf.Model;
 using FlowFreeSolverWpf.ViewModel;
 using Path = System.Windows.Shapes.Path;
 
-namespace FlowFreeSolverWpf
+namespace FlowFreeSolverWpf.View
 {
     public partial class BoardControl : IBoardControl
     {

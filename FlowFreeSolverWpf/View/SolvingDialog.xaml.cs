@@ -1,4 +1,4 @@
-﻿namespace FlowFreeSolverWpf
+﻿namespace FlowFreeSolverWpf.View
 {
     public partial class SolvingDialog
     {

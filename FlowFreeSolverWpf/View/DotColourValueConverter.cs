@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows.Data;
 using FlowFreeSolverWpf.Model;
 
-namespace FlowFreeSolverWpf
+namespace FlowFreeSolverWpf.View
 {
     public class DotColourValueConverter : IValueConverter
     {

@@ -1,0 +1,26 @@
+﻿<Window x:Class="FlowFreeSolverWpf.View.SolvingDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Free Flow Solver"
+        Height="170"
+        Width="300"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        >
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        
+        <StackPanel Grid.Row="0" Orientation="Vertical">
+            <Label Content="Solving..." Margin="10" />
+            <ProgressBar Margin="10, 0, 10, 0" HorizontalAlignment="Stretch" FlowDirection="LeftToRight" IsIndeterminate="True" Height="18" />
+        </StackPanel>
+
+        <Button Grid.Row="1" x:Name="CancelButton" Content="Cancel" IsCancel="True" Margin="10" Width="50" HorizontalAlignment="Right" VerticalAlignment="Bottom" />
+        
+    </Grid>
+    
+</Window>

@@ -68,13 +68,13 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
+    <ApplicationDefinition Include="View\App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ViewModel\CellClickedEventArgs.cs" />
-    <Compile Include="DotColourValueConverter.cs" />
-    <Compile Include="DotColourExtensions.cs" />
+    <Compile Include="View\DotColourValueConverter.cs" />
+    <Compile Include="View\DotColourExtensions.cs" />
     <Compile Include="ViewModel\IBoardControl.cs" />
     <Compile Include="ViewModel\IDialogService.cs" />
     <Compile Include="ViewModel\IDispatcher.cs" />
@@ -82,38 +82,38 @@
     <Compile Include="Model\GridDescription.cs" />
     <Compile Include="Model\Grids.cs" />
     <Compile Include="Model\DotColours.cs" />
-    <Compile Include="MyMessageBox.xaml.cs">
+    <Compile Include="View\MyMessageBox.xaml.cs">
       <DependentUpon>MyMessageBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModel\PuzzleSolver.cs" />
     <Compile Include="ViewModel\SolutionStats.cs" />
-    <Compile Include="SolvingDialog.xaml.cs">
+    <Compile Include="View\SolvingDialog.xaml.cs">
       <DependentUpon>SolvingDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\ViewModelLocator.cs" />
-    <Compile Include="WpfDialogService.cs" />
-    <Compile Include="WpfDispatcher.cs" />
-    <Page Include="BoardControl.xaml">
+    <Compile Include="View\WpfDialogService.cs" />
+    <Compile Include="View\WpfDispatcher.cs" />
+    <Page Include="View\BoardControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="MainWindow.xaml">
+    <Page Include="View\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="BoardControl.xaml.cs">
+    <Compile Include="View\BoardControl.xaml.cs">
       <DependentUpon>BoardControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="MainWindow.xaml.cs">
+    <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="MyMessageBox.xaml">
+    <Page Include="View\MyMessageBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="SolvingDialog.xaml">
+    <Page Include="View\SolvingDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

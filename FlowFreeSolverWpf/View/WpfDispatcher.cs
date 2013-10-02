@@ -2,7 +2,7 @@
 using System.Windows.Threading;
 using FlowFreeSolverWpf.ViewModel;
 
-namespace FlowFreeSolverWpf
+namespace FlowFreeSolverWpf.View
 {
     class WpfDispatcher : IDispatcher
     {

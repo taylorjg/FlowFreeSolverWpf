@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Windows.Media;
 using FlowFreeSolverWpf.Model;
 
-namespace FlowFreeSolverWpf
+namespace FlowFreeSolverWpf.View
 {
     public static class DotColourExtensions
     {

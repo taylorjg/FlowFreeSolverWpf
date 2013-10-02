@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using FlowFreeSolverWpf.ViewModel;
 
-namespace FlowFreeSolverWpf
+namespace FlowFreeSolverWpf.View
 {
     class WpfDialogService : IDialogService
     {
