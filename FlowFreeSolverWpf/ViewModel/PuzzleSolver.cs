@@ -50,7 +50,8 @@ namespace FlowFreeSolverWpf.ViewModel
 
             _dlx.SolutionFound += (_, __) => _dlx.Cancel();
 
-            var maxDirectionChanges = 1; // SelectedGrid.InitialMaxDirectionChanges;
+            // TODO: this should come from SelectedGrid.InitialMaxDirectionChanges
+            var maxDirectionChanges = 1;
 
             for (;;)
             {
