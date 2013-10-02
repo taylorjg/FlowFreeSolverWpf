@@ -11,6 +11,7 @@ namespace FlowFreeSolverWpf.ViewModel
 {
     public class MainWindowViewModel : ViewModelBase
     {
+        private readonly IDialogService _dialogService;
         private readonly IDispatcher _dispatcher;
         private readonly IMainWindow _mainWindow;
         private readonly IBoardControl _boardControl;
@@ -24,8 +25,9 @@ namespace FlowFreeSolverWpf.ViewModel
         private RelayCommand _selectedGridChangedCommand;
         private CancellationTokenSource _cancellationTokenSource;
 
-        public MainWindowViewModel(IDispatcher dispatcher, IMainWindow mainWindow, IBoardControl boardControl)
+        public MainWindowViewModel(IDialogService dialogService, IDispatcher dispatcher, IMainWindow mainWindow, IBoardControl boardControl)
         {
+            _dialogService = dialogService;
             _dispatcher = dispatcher;
             _mainWindow = mainWindow;
             _boardControl = boardControl;
@@ -120,6 +122,8 @@ namespace FlowFreeSolverWpf.ViewModel
 
         private void OnSolve()
         {
+            _boardControl.ClearPaths();
+            ClearStatusMessage();
             var colourPairs = _boardControl.GetColourPairs();
             var grid = new Grid(SelectedGrid.GridSize, colourPairs.ToArray());
             _cancellationTokenSource = new CancellationTokenSource();
@@ -131,6 +135,16 @@ namespace FlowFreeSolverWpf.ViewModel
                 _dispatcher,
                 _cancellationTokenSource.Token);
             puzzleSolver.SolvePuzzle();
+
+            var dialogResult = _dialogService.ShowSolvingDialog();
+            if (dialogResult.HasValue && !dialogResult.Value)
+            {
+                _cancellationTokenSource.Cancel();
+                //if (_dlx != null)
+                //{
+                //    _dlx.Cancel();
+                //}
+            }
         }
 
         private bool OnCanSolve()
@@ -154,17 +168,21 @@ namespace FlowFreeSolverWpf.ViewModel
 
         private void OnSolveSolutionFound(SolutionStats solutionStats, IEnumerable<Tuple<ColourPair, Path>> colourPairPaths)
         {
-            _mainWindow.OnSolveSolutionFound(solutionStats, colourPairPaths);
+            _mainWindow.OnSolveSolutionFound(colourPairPaths);
+            _dialogService.CloseSolvingDialog(true);
         }
 
         private void OnSolveNoSolutionFound(SolutionStats solutionStats)
         {
-            _mainWindow.OnSolveNoSolutionFound(solutionStats);
+            _mainWindow.OnSolveNoSolutionFound();
+            _dialogService.CloseSolvingDialog(true);
+            _dialogService.ShowMyMessageBox("Sorry - no solution was found!");
         }
 
         private void OnSolveCancelled(SolutionStats solutionStats)
         {
-            _mainWindow.OnSolveCancelled(solutionStats);
+            _mainWindow.OnSolveCancelled();
+            _dialogService.ShowMyMessageBox("You cancelled the solving process before completion!");
         }
 
         private void OnClear()

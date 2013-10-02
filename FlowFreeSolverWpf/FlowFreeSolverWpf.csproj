@@ -76,6 +76,7 @@
     <Compile Include="DotColourValueConverter.cs" />
     <Compile Include="DotColourExtensions.cs" />
     <Compile Include="IBoardControl.cs" />
+    <Compile Include="IDialogService.cs" />
     <Compile Include="IDispatcher.cs" />
     <Compile Include="IMainWindow.cs" />
     <Compile Include="Model\DotColour.cs" />
@@ -92,6 +93,7 @@
     </Compile>
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\ViewModelLocator.cs" />
+    <Compile Include="WpfDialogService.cs" />
     <Compile Include="WpfDispatcher.cs" />
     <Page Include="BoardControl.xaml">
       <Generator>MSBuild:Compile</Generator>
