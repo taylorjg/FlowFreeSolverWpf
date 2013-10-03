@@ -209,7 +209,7 @@ namespace FlowFreeSolverWpf.ViewModel
         {
             _boardControl.GridSize = SelectedGrid.GridSize;
             PreLoadSamplePuzzle();
-            ClearStatusMessage();
+            StatusMessage = string.Format("There must be {0} to {1} pairs of dots", SelectedGrid.MinColourPairs, SelectedGrid.MaxColourPairs);
             BoardControlHasChanged();
         }
 

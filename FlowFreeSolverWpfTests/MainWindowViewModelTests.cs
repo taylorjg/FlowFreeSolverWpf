@@ -1,6 +1,5 @@
 ﻿using System.Windows.Threading;
 using FakeItEasy;
-using FlowFreeSolverWpf;
 using FlowFreeSolverWpf.ViewModel;
 using NUnit.Framework;
 
@@ -21,6 +20,38 @@ namespace FlowFreeSolverWpfTests
             _fakeDispatcher = A.Fake<IDispatcher>();
             _fakeBoardControl = A.Fake<IBoardControl>();
             _mainWindowViewModel = new MainWindowViewModel(_fakeDialogService, _fakeDispatcher, _fakeBoardControl);
+        }
+
+        [Test]
+        public void ChangingSelectedGridRaisesPropertyChangedEvent()
+        {
+            var propertyName = string.Empty;
+            _mainWindowViewModel.PropertyChanged += (_, e) => propertyName = e.PropertyName;
+            _mainWindowViewModel.SelectedGrid = _mainWindowViewModel.GridDescriptions[0];
+            DispatcherTestHelper.ProcessWorkItems(DispatcherPriority.Background);
+            Assert.That(propertyName, Is.EqualTo("SelectedGrid"));
+        }
+
+        [Test]
+        public void ChangingSelectedDotColourRaisesPropertyChangedEvent()
+        {
+            var propertyName = string.Empty;
+            _mainWindowViewModel.PropertyChanged += (_, e) => propertyName = e.PropertyName;
+            _mainWindowViewModel.SelectedDotColour = _mainWindowViewModel.DotColours[10];
+            DispatcherTestHelper.ProcessWorkItems(DispatcherPriority.Background);
+            Assert.That(propertyName, Is.EqualTo("SelectedDotColour"));
+        }
+
+        [Test]
+        public void ChangingStatusMessageRaisesPropertyChangedEvent()
+        {
+            const string expectedPropertyName = "StatusMessage";
+            var propertyName = string.Empty;
+            _mainWindowViewModel.PropertyChanged += (_, e) =>
+                { if (e.PropertyName == expectedPropertyName) propertyName = e.PropertyName; };
+            _mainWindowViewModel.SelectedGridChangedCommand.Execute(null);
+            DispatcherTestHelper.ProcessWorkItems(DispatcherPriority.Background);
+            Assert.That(propertyName, Is.EqualTo(expectedPropertyName));
         }
 
         [Test]
