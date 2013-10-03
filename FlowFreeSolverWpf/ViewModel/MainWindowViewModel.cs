@@ -127,6 +127,7 @@ namespace FlowFreeSolverWpf.ViewModel
             _cancellationTokenSource = new CancellationTokenSource();
             var puzzleSolver = new PuzzleSolver(
                 grid,
+                SelectedGrid,
                 OnSolveSolutionFound,
                 OnSolveNoSolutionFound,
                 OnSolveCancelled,
@@ -253,10 +254,10 @@ namespace FlowFreeSolverWpf.ViewModel
                 statusMessage += string.Format("; Matrix solve time: {0}", solutionStats.MatrixSolvingDuration.Value.ToString(timeSpanFormat));
             }
 
-            if (!string.IsNullOrEmpty(extraMessage))
-            {
-                statusMessage += string.Format(" ({0})", extraMessage);
-            }
+            //if (!string.IsNullOrEmpty(extraMessage))
+            //{
+            //    statusMessage += string.Format(" ({0})", extraMessage);
+            //}
 
             statusMessage += string.Format("; Direction changes: {0}", solutionStats.MaxDirectionChanges);
 
