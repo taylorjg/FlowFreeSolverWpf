@@ -84,5 +84,18 @@ namespace FlowFreeSolverWpfTests
             Assert.That(wasRaised, Is.True, "Expected the mainWindowViewModel.SolveCommand.CanExecuteChanged event to have been raised");
             Assert.That(_mainWindowViewModel.SolveCommand.CanExecute(null), Is.False, "Expected mainWindowViewModel.SolveCommand.CanExecute() to return false");
         }
+
+        [Test]
+        public void ChangingSelectedGridLoadsSamplePuzzle()
+        {
+            _mainWindowViewModel.SelectedGrid = _mainWindowViewModel.GridDescriptions[0];
+            _mainWindowViewModel.SelectedGridChangedCommand.Execute(null);
+            foreach (var colourPair in _mainWindowViewModel.SelectedGrid.SamplePuzzle)
+            {
+                var localColourPair = colourPair;
+                A.CallTo(() => _fakeBoardControl.AddDot(localColourPair.StartCoords, localColourPair.DotColour)).MustHaveHappened();
+                A.CallTo(() => _fakeBoardControl.AddDot(localColourPair.EndCoords, localColourPair.DotColour)).MustHaveHappened();
+            }
+        }
     }
 }

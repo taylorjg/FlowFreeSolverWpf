@@ -203,14 +203,15 @@ namespace FlowFreeSolverWpf.ViewModel
             _boardControl.ClearPaths();
             ClearStatusMessage();
             BoardControlHasChanged();
+            SetSelectedGridStatusMessage();
         }
 
         private void OnSelectedGridChanged()
         {
             _boardControl.GridSize = SelectedGrid.GridSize;
             PreLoadSamplePuzzle();
-            StatusMessage = string.Format("There must be {0} to {1} pairs of dots", SelectedGrid.MinColourPairs, SelectedGrid.MaxColourPairs);
             BoardControlHasChanged();
+            SetSelectedGridStatusMessage();
         }
 
         private void PreLoadSamplePuzzle()
@@ -225,6 +226,14 @@ namespace FlowFreeSolverWpf.ViewModel
         private void ClearStatusMessage()
         {
             StatusMessage = string.Empty;
+        }
+
+        private void SetSelectedGridStatusMessage()
+        {
+            StatusMessage = string.Format(
+                "There must be {0} to {1} pairs of dots",
+                SelectedGrid.MinColourPairs,
+                SelectedGrid.MaxColourPairs);
         }
 
         private void BoardControlHasChanged()
