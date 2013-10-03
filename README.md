@@ -34,21 +34,20 @@ This project is a WPF version of my earlier [FlowFreeDlx](https://github.com/tay
 * ~~add a dropdown with a list of colours, add dot of selected colour when clicking on the board~~
 * ~~un-add a dot when clicking on an existing dot~~
 * ~~display the colour in the dropdown items (use an item template ?)~~
-* add validation of colour pairs on the grid
+* ~~add validation of colour pairs on the grid~~
     * ~~must be exact pairs~~
-    * minimum number of pairs for the selected grid size
-    * maximum number of pairs for the selected grid size
+    * ~~minimum number of pairs for the selected grid size~~
+    * ~~maximum number of pairs for the selected grid size~~
 * ~~add a clear/reset button~~
 * ~~pass maxDirectionChanges into BuildMatrixFor()~~
 * ~~increase maxDirectionChanges (extending the matrix) until a solution is found~~
 * add an app icon
-* enhance the validation messages (identify the exact problem)
-    * indicate minimum number of pairs if too few
-    * indicate maximum number of pairs if too many
-    * indicate which colours are not exact pairs
-    * any others ?
+* ~~enhance the validation messages (identify the exact problem)~~
+    * ~~indicate minimum number of pairs if too few~~
+    * ~~indicate maximum number of pairs if too many~~
+    * ~~indicate which colours are not exact pairs~~
+        * Now that I am using MVVM, the Solve button is not enabled unless the dots are valid
 * ~~use TPL to try to speed up the creation of the matrix ?~~
 * ~~Fix the bug introduced by using Parallel.ForEach()~~
 * ~~Add an InternalDataRow inner class to simplify the MatrixBuilder code~~
-* apply the MVVM design pattern (MVVM Light Toolkit ?)
-    * sub-steps ?
+* ~~apply the MVVM design pattern (MVVM Light Toolkit ?)~~
