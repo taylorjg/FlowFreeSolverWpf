@@ -14,14 +14,20 @@ namespace FlowFreeSolverWpf.View
 {
     public partial class BoardControl : IBoardControl
     {
+        private int _gridSize;
         private readonly Color _gridLineColour = Colors.Yellow;
         private const double GridLineThickness = 0.8;
         private const double GridLineHalfThickness = GridLineThickness / 2;
+
+        private enum TagType
+        {
+            GridLine,
+            HighlightRectangle,
+            Path,
+            Dot
+        }
+
         private readonly IDictionary<Coords, Tuple<DotColour, Ellipse>> _coordsToTagsAndDots = new Dictionary<Coords, Tuple<DotColour, Ellipse>>();
-        private readonly IList<Path> _paths = new List<Path>();
-        private readonly IList<Rectangle> _highlightRectangles = new List<Rectangle>();
-        private readonly IList<Line> _gridLines = new List<Line>();
-        private int _gridSize;
 
         public BoardControl()
         {
@@ -112,38 +118,46 @@ namespace FlowFreeSolverWpf.View
 
         public void ClearDots()
         {
-            ClearShapes(_coordsToTagsAndDots, tuple => tuple.Item2);
+            RemoveChildrenWithTagType(TagType.Dot);
+            _coordsToTagsAndDots.Clear();
         }
 
         public void ClearPaths()
         {
-            ClearShapes(_paths);
-            ClearShapes(_highlightRectangles);
+            RemoveChildrenWithTagType(TagType.Path);
+            RemoveChildrenWithTagType(TagType.HighlightRectangle);
         }
 
         public void ClearGridLines()
         {
-            ClearShapes(_gridLines);
+            RemoveChildrenWithTagType(TagType.GridLine);
         }
 
-        private void ClearShapes<TKey, TValue>(ICollection<KeyValuePair<TKey, TValue>> dictionary, Func<TValue, Shape> shapeSelector)
+        private void RemoveChildrenWithTagType(TagType tagType)
         {
-            foreach (var shape in dictionary.Select(kvp => shapeSelector(kvp.Value)))
+            var elementsToRemove = new List<UIElement>();
+
+            // ReSharper disable LoopCanBeConvertedToQuery
+            foreach (var element in BoardCanvas.Children)
             {
-                BoardCanvas.Children.Remove(shape);
+                var frameworkElement = element as FrameworkElement;
+                if (frameworkElement != null)
+                {
+                    if (frameworkElement.Tag is TagType)
+                    {
+                        if ((TagType)frameworkElement.Tag == tagType)
+                        {
+                            elementsToRemove.Add(frameworkElement);
+                        }
+                    }
+                }
             }
+            // ReSharper restore LoopCanBeConvertedToQuery
 
-            dictionary.Clear();
-        }
-
-        private void ClearShapes<T>(ICollection<T> list) where T : Shape
-        {
-            foreach (var control in list)
+            foreach (var element in elementsToRemove)
             {
-                BoardCanvas.Children.Remove(control);
+                BoardCanvas.Children.Remove(element);
             }
-
-            list.Clear();
         }
 
         public void AddDot(Coords coords, DotColour dotColour)
@@ -160,6 +174,7 @@ namespace FlowFreeSolverWpf.View
 
             var dot = new Ellipse
                 {
+                    Tag = TagType.Dot,
                     Width = sw * 6 / 8,
                     Height = sh * 6 / 8,
                     Fill = new SolidColorBrush(dotColour.ToWpfColour())
@@ -216,6 +231,7 @@ namespace FlowFreeSolverWpf.View
             pathGeometry.Figures.Add(pathFigure);
             var polyLinePath = new Path
             {
+                Tag = TagType.Path,
                 Stroke = new SolidColorBrush(pathColour),
                 StrokeThickness = sw / 3,
                 StrokeEndLineCap = PenLineCap.Round,
@@ -224,7 +240,6 @@ namespace FlowFreeSolverWpf.View
             };
 
             BoardCanvas.Children.Add(polyLinePath);
-            _paths.Add(polyLinePath);
 
             // ReSharper disable LoopCanBeConvertedToQuery
             foreach (var coords in path.CoordsList)
@@ -232,6 +247,7 @@ namespace FlowFreeSolverWpf.View
                 var cellRect = new Rect(coords.X * sw + GridLineHalfThickness, (GridSize - coords.Y - 1) * sh + GridLineHalfThickness, sw, sh);
                 var highlightRectangle = new Rectangle
                     {
+                        Tag = TagType.HighlightRectangle,
                         Width = cellRect.Width,
                         Height = cellRect.Height,
                         Fill = new SolidColorBrush(Color.FromArgb(0x80, pathColour.R, pathColour.G, pathColour.B))
@@ -239,7 +255,6 @@ namespace FlowFreeSolverWpf.View
                 Canvas.SetLeft(highlightRectangle, cellRect.Left);
                 Canvas.SetTop(highlightRectangle, cellRect.Top);
                 BoardCanvas.Children.Add(highlightRectangle);
-                _highlightRectangles.Add(highlightRectangle);
             }
             // ReSharper restore LoopCanBeConvertedToQuery
         }
@@ -258,6 +273,7 @@ namespace FlowFreeSolverWpf.View
             {
                 var line = new Line
                     {
+                        Tag = TagType.GridLine,
                         SnapsToDevicePixels = true,
                         Stroke = gridLineBrush,
                         StrokeThickness = GridLineThickness,
@@ -267,7 +283,6 @@ namespace FlowFreeSolverWpf.View
                         Y2 = row * sh + GridLineHalfThickness
                     };
                 BoardCanvas.Children.Add(line);
-                _gridLines.Add(line);
             }
             
             // Vertical grid lines
@@ -275,6 +290,7 @@ namespace FlowFreeSolverWpf.View
             {
                 var line = new Line
                 {
+                    Tag = TagType.GridLine,
                     SnapsToDevicePixels = true,
                     Stroke = gridLineBrush,
                     StrokeThickness = GridLineThickness,
@@ -284,7 +300,6 @@ namespace FlowFreeSolverWpf.View
                     Y2 = ah
                 };
                 BoardCanvas.Children.Add(line);
-                _gridLines.Add(line);
             }
         }
     }
