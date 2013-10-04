@@ -23,6 +23,7 @@ namespace FlowFreeSolverWpf.ViewModel
         private RelayCommand _clearCommand;
         private RelayCommand _selectedGridChangedCommand;
         private CancellationTokenSource _cancellationTokenSource;
+        private readonly IDictionary<Coords, DotColour> _coordsToDots = new Dictionary<Coords, DotColour>();
 
         public MainWindowViewModel(IDialogService dialogService, IDispatcher dispatcher, IBoardControl boardControl)
         {
@@ -81,11 +82,10 @@ namespace FlowFreeSolverWpf.ViewModel
 
         public void CellClicked(Coords coords)
         {
-            if (_boardControl.IsDotAt(coords))
-                _boardControl.RemoveDot(coords);
+            if (IsDotAt(coords))
+                RemoveDot(coords);
             else
-                _boardControl.AddDot(coords, SelectedDotColour);
-            BoardControlHasChanged();
+                AddDot(coords, SelectedDotColour);
         }
 
         public ICommand LoadedCommand
@@ -122,7 +122,7 @@ namespace FlowFreeSolverWpf.ViewModel
         {
             _boardControl.ClearPaths();
             ClearStatusMessage();
-            var colourPairs = _boardControl.GetColourPairs();
+            var colourPairs = GetColourPairs();
             var grid = new Grid(SelectedGrid.GridSize, colourPairs.ToArray());
             _cancellationTokenSource = new CancellationTokenSource();
             var puzzleSolver = new PuzzleSolver(
@@ -152,7 +152,7 @@ namespace FlowFreeSolverWpf.ViewModel
         {
             try
             {
-                var colourPairs = _boardControl.GetColourPairs();
+                var colourPairs = GetColourPairs();
                 var numColourPairs = colourPairs.Count;
                 return (numColourPairs >= SelectedGrid.MinColourPairs && numColourPairs <= SelectedGrid.MaxColourPairs);
             }
@@ -188,13 +188,13 @@ namespace FlowFreeSolverWpf.ViewModel
         {
             _dialogService.CloseSolvingDialog(true);
             _dialogService.ShowMyMessageBox("Sorry - no solution was found!");
-            SetStatusMessageFromSolutionStats(solutionStats, "no solution found");
+            SetStatusMessageFromSolutionStats(solutionStats /*, "no solution found" */);
         }
 
         private void OnSolveCancelled(SolutionStats solutionStats)
         {
             _dialogService.ShowMyMessageBox("You cancelled the solving process before completion!");
-            SetStatusMessageFromSolutionStats(solutionStats, "cancelled");
+            SetStatusMessageFromSolutionStats(solutionStats /*, "cancelled" */);
         }
 
         private void OnClear()
@@ -208,6 +208,7 @@ namespace FlowFreeSolverWpf.ViewModel
 
         private void OnSelectedGridChanged()
         {
+            _coordsToDots.Clear();
             _boardControl.GridSize = SelectedGrid.GridSize;
             PreLoadSamplePuzzle();
             BoardControlHasChanged();
@@ -218,8 +219,8 @@ namespace FlowFreeSolverWpf.ViewModel
         {
             foreach (var colourPair in SelectedGrid.SamplePuzzle)
             {
-                _boardControl.AddDot(colourPair.StartCoords, colourPair.DotColour);
-                _boardControl.AddDot(colourPair.EndCoords, colourPair.DotColour);
+                AddDot(colourPair.StartCoords, colourPair.DotColour);
+                AddDot(colourPair.EndCoords, colourPair.DotColour);
             }
         }
 
@@ -244,7 +245,7 @@ namespace FlowFreeSolverWpf.ViewModel
             }
         }
 
-        private void SetStatusMessageFromSolutionStats(SolutionStats solutionStats, string extraMessage = null)
+        private void SetStatusMessageFromSolutionStats(SolutionStats solutionStats /*, string extraMessage = null */)
         {
             var statusMessage = string.Format(
                 "Matrix size: {0} rows x {1} cols",
@@ -271,6 +272,45 @@ namespace FlowFreeSolverWpf.ViewModel
             statusMessage += string.Format("; Direction changes: {0}", solutionStats.MaxDirectionChanges);
 
             StatusMessage = statusMessage;
+        }
+
+        private void AddDot(Coords coords, DotColour dotColour)
+        {
+            _boardControl.AddDot(coords, dotColour);
+            _coordsToDots.Add(coords, dotColour);
+            BoardControlHasChanged();
+        }
+
+        private void RemoveDot(Coords coords)
+        {
+            _boardControl.RemoveDot(coords);
+            _coordsToDots.Remove(coords);
+            BoardControlHasChanged();
+        }
+
+        private bool IsDotAt(Coords coords)
+        {
+            return _coordsToDots.ContainsKey(coords);
+        }
+
+        private IList<ColourPair> GetColourPairs()
+        {
+            var dotsGroupedByTag = _coordsToDots.GroupBy(kvp => kvp.Value,
+                                                         kvp => new {Coords = kvp.Key})
+                                                .ToList();
+
+            if (dotsGroupedByTag.Any(grouping => grouping.Count() != 2))
+            {
+                throw new InvalidOperationException("Dots must be in pairs!");
+            }
+
+            return dotsGroupedByTag.Select(grouping =>
+            {
+                var startCoords = grouping.ElementAt(0).Coords;
+                var endCoords = grouping.ElementAt(1).Coords;
+                var dotColour = grouping.Key;
+                return new ColourPair(startCoords, endCoords, dotColour);
+            }).ToList();
         }
     }
 }

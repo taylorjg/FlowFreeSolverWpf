@@ -27,7 +27,7 @@ namespace FlowFreeSolverWpf.View
             Dot
         }
 
-        private readonly IDictionary<Coords, Tuple<DotColour, Ellipse>> _coordsToTagsAndDots = new Dictionary<Coords, Tuple<DotColour, Ellipse>>();
+        private readonly IDictionary<Coords, Ellipse> _coordsToDots = new Dictionary<Coords, Ellipse>();
 
         public BoardControl()
         {
@@ -36,29 +36,6 @@ namespace FlowFreeSolverWpf.View
         }
 
         public event EventHandler<CellClickedEventArgs> CellClicked;
-
-        private void BoardCanvasOnMouseLeftButtonDown(object sender, MouseButtonEventArgs mouseButtonEventArgs)
-        {
-            var aw = ActualWidth;
-            var ah = ActualHeight;
-            var sw = (aw - GridLineThickness) / GridSize;
-            var sh = (ah - GridLineThickness) / GridSize;
-
-            var pt = mouseButtonEventArgs.MouseDevice.GetPosition(this);
-
-            for (var x = 0; x < GridSize; x++)
-            {
-                for (var y = 0; y < GridSize; y++)
-                {
-                    var cellRect = new Rect(x * sw + GridLineHalfThickness, (GridSize - y - 1) * sh + GridLineHalfThickness, sw, sh);
-                    if (cellRect.Contains(pt))
-                    {
-                        RaiseCellClicked(new Coords(x, y));
-                        return;
-                    }
-                }
-            }
-        }
 
         private void RaiseCellClicked(Coords coords)
         {
@@ -84,31 +61,6 @@ namespace FlowFreeSolverWpf.View
             }
         }
 
-        public IList<ColourPair> GetColourPairs()
-        {
-            var dotsGroupedByTag = _coordsToTagsAndDots.GroupBy(kvp => kvp.Value.Item1,
-                                                                kvp => new {Coords = kvp.Key})
-                                                       .ToList();
-
-            if (dotsGroupedByTag.Any(x => x.Count() != 2))
-            {
-                throw new InvalidOperationException("Dots must be in pairs!");
-            }
-
-            return dotsGroupedByTag.Select(x =>
-                {
-                    var startCoords = x.ElementAt(0).Coords;
-                    var endCoords = x.ElementAt(1).Coords;
-                    var dotColour = x.Key;
-                    return new ColourPair(startCoords, endCoords, dotColour);
-                }).ToList();
-        }
-
-        public void DrawGrid()
-        {
-            DrawGridLines();
-        }
-
         public void ClearAll()
         {
             ClearDots();
@@ -119,7 +71,7 @@ namespace FlowFreeSolverWpf.View
         public void ClearDots()
         {
             RemoveChildrenWithTagType(TagType.Dot);
-            _coordsToTagsAndDots.Clear();
+            _coordsToDots.Clear();
         }
 
         public void ClearPaths()
@@ -133,40 +85,52 @@ namespace FlowFreeSolverWpf.View
             RemoveChildrenWithTagType(TagType.GridLine);
         }
 
-        private void RemoveChildrenWithTagType(TagType tagType)
+        public void DrawGrid()
         {
-            var elementsToRemove = new List<UIElement>();
+            var aw = ActualWidth;
+            var ah = ActualHeight;
+            var sw = (aw - GridLineThickness) / GridSize;
+            var sh = (ah - GridLineThickness) / GridSize;
 
-            // ReSharper disable LoopCanBeConvertedToQuery
-            foreach (var element in BoardCanvas.Children)
+            var gridLineBrush = new SolidColorBrush(_gridLineColour);
+
+            // Horizontal grid lines
+            for (var row = 0; row <= GridSize; row++)
             {
-                var frameworkElement = element as FrameworkElement;
-                if (frameworkElement != null)
+                var line = new Line
                 {
-                    if (frameworkElement.Tag is TagType)
-                    {
-                        if ((TagType)frameworkElement.Tag == tagType)
-                        {
-                            elementsToRemove.Add(frameworkElement);
-                        }
-                    }
-                }
+                    Tag = TagType.GridLine,
+                    SnapsToDevicePixels = true,
+                    Stroke = gridLineBrush,
+                    StrokeThickness = GridLineThickness,
+                    X1 = 0,
+                    Y1 = row * sh + GridLineHalfThickness,
+                    X2 = aw,
+                    Y2 = row * sh + GridLineHalfThickness
+                };
+                BoardCanvas.Children.Add(line);
             }
-            // ReSharper restore LoopCanBeConvertedToQuery
 
-            foreach (var element in elementsToRemove)
+            // Vertical grid lines
+            for (var col = 0; col <= GridSize; col++)
             {
-                BoardCanvas.Children.Remove(element);
+                var line = new Line
+                {
+                    Tag = TagType.GridLine,
+                    SnapsToDevicePixels = true,
+                    Stroke = gridLineBrush,
+                    StrokeThickness = GridLineThickness,
+                    X1 = col * sw + GridLineHalfThickness,
+                    Y1 = 0,
+                    X2 = col * sw + GridLineHalfThickness,
+                    Y2 = ah
+                };
+                BoardCanvas.Children.Add(line);
             }
         }
 
         public void AddDot(Coords coords, DotColour dotColour)
         {
-            if (IsDotAt(coords))
-            {
-                return;
-            }
-
             var aw = ActualWidth;
             var ah = ActualHeight;
             var sw = (aw - GridLineThickness) / GridSize;
@@ -187,21 +151,16 @@ namespace FlowFreeSolverWpf.View
             Canvas.SetTop(dot, cellRect.Top);
 
             BoardCanvas.Children.Add(dot);
-            _coordsToTagsAndDots.Add(coords, Tuple.Create(dotColour, dot));
+            _coordsToDots.Add(coords, dot);
         }
 
         public void RemoveDot(Coords coords)
         {
-            if (_coordsToTagsAndDots.ContainsKey(coords))
+            if (_coordsToDots.ContainsKey(coords))
             {
-                BoardCanvas.Children.Remove(_coordsToTagsAndDots[coords].Item2);
-                _coordsToTagsAndDots.Remove(coords);
+                BoardCanvas.Children.Remove(_coordsToDots[coords]);
+                _coordsToDots.Remove(coords);
             }
-        }
-
-        public bool IsDotAt(Coords coords)
-        {
-            return _coordsToTagsAndDots.ContainsKey(coords);
         }
 
         public void DrawPath(ColourPair colourPair, Model.Path path)
@@ -259,47 +218,53 @@ namespace FlowFreeSolverWpf.View
             // ReSharper restore LoopCanBeConvertedToQuery
         }
 
-        private void DrawGridLines()
+        private void RemoveChildrenWithTagType(TagType tagType)
+        {
+            var elementsToRemove = new List<UIElement>();
+
+            // ReSharper disable LoopCanBeConvertedToQuery
+            foreach (var element in BoardCanvas.Children)
+            {
+                var frameworkElement = element as FrameworkElement;
+                if (frameworkElement != null)
+                {
+                    if (frameworkElement.Tag is TagType)
+                    {
+                        if ((TagType)frameworkElement.Tag == tagType)
+                        {
+                            elementsToRemove.Add(frameworkElement);
+                        }
+                    }
+                }
+            }
+            // ReSharper restore LoopCanBeConvertedToQuery
+
+            foreach (var element in elementsToRemove)
+            {
+                BoardCanvas.Children.Remove(element);
+            }
+        }
+
+        private void BoardCanvasOnMouseLeftButtonDown(object sender, MouseButtonEventArgs mouseButtonEventArgs)
         {
             var aw = ActualWidth;
             var ah = ActualHeight;
             var sw = (aw - GridLineThickness) / GridSize;
             var sh = (ah - GridLineThickness) / GridSize;
-            
-            var gridLineBrush = new SolidColorBrush(_gridLineColour);
-            
-            // Horizontal grid lines
-            for (var row = 0; row <= GridSize; row++)
+
+            var pt = mouseButtonEventArgs.MouseDevice.GetPosition(this);
+
+            for (var x = 0; x < GridSize; x++)
             {
-                var line = new Line
-                    {
-                        Tag = TagType.GridLine,
-                        SnapsToDevicePixels = true,
-                        Stroke = gridLineBrush,
-                        StrokeThickness = GridLineThickness,
-                        X1 = 0,
-                        Y1 = row * sh + GridLineHalfThickness,
-                        X2 = aw,
-                        Y2 = row * sh + GridLineHalfThickness
-                    };
-                BoardCanvas.Children.Add(line);
-            }
-            
-            // Vertical grid lines
-            for (var col = 0; col <= GridSize; col++)
-            {
-                var line = new Line
+                for (var y = 0; y < GridSize; y++)
                 {
-                    Tag = TagType.GridLine,
-                    SnapsToDevicePixels = true,
-                    Stroke = gridLineBrush,
-                    StrokeThickness = GridLineThickness,
-                    X1 = col * sw + GridLineHalfThickness,
-                    Y1 = 0,
-                    X2 = col * sw + GridLineHalfThickness,
-                    Y2 = ah
-                };
-                BoardCanvas.Children.Add(line);
+                    var cellRect = new Rect(x * sw + GridLineHalfThickness, (GridSize - y - 1) * sh + GridLineHalfThickness, sw, sh);
+                    if (cellRect.Contains(pt))
+                    {
+                        RaiseCellClicked(new Coords(x, y));
+                        return;
+                    }
+                }
             }
         }
     }
