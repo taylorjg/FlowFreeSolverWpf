@@ -17,7 +17,7 @@ namespace FlowFreeSolverWpfTests
         public void NumDirectionChangesIsZeroWhenThePathContainsOneLocation()
         {
             var path = new Path();
-            path.AddCoords(new Coords(3, 3));
+            path.AddCoords(CoordsFactory.GetCoords(3, 3));
             Assert.That(path.NumDirectionChanges, Is.EqualTo(0));
         }
 
@@ -25,8 +25,8 @@ namespace FlowFreeSolverWpfTests
         public void NumDirectionChangesIsZeroWhenThePathContainsTwoLocations()
         {
             var path = new Path();
-            path.AddCoords(new Coords(3, 3));
-            path.AddCoords(new Coords(4, 3));
+            path.AddCoords(CoordsFactory.GetCoords(3, 3));
+            path.AddCoords(CoordsFactory.GetCoords(4, 3));
             Assert.That(path.NumDirectionChanges, Is.EqualTo(0));
         }
 
@@ -34,9 +34,9 @@ namespace FlowFreeSolverWpfTests
         public void NumDirectionChangesIsZeroWhenThePathContainsThreeLocationsInALine()
         {
             var path = new Path();
-            path.AddCoords(new Coords(3, 3));
-            path.AddCoords(new Coords(4, 3));
-            path.AddCoords(new Coords(5, 3));
+            path.AddCoords(CoordsFactory.GetCoords(3, 3));
+            path.AddCoords(CoordsFactory.GetCoords(4, 3));
+            path.AddCoords(CoordsFactory.GetCoords(5, 3));
             Assert.That(path.NumDirectionChanges, Is.EqualTo(0));
         }
 
@@ -44,9 +44,9 @@ namespace FlowFreeSolverWpfTests
         public void NumDirectionChangesIsOneWhenThePathContainsThreeLocationsInASmallRightAngle()
         {
             var path = new Path();
-            path.AddCoords(new Coords(3, 3));
-            path.AddCoords(new Coords(4, 3));
-            path.AddCoords(new Coords(4, 4));
+            path.AddCoords(CoordsFactory.GetCoords(3, 3));
+            path.AddCoords(CoordsFactory.GetCoords(4, 3));
+            path.AddCoords(CoordsFactory.GetCoords(4, 4));
             Assert.That(path.NumDirectionChanges, Is.EqualTo(1));
         }
 
@@ -54,13 +54,13 @@ namespace FlowFreeSolverWpfTests
         public void NumDirectionChangesIsOneWhenThePathContainsThreeLocationsInAnLargeRightAngle()
         {
             var path = new Path();
-            path.AddCoords(new Coords(3, 3));
-            path.AddCoords(new Coords(4, 3));
-            path.AddCoords(new Coords(5, 3));
-            path.AddCoords(new Coords(6, 3));
-            path.AddCoords(new Coords(6, 4));
-            path.AddCoords(new Coords(6, 5));
-            path.AddCoords(new Coords(6, 6));
+            path.AddCoords(CoordsFactory.GetCoords(3, 3));
+            path.AddCoords(CoordsFactory.GetCoords(4, 3));
+            path.AddCoords(CoordsFactory.GetCoords(5, 3));
+            path.AddCoords(CoordsFactory.GetCoords(6, 3));
+            path.AddCoords(CoordsFactory.GetCoords(6, 4));
+            path.AddCoords(CoordsFactory.GetCoords(6, 5));
+            path.AddCoords(CoordsFactory.GetCoords(6, 6));
             Assert.That(path.NumDirectionChanges, Is.EqualTo(1));
         }
 
@@ -68,14 +68,14 @@ namespace FlowFreeSolverWpfTests
         public void NumDirectionChangesIsTwoWhenTheDirectionChangesTwice()
         {
             var path = new Path();
-            path.AddCoords(new Coords(3, 3));
-            path.AddCoords(new Coords(4, 3));
-            path.AddCoords(new Coords(5, 3));
-            path.AddCoords(new Coords(6, 3));
-            path.AddCoords(new Coords(6, 4));
-            path.AddCoords(new Coords(6, 5));
-            path.AddCoords(new Coords(5, 5));
-            path.AddCoords(new Coords(4, 5));
+            path.AddCoords(CoordsFactory.GetCoords(3, 3));
+            path.AddCoords(CoordsFactory.GetCoords(4, 3));
+            path.AddCoords(CoordsFactory.GetCoords(5, 3));
+            path.AddCoords(CoordsFactory.GetCoords(6, 3));
+            path.AddCoords(CoordsFactory.GetCoords(6, 4));
+            path.AddCoords(CoordsFactory.GetCoords(6, 5));
+            path.AddCoords(CoordsFactory.GetCoords(5, 5));
+            path.AddCoords(CoordsFactory.GetCoords(4, 5));
             Assert.That(path.NumDirectionChanges, Is.EqualTo(2));
         }
     }

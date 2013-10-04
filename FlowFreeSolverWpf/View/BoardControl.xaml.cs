@@ -261,7 +261,7 @@ namespace FlowFreeSolverWpf.View
                     var cellRect = new Rect(x * sw + GridLineHalfThickness, (GridSize - y - 1) * sh + GridLineHalfThickness, sw, sh);
                     if (cellRect.Contains(pt))
                     {
-                        RaiseCellClicked(new Coords(x, y));
+                        RaiseCellClicked(CoordsFactory.GetCoords(x, y));
                         return;
                     }
                 }

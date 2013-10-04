@@ -19,10 +19,10 @@ namespace FlowFreeSolverWpfTests
             // "    "
             var grid = new Grid(4, new[]
                 {
-                    new ColourPair(new Coords(0, 3), new Coords(3, 3), DotColours.Blue),
-                    new ColourPair(new Coords(1, 3), new Coords(2, 3), DotColours.Orange),
-                    new ColourPair(new Coords(1, 2), new Coords(2, 2), DotColours.Red),
-                    new ColourPair(new Coords(1, 1), new Coords(2, 1), DotColours.Green)
+                    new ColourPair(CoordsFactory.GetCoords(0, 3), CoordsFactory.GetCoords(3, 3), DotColours.Blue),
+                    new ColourPair(CoordsFactory.GetCoords(1, 3), CoordsFactory.GetCoords(2, 3), DotColours.Orange),
+                    new ColourPair(CoordsFactory.GetCoords(1, 2), CoordsFactory.GetCoords(2, 2), DotColours.Red),
+                    new ColourPair(CoordsFactory.GetCoords(1, 1), CoordsFactory.GetCoords(2, 1), DotColours.Green)
                 });
 
             var matrixBuilder1 = new MatrixBuilder();

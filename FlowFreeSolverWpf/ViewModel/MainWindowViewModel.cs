@@ -210,6 +210,7 @@ namespace FlowFreeSolverWpf.ViewModel
         {
             _coordsToDots.Clear();
             _boardControl.GridSize = SelectedGrid.GridSize;
+            CoordsFactory.PrimeCache(SelectedGrid.GridSize);
             PreLoadSamplePuzzle();
             BoardControlHasChanged();
             SetSelectedGridStatusMessage();

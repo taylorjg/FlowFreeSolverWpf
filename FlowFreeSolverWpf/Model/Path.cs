@@ -49,16 +49,16 @@ namespace FlowFreeSolverWpf.Model
             switch (direction)
             {
                 case Direction.Up:
-                    return new Coords(lastCoords.X, lastCoords.Y + 1);
+                    return CoordsFactory.GetCoords(lastCoords.X, lastCoords.Y + 1);
 
                 case Direction.Down:
-                    return new Coords(lastCoords.X, lastCoords.Y - 1);
+                    return CoordsFactory.GetCoords(lastCoords.X, lastCoords.Y - 1);
 
                 case Direction.Left:
-                    return new Coords(lastCoords.X - 1, lastCoords.Y);
+                    return CoordsFactory.GetCoords(lastCoords.X - 1, lastCoords.Y);
 
                 case Direction.Right:
-                    return new Coords(lastCoords.X + 1, lastCoords.Y);
+                    return CoordsFactory.GetCoords(lastCoords.X + 1, lastCoords.Y);
 
                 default:
                     throw new InvalidOperationException("Unknown direction");

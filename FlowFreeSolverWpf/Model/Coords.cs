@@ -47,5 +47,15 @@
         {
             return (X == rhs.X && Y == rhs.Y);
         }
+
+        public static bool operator ==(Coords coords1, Coords coords2)
+        {
+            return Equals(coords1, coords2);
+        }
+
+        public static bool operator !=(Coords coords1, Coords coords2)
+        {
+            return !Equals(coords1, coords2);
+        }
     }
 }
