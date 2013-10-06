@@ -15,6 +15,7 @@ namespace FlowFreeSolverWpf.ViewModel
         private readonly Action<SolutionStats, IEnumerable<Tuple<ColourPair, Path>>> _solutionFoundHandler;
         private readonly Action<SolutionStats> _noSolutionFoundHandler;
         private readonly Action<SolutionStats> _cancelledHandler;
+        private readonly Action<SolutionStats> _updateSolutionStatsHandler;
         private readonly IDispatcher _dispatcher;
         private readonly CancellationToken _cancellationToken;
         private readonly MatrixBuilder _matrixBuilder = new MatrixBuilder();
@@ -27,6 +28,7 @@ namespace FlowFreeSolverWpf.ViewModel
             IEnumerable<Tuple<ColourPair, Path>>> solutionFoundHandler,
             Action<SolutionStats> noSolutionFoundHandler,
             Action<SolutionStats> cancelledHandler,
+            Action<SolutionStats> updateSolutionStatsHandler,
             IDispatcher dispatcher,
             CancellationToken cancellationToken)
         {
@@ -35,6 +37,7 @@ namespace FlowFreeSolverWpf.ViewModel
             _solutionFoundHandler = solutionFoundHandler;
             _noSolutionFoundHandler = noSolutionFoundHandler;
             _cancelledHandler = cancelledHandler;
+            _updateSolutionStatsHandler = updateSolutionStatsHandler;
             _dispatcher = dispatcher;
             _cancellationToken = cancellationToken;
         }
@@ -67,6 +70,15 @@ namespace FlowFreeSolverWpf.ViewModel
                     () => _matrixBuilder.BuildMatrixFor(_grid, localMaxDirectionChanges, _cancellationToken),
                     ref matrixBuildingDuration);
 
+                _dispatcher.Invoke(
+                    _updateSolutionStatsHandler,
+                    new SolutionStats(
+                        matrix.GetLength(0),
+                        matrix.GetLength(1),
+                        matrixBuildingDuration,
+                        matrixBuildingSolving,
+                        maxDirectionChanges));
+
                 if (_cancellationToken.IsCancellationRequested)
                 {
                     break;
@@ -76,6 +88,15 @@ namespace FlowFreeSolverWpf.ViewModel
                 solutions = MeasureFunctionExecutionTime(
                     () => _dlx.Solve(localMatrix).ToList(),
                     ref matrixBuildingSolving);
+
+                _dispatcher.Invoke(
+                    _updateSolutionStatsHandler,
+                    new SolutionStats(
+                        matrix.GetLength(0),
+                        matrix.GetLength(1),
+                        matrixBuildingDuration,
+                        matrixBuildingSolving,
+                        maxDirectionChanges));
 
                 if (solutions.Any())
                 {
@@ -90,7 +111,7 @@ namespace FlowFreeSolverWpf.ViewModel
                 maxDirectionChanges++;
             }
 
-            var maxActualDirectionChanges = 0;
+            int maxActualDirectionChanges;
 
             if (solutions.Any())
             {

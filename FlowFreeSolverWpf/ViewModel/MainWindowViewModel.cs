@@ -150,6 +150,7 @@ namespace FlowFreeSolverWpf.ViewModel
                 OnSolveSolutionFound,
                 OnSolveNoSolutionFound,
                 OnSolveCancelled,
+                SetStatusMessageFromSolutionStats,
                 _dispatcher,
                 _cancellationTokenSource.Token);
             puzzleSolver.SolvePuzzle();
