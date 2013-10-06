@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Media;
 using System.Threading;
-using System.Windows.Input; // for ICommand only
+using System.Windows.Input; // needed for ICommand only
 using FlowFreeSolverWpf.Model;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
@@ -31,11 +32,11 @@ namespace FlowFreeSolverWpf.ViewModel
             _dispatcher = dispatcher;
             _boardControl = boardControl;
             _boardControl.CellClicked += (_, e) => CellClicked(e.Coords);
+
             GridDescriptions = Grids.GridDescriptions;
             DotColours = Model.DotColours.Colours;
-            SelectedGrid = GridDescriptions[2];
-            SelectedDotColour = DotColours[0];
-            ClearStatusMessage();
+            SelectedGrid = GridDescriptions.First();
+            SelectedDotColour = DotColours.First();
         }
 
         public GridDescription[] GridDescriptions { get; private set; }
@@ -83,9 +84,25 @@ namespace FlowFreeSolverWpf.ViewModel
         public void CellClicked(Coords coords)
         {
             if (IsDotAt(coords))
+            {
                 RemoveDot(coords);
+            }
             else
-                AddDot(coords, SelectedDotColour);
+            {
+                if (_coordsToDots.Values.Count(dotColour => dotColour == SelectedDotColour) < 2)
+                {
+                    AddDot(coords, SelectedDotColour);
+                }
+                else
+                {
+                    // http://stackoverflow.com/questions/3044438/what-should-i-use-to-replace-the-winapi-beep-function
+                    // http://stackoverflow.com/questions/5756855/c-sharp-play-sound-with-one-line-of-c-sharp-code
+
+                    // TODO: embed the .wav file as a resource...
+                    var simpleSound = new SoundPlayer(@"C:\Users\taylojo\Documents\Visual Studio 2010\Projects\FlowFreeSolverWpf\FlowFreeSolverWpf\Sounds\IllegalMove.wav");
+                    simpleSound.Play();
+                }
+            }
         }
 
         public ICommand LoadedCommand
@@ -120,10 +137,12 @@ namespace FlowFreeSolverWpf.ViewModel
 
         private void OnSolve()
         {
-            _boardControl.ClearPaths();
-            ClearStatusMessage();
+            ClearPaths();
+            SetSolvingStatusMessage();
+
             var colourPairs = GetColourPairs();
             var grid = new Grid(SelectedGrid.GridSize, colourPairs.ToArray());
+
             _cancellationTokenSource = new CancellationTokenSource();
             var puzzleSolver = new PuzzleSolver(
                 grid,
@@ -199,21 +218,18 @@ namespace FlowFreeSolverWpf.ViewModel
 
         private void OnClear()
         {
-            _boardControl.ClearDots();
-            _boardControl.ClearPaths();
-            ClearStatusMessage();
-            BoardControlHasChanged();
-            SetSelectedGridStatusMessage();
+            ClearDots();
+            ClearPaths();
         }
 
         private void OnSelectedGridChanged()
         {
-            _coordsToDots.Clear();
+            ClearDots();
             _boardControl.GridSize = SelectedGrid.GridSize;
             CoordsFactory.PrimeCache(SelectedGrid.GridSize);
             PreLoadSamplePuzzle();
+            SetGridRequirementsStatusMessage();
             BoardControlHasChanged();
-            SetSelectedGridStatusMessage();
         }
 
         private void PreLoadSamplePuzzle()
@@ -225,25 +241,42 @@ namespace FlowFreeSolverWpf.ViewModel
             }
         }
 
-        private void ClearStatusMessage()
-        {
-            StatusMessage = string.Empty;
-        }
-
-        private void SetSelectedGridStatusMessage()
-        {
-            StatusMessage = string.Format(
-                "There must be {0} to {1} pairs of dots",
-                SelectedGrid.MinColourPairs,
-                SelectedGrid.MaxColourPairs);
-        }
-
         private void BoardControlHasChanged()
         {
             if (_solveCommand != null)
             {
                 _solveCommand.RaiseCanExecuteChanged();
             }
+
+            UpdateStatusMessage();
+        }
+
+        private void UpdateStatusMessage()
+        {
+            if (SolveCommand.CanExecute(null))
+                SetReadyToSolveStatusMessage();
+            else
+            {
+                SetGridRequirementsStatusMessage();
+            }
+        }
+
+        private void SetGridRequirementsStatusMessage()
+        {
+            StatusMessage = string.Format(
+                "Please enter between {0} and {1} different coloured pairs of dots",
+                SelectedGrid.MinColourPairs,
+                SelectedGrid.MaxColourPairs);
+        }
+
+        private void SetReadyToSolveStatusMessage()
+        {
+            StatusMessage = "Ready to solve";
+        }
+
+        private void SetSolvingStatusMessage()
+        {
+            StatusMessage = "Solving...";
         }
 
         private void SetStatusMessageFromSolutionStats(SolutionStats solutionStats /*, string extraMessage = null */)
@@ -286,6 +319,20 @@ namespace FlowFreeSolverWpf.ViewModel
         {
             _boardControl.RemoveDot(coords);
             _coordsToDots.Remove(coords);
+            BoardControlHasChanged();
+        }
+
+        private void ClearDots()
+        {
+            _boardControl.ClearDots();
+            _coordsToDots.Clear();
+            BoardControlHasChanged();
+        }
+
+        private void ClearPaths()
+        {
+            _boardControl.ClearPaths();
+            SetGridRequirementsStatusMessage();
             BoardControlHasChanged();
         }
 

@@ -15,7 +15,10 @@
         </Grid.RowDefinitions>
         
         <StackPanel Grid.Row="0" Orientation="Vertical">
-            <Label Content="Solving..." Margin="10" />
+            <Grid>
+                <Label Content="Solving..." Margin="10" />
+                <Label x:Name="ElapsedTime" Content="00:00:00.000" Margin="10" HorizontalAlignment="Right" />
+            </Grid>
             <ProgressBar Margin="10, 0, 10, 0" HorizontalAlignment="Stretch" FlowDirection="LeftToRight" IsIndeterminate="True" Height="18" />
         </StackPanel>
 
