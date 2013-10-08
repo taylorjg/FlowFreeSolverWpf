@@ -56,7 +56,7 @@ namespace FlowFreeSolverWpf.Model
 
             var nextCoords = activePath.GetNextCoords(activePath.Direction);
 
-            if (nextCoords.Equals(endCoords))
+            if (nextCoords == endCoords)
             {
                 activePath.AddCoords(nextCoords);
                 activePath.IsAbandoned = false;
@@ -64,17 +64,9 @@ namespace FlowFreeSolverWpf.Model
                 return;
             }
 
-            if (activePath.ContainsCoords(nextCoords))
-            {
-                return;
-            }
-
-            if (grid.CoordsAreOffTheGrid(nextCoords))
-            {
-                return;
-            }
-
-            if (grid.IsCellOccupied(nextCoords))
+            if (activePath.ContainsCoords(nextCoords) ||
+                grid.CoordsAreOffTheGrid(nextCoords) ||
+                grid.IsCellOccupied(nextCoords))
             {
                 return;
             }
