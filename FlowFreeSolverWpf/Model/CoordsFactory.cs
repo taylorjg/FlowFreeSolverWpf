@@ -26,9 +26,9 @@ namespace FlowFreeSolverWpf.Model
 
         public static void PrimeCache(int gridSize)
         {
-            for (var x = 0; x < gridSize; x++)
+            for (var x = -1; x <= gridSize; x++)
             {
-                for (var y = 0; y < gridSize; y++)
+                for (var y = -1; y <= gridSize; y++)
                 {
                     GetCoords(x, y);
                 }
