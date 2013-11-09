@@ -19,7 +19,11 @@ namespace FlowFreeSolverWpfTests
         {
             CoordsFactory.PrimeCache(9);
             var actual = CoordsFactory.GetCacheSize();
-            Assert.That(actual, Is.EqualTo(9 * 9));
+
+            // We also cache all coords that are just off the edge of the board.
+            // Therefore, in addition to (0, 0) through (0, 8), we also cache (0, -1) and (0, 9).
+            // And similarly for all the other rows and columns.
+            Assert.That(actual, Is.EqualTo(11 * 11));
         }
     }
 }
