@@ -38,8 +38,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DlxLib">
-      <HintPath>..\packages\DlxLib.1.0.0.0\lib\net40\DlxLib.dll</HintPath>
+    <Reference Include="DlxLib, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\DlxLib.1.1.0.0\lib\net40\DlxLib.dll</HintPath>
     </Reference>
     <Reference Include="GalaSoft.MvvmLight.Extras.WPF4">
       <HintPath>..\packages\MvvmLightLibs.4.1.27.1\lib\net40\GalaSoft.MvvmLight.Extras.WPF4.dll</HintPath>
