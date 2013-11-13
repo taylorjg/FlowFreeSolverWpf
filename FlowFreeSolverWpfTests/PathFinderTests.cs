@@ -37,6 +37,7 @@ namespace FlowFreeSolverWpfTests
             // Assert
             Assert.That(paths.PathList.Count(), Is.EqualTo(2));
             Assert.That(paths.PathList, Has.All.Matches<Path>(p => !p.IsAbandoned));
+            Assert.That(paths.PathList, Has.None.Matches<Path>(p => p.IsAbandoned));
             Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath1.CoordsList)));
             Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath2.CoordsList)));
         }
