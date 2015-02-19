@@ -35,9 +35,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DlxLib, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="DlxLib, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\DlxLib.1.1.0.0\lib\net40\DlxLib.dll</HintPath>
+      <HintPath>..\packages\DlxLib.1.2.0.0\lib\net40\DlxLib.dll</HintPath>
     </Reference>
     <Reference Include="FakeItEasy">
       <HintPath>..\packages\FakeItEasy.1.13.1\lib\net40\FakeItEasy.dll</HintPath>

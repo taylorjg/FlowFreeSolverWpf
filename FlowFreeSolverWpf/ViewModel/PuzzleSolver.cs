@@ -17,13 +17,8 @@ namespace FlowFreeSolverWpf.ViewModel
         private readonly Action<SolutionStats> _cancelledHandler;
         private readonly Action<SolutionStats> _updateSolutionStatsHandler;
         private readonly IDispatcher _dispatcher;
-        private readonly CancellationToken _externalCancellationToken;
-        private readonly CancellationTokenSource _internalCancellationTokenSource;
-        private readonly CancellationToken _internalCancellationToken;
-        private readonly CancellationTokenSource _linkedCancellationTokenSource;
-        private readonly CancellationToken _linkedCancellationToken;
+        private readonly CancellationToken _cancellationToken;
         private readonly MatrixBuilder _matrixBuilder = new MatrixBuilder();
-        private readonly Dlx _dlx;
 
         public PuzzleSolver(
             Grid grid,
@@ -43,42 +38,30 @@ namespace FlowFreeSolverWpf.ViewModel
             _cancelledHandler = cancelledHandler;
             _updateSolutionStatsHandler = updateSolutionStatsHandler;
             _dispatcher = dispatcher;
-            _externalCancellationToken = cancellationToken;
-            _internalCancellationTokenSource = new CancellationTokenSource();
-            _internalCancellationToken = _internalCancellationTokenSource.Token;
-            _linkedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
-                _externalCancellationToken,
-                _internalCancellationToken);
-            _linkedCancellationToken = _linkedCancellationTokenSource.Token;
-            _dlx = new Dlx(_linkedCancellationToken);
+            _cancellationToken = cancellationToken;
         }
 
         public void SolvePuzzle()
         {
-            Task.Factory.StartNew(SolvePuzzleInBackground);
+            Task.Factory.StartNew(SolvePuzzleInBackground, _cancellationToken);
         }
 
         private void SolvePuzzleInBackground()
         {
-            var matrix = new bool[0,0];
+            var dlx = new Dlx(_cancellationToken);
+            var matrix = new bool[0, 0];
+            var maxDirectionChanges = _gridDescription.InitialMaxDirectionChanges;
             TimeSpan? matrixBuildingDuration = null;
             TimeSpan? matrixBuildingSolving = null;
-            var solutions = new List<Solution>();
-
-            _dlx.SolutionFound += (_, __) => _internalCancellationTokenSource.Cancel();
-
-            var maxDirectionChanges = _gridDescription.InitialMaxDirectionChanges;
+            Solution firstSolution = null;
 
             for (;;)
             {
-                if (_externalCancellationToken.IsCancellationRequested)
-                {
-                    break;
-                }
+                if (_cancellationToken.IsCancellationRequested) break;
 
                 var localMaxDirectionChanges = maxDirectionChanges;
                 matrix = MeasureFunctionExecutionTime(
-                    () => _matrixBuilder.BuildMatrixFor(_grid, localMaxDirectionChanges, _externalCancellationToken),
+                    () => _matrixBuilder.BuildMatrixFor(_grid, localMaxDirectionChanges, _cancellationToken),
                     ref matrixBuildingDuration);
 
                 _dispatcher.Invoke(
@@ -90,14 +73,11 @@ namespace FlowFreeSolverWpf.ViewModel
                         matrixBuildingSolving,
                         maxDirectionChanges));
 
-                if (_externalCancellationToken.IsCancellationRequested)
-                {
-                    break;
-                }
+                if (_cancellationToken.IsCancellationRequested) break;
 
                 var localMatrix = matrix;
-                solutions = MeasureFunctionExecutionTime(
-                    () => _dlx.Solve(localMatrix).ToList(),
+                firstSolution = MeasureFunctionExecutionTime(
+                    () => dlx.Solve(localMatrix).FirstOrDefault(),
                     ref matrixBuildingSolving);
 
                 _dispatcher.Invoke(
@@ -109,25 +89,18 @@ namespace FlowFreeSolverWpf.ViewModel
                         matrixBuildingSolving,
                         maxDirectionChanges));
 
-                if (solutions.Any())
-                {
-                    break;
-                }
-
-                if (!_matrixBuilder.ThereAreStillSomeAbandonedPaths())
-                {
-                    break;
-                }
+                if (firstSolution != null) break;
+                if (!_matrixBuilder.ThereAreStillSomeAbandonedPaths()) break;
 
                 maxDirectionChanges++;
             }
 
             int maxActualDirectionChanges;
 
-            if (solutions.Any())
+            if (firstSolution != null)
             {
-                maxActualDirectionChanges = solutions
-                    .First()
+                maxActualDirectionChanges = 
+                    firstSolution
                     .RowIndexes
                     .Max(rowIndex => _matrixBuilder.GetColourPairAndPathForRowIndex(rowIndex).Item2.NumDirectionChanges);
             }
@@ -146,15 +119,15 @@ namespace FlowFreeSolverWpf.ViewModel
                 matrixBuildingSolving,
                 maxActualDirectionChanges);
 
-            if (_externalCancellationToken.IsCancellationRequested)
+            if (_cancellationToken.IsCancellationRequested)
             {
                 _dispatcher.Invoke(_cancelledHandler, solutionStats);
             }
             else
             {
-                if (solutions.Any())
+                if (firstSolution != null)
                 {
-                    var colourPairPaths = solutions.First().RowIndexes.Select(_matrixBuilder.GetColourPairAndPathForRowIndex);
+                    var colourPairPaths = firstSolution.RowIndexes.Select(_matrixBuilder.GetColourPairAndPathForRowIndex);
                     _dispatcher.Invoke(_solutionFoundHandler, solutionStats, colourPairPaths);
                 }
                 else

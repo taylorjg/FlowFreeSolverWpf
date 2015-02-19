@@ -85,13 +85,11 @@ namespace FlowFreeSolverWpfTests
             // " CC "
             // " DD "
             // "    "
-            var grid = new Grid(4, new[]
-                {
-                    new ColourPair(startCoords, endCoords, DotColours.Blue),
-                    new ColourPair(CoordsFactory.GetCoords(1, 3), CoordsFactory.GetCoords(2, 3), DotColours.Orange),
-                    new ColourPair(CoordsFactory.GetCoords(1, 2), CoordsFactory.GetCoords(2, 2), DotColours.Red),
-                    new ColourPair(CoordsFactory.GetCoords(1, 1), CoordsFactory.GetCoords(2, 1), DotColours.Green)
-                });
+            var grid = new Grid(4,
+                new ColourPair(startCoords, endCoords, DotColours.Blue),
+                new ColourPair(CoordsFactory.GetCoords(1, 3), CoordsFactory.GetCoords(2, 3), DotColours.Orange),
+                new ColourPair(CoordsFactory.GetCoords(1, 2), CoordsFactory.GetCoords(2, 2), DotColours.Red),
+                new ColourPair(CoordsFactory.GetCoords(1, 1), CoordsFactory.GetCoords(2, 1), DotColours.Green));
 
             var expectedPath = new Path();
             expectedPath.AddCoords(startCoords);
@@ -126,13 +124,11 @@ namespace FlowFreeSolverWpfTests
             // " CC "
             // " DD "
             // "    "
-            var grid = new Grid(4, new[]
-                {
-                    new ColourPair(startCoords, endCoords, DotColours.Blue),
-                    new ColourPair(CoordsFactory.GetCoords(1, 3), CoordsFactory.GetCoords(2, 3), DotColours.Orange),
-                    new ColourPair(CoordsFactory.GetCoords(1, 2), CoordsFactory.GetCoords(2, 2), DotColours.Red),
-                    new ColourPair(CoordsFactory.GetCoords(1, 1), CoordsFactory.GetCoords(2, 1), DotColours.Green)
-                });
+            var grid = new Grid(4,
+                new ColourPair(startCoords, endCoords, DotColours.Blue),
+                new ColourPair(CoordsFactory.GetCoords(1, 3), CoordsFactory.GetCoords(2, 3), DotColours.Orange),
+                new ColourPair(CoordsFactory.GetCoords(1, 2), CoordsFactory.GetCoords(2, 2), DotColours.Red),
+                new ColourPair(CoordsFactory.GetCoords(1, 1), CoordsFactory.GetCoords(2, 1), DotColours.Green));
 
             // Act
             var pathFinder = new PathFinder(CancellationToken.None);
@@ -154,13 +150,11 @@ namespace FlowFreeSolverWpfTests
             // " CC "
             // " DD "
             // "    "
-            var grid = new Grid(4, new[]
-                {
-                    new ColourPair(startCoords, endCoords, DotColours.Blue),
-                    new ColourPair(CoordsFactory.GetCoords(1, 3), CoordsFactory.GetCoords(2, 3), DotColours.Orange),
-                    new ColourPair(CoordsFactory.GetCoords(1, 2), CoordsFactory.GetCoords(2, 2), DotColours.Red),
-                    new ColourPair(CoordsFactory.GetCoords(1, 1), CoordsFactory.GetCoords(2, 1), DotColours.Green)
-                });
+            var grid = new Grid(4,
+                new ColourPair(startCoords, endCoords, DotColours.Blue),
+                new ColourPair(CoordsFactory.GetCoords(1, 3), CoordsFactory.GetCoords(2, 3), DotColours.Orange),
+                new ColourPair(CoordsFactory.GetCoords(1, 2), CoordsFactory.GetCoords(2, 2), DotColours.Red),
+                new ColourPair(CoordsFactory.GetCoords(1, 1), CoordsFactory.GetCoords(2, 1), DotColours.Green));
 
             var expectedPath = new Path();
             expectedPath.AddCoords(startCoords);
@@ -197,13 +191,11 @@ namespace FlowFreeSolverWpfTests
             // " CC "
             // " DD "
             // "    "
-            var grid = new Grid(4, new[]
-                {
-                    new ColourPair(CoordsFactory.GetCoords(0, 3), CoordsFactory.GetCoords(3, 3), DotColours.Blue),
-                    new ColourPair(CoordsFactory.GetCoords(1, 3), CoordsFactory.GetCoords(2, 3), DotColours.Orange),
-                    new ColourPair(CoordsFactory.GetCoords(1, 2), CoordsFactory.GetCoords(2, 2), DotColours.Red),
-                    new ColourPair(CoordsFactory.GetCoords(1, 1), CoordsFactory.GetCoords(2, 1), DotColours.Green)
-                });
+            var grid = new Grid(4,
+                new ColourPair(CoordsFactory.GetCoords(0, 3), CoordsFactory.GetCoords(3, 3), DotColours.Blue),
+                new ColourPair(CoordsFactory.GetCoords(1, 3), CoordsFactory.GetCoords(2, 3), DotColours.Orange),
+                new ColourPair(CoordsFactory.GetCoords(1, 2), CoordsFactory.GetCoords(2, 2), DotColours.Red),
+                new ColourPair(CoordsFactory.GetCoords(1, 1), CoordsFactory.GetCoords(2, 1), DotColours.Green));
 
             var startCoords = CoordsFactory.GetCoords(0, 3);
             var endCoords = CoordsFactory.GetCoords(3, 3);
@@ -242,14 +234,12 @@ namespace FlowFreeSolverWpfTests
         [Test]
         public void BugExploration2()
         {
-            var grid = new Grid(5, new[]
-                {
-                    new ColourPair(CoordsFactory.GetCoords(1, 1), CoordsFactory.GetCoords(2, 3), DotColours.Blue),
-                    new ColourPair(CoordsFactory.GetCoords(0, 1), CoordsFactory.GetCoords(4, 1), DotColours.Orange),
-                    new ColourPair(CoordsFactory.GetCoords(0, 2), CoordsFactory.GetCoords(3, 4), DotColours.Red),
-                    new ColourPair(CoordsFactory.GetCoords(3, 3), CoordsFactory.GetCoords(4, 4), DotColours.Green),
-                    new ColourPair(CoordsFactory.GetCoords(3, 1), CoordsFactory.GetCoords(4, 0), DotColours.Yellow)
-                });
+            var grid = new Grid(5,
+                new ColourPair(CoordsFactory.GetCoords(1, 1), CoordsFactory.GetCoords(2, 3), DotColours.Blue),
+                new ColourPair(CoordsFactory.GetCoords(0, 1), CoordsFactory.GetCoords(4, 1), DotColours.Orange),
+                new ColourPair(CoordsFactory.GetCoords(0, 2), CoordsFactory.GetCoords(3, 4), DotColours.Red),
+                new ColourPair(CoordsFactory.GetCoords(3, 3), CoordsFactory.GetCoords(4, 4), DotColours.Green),
+                new ColourPair(CoordsFactory.GetCoords(3, 1), CoordsFactory.GetCoords(4, 0), DotColours.Yellow));
 
             var startCoords = grid.ColourPairs.ElementAt(0).StartCoords;
             var endCoords = grid.ColourPairs.ElementAt(0).EndCoords;

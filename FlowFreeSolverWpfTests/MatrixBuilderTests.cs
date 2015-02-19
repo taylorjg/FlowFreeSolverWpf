@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using DlxLib;
+﻿using System.Threading;
 using FlowFreeSolverWpf.Model;
 using NUnit.Framework;
 
@@ -17,13 +14,11 @@ namespace FlowFreeSolverWpfTests
             // " CC "
             // " DD "
             // "    "
-            var grid = new Grid(4, new[]
-                {
-                    new ColourPair(CoordsFactory.GetCoords(0, 3), CoordsFactory.GetCoords(3, 3), DotColours.Blue),
-                    new ColourPair(CoordsFactory.GetCoords(1, 3), CoordsFactory.GetCoords(2, 3), DotColours.Orange),
-                    new ColourPair(CoordsFactory.GetCoords(1, 2), CoordsFactory.GetCoords(2, 2), DotColours.Red),
-                    new ColourPair(CoordsFactory.GetCoords(1, 1), CoordsFactory.GetCoords(2, 1), DotColours.Green)
-                });
+            var grid = new Grid(4,
+                new ColourPair(CoordsFactory.GetCoords(0, 3), CoordsFactory.GetCoords(3, 3), DotColours.Blue),
+                new ColourPair(CoordsFactory.GetCoords(1, 3), CoordsFactory.GetCoords(2, 3), DotColours.Orange),
+                new ColourPair(CoordsFactory.GetCoords(1, 2), CoordsFactory.GetCoords(2, 2), DotColours.Red),
+                new ColourPair(CoordsFactory.GetCoords(1, 1), CoordsFactory.GetCoords(2, 1), DotColours.Green));
 
             var matrixBuilder1 = new MatrixBuilder();
             var matrix1 = matrixBuilder1.BuildMatrixFor(grid, 100, CancellationToken.None);
@@ -31,27 +26,16 @@ namespace FlowFreeSolverWpfTests
             var matrixBuilder2 = new MatrixBuilder();
             bool[,] matrix2;
             var maxDirectionChanges = 1;
-            //var dlx = new Dlx();
-            //dlx.SolutionFound += (_, __) => dlx.Cancel();
-            //var solutions = new List<Solution>();
 
             for (; ; )
             {
                 matrix2 = matrixBuilder2.BuildMatrixFor(grid, maxDirectionChanges, CancellationToken.None);
-                //solutions = dlx.Solve(matrix2).ToList();
-                //if (solutions.Any())
-                //{
-                //    break;
-                //}
-                if (!matrixBuilder2.ThereAreStillSomeAbandonedPaths())
-                {
-                    break;
-                }
+                if (!matrixBuilder2.ThereAreStillSomeAbandonedPaths()) break;
                 maxDirectionChanges++;
             }
 
-            Assert.That(matrix2.GetLength(1), Is.EqualTo(matrix1.GetLength(1)));
-            Assert.That(matrix2.GetLength(0), Is.EqualTo(matrix1.GetLength(0)));
+            Assert.That(matrix1.GetLength(0), Is.EqualTo(matrix2.GetLength(0)));
+            Assert.That(matrix1.GetLength(1), Is.EqualTo(matrix2.GetLength(1)));
         }
     }
 }

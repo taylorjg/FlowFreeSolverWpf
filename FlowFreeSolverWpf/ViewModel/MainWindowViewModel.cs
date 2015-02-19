@@ -159,12 +159,6 @@ namespace FlowFreeSolverWpf.ViewModel
             if (dialogResult.HasValue && !dialogResult.Value)
             {
                 _cancellationTokenSource.Cancel();
-
-                // TODO: also, we should cancel Dlx - via PuzzleSolver ?
-                //if (_dlx != null)
-                //{
-                //    _dlx.Cancel();
-                //}
             }
         }
 
