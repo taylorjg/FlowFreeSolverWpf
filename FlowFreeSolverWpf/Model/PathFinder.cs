@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
@@ -7,8 +6,7 @@ namespace FlowFreeSolverWpf.Model
 {
     public class PathFinder
     {
-        private static readonly IEnumerable<Direction> AllDirections = Enum.GetValues(typeof(Direction)).Cast<Direction>();
-        private CancellationToken _cancellationToken;
+        private readonly CancellationToken _cancellationToken;
 
         public PathFinder(CancellationToken cancellationToken)
         {
@@ -71,11 +69,12 @@ namespace FlowFreeSolverWpf.Model
                 return;
             }
 
-            var oppositeDirection = activePath.Direction.Opposite();
-            var directionsToTry = AllDirections.Where(direction => direction != oppositeDirection);
+            var directionsToTry = activePath.Direction.DirectionsToTry();
 
-            foreach (var directionToTry in directionsToTry)
+            // ReSharper disable once ForCanBeConvertedToForeach
+            for (var index = 0; index < directionsToTry.Length; index++)
             {
+                var directionToTry = directionsToTry[index];
                 var copyOfActivePath = Path.CopyOfPath(activePath);
                 copyOfActivePath.AddCoords(nextCoords);
                 copyOfActivePath.IsAbandoned = false;
