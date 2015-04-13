@@ -1,6 +1,6 @@
 ﻿namespace FlowFreeSolverWpf.Model
 {
-    public static class Grids
+    public static class PreDefinedGrids
     {
         private static readonly ColourPair[] Sample5X5Puzzle = new[]
             {

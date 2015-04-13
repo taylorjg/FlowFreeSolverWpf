@@ -2,11 +2,16 @@
 {
     public class DotColour
     {
+        private readonly string _colourName;
+
         public DotColour(string colourName)
         {
-            ColourName = colourName;
+            _colourName = colourName;
         }
 
-        public string ColourName { get; private set; }
+        public string ColourName
+        {
+            get { return _colourName; }
+        }
     }
 }

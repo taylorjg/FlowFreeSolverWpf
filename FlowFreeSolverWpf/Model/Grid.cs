@@ -1,34 +1,32 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace FlowFreeSolverWpf.Model
 {
     public class Grid
     {
-        public int GridSize { get; private set; }
-        public IEnumerable<ColourPair> ColourPairs { get; private set; }
-        private readonly ColourPair[,] _cells;
+        private readonly int _gridSize;
+        private readonly IEnumerable<ColourPair> _colourPairs;
 
         public Grid(int gridSize, params ColourPair[] colourPairs)
         {
-            GridSize = gridSize;
-            ColourPairs = colourPairs;
-            _cells = new ColourPair[GridSize, GridSize];
-
-            foreach (var colourPair in colourPairs)
-            {
-                SetCellContents(colourPair.StartCoords, colourPair);
-                SetCellContents(colourPair.EndCoords, colourPair);
-            }
+            _gridSize = gridSize;
+            _colourPairs = colourPairs;
         }
 
-        private void SetCellContents(Coords coords, ColourPair colourPair)
+        public int GridSize
         {
-            _cells[coords.X, coords.Y] = colourPair;
+            get { return _gridSize; }
+        }
+
+        public IEnumerable<ColourPair> ColourPairs
+        {
+            get { return _colourPairs; }
         }
 
         public bool IsCellOccupied(Coords coords)
         {
-            return _cells[coords.X, coords.Y] != null;
+            return _colourPairs.Any(cp => cp.StartCoords == coords || cp.EndCoords == coords);
         }
 
         public bool CoordsAreOffTheGrid(Coords coords)

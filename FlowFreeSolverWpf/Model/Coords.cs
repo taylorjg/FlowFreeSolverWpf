@@ -2,26 +2,30 @@
 {
     public class Coords
     {
+        private readonly int _x;
+        private readonly int _y;
+
         public Coords(int x, int y)
         {
-            X = x;
-            Y = y;
+            _x = x;
+            _y = y;
         }
 
-        public int X { get; private set; }
-        public int Y { get; private set; }
+        public int X
+        {
+            get { return _x; }
+        }
+
+        public int Y
+        {
+            get { return _y; }
+        }
 
         public override bool Equals(object rhs)
         {
-            if (rhs == null)
-                return false;
-
-            if (ReferenceEquals(this, rhs))
-                return true;
-
-            if (GetType() != rhs.GetType())
-                return false;
-
+            if (rhs == null) return false;
+            if (ReferenceEquals(this, rhs)) return true;
+            if (GetType() != rhs.GetType()) return false;
             return CompareFields(rhs as Coords);
         }
 
