@@ -80,8 +80,7 @@ namespace FlowFreeSolverWpf.Model
                     }
                 }
                 var task = taskFactory.StartNew(
-                    () =>
-                    BuildInternalDataRowsForColourPair(
+                    () => BuildInternalDataRowsForColourPair(
                         copyOfItemForCapture.ColourPair,
                         copyOfItemForCapture.ColourPairIndex,
                         paths,
@@ -95,7 +94,7 @@ namespace FlowFreeSolverWpf.Model
             _allAbandonedPaths.Clear();
             var combinedMatrixRows = new List<MatrixRow>();
             combinedMatrixRows.AddRange(_previousCombinedMatrixRows);
-            foreach (var internalDataRow in tasks.Select(task => task.Result).SelectMany(internalDataRows => internalDataRows))
+            foreach (var internalDataRow in tasks.SelectMany(task => task.Result))
             {
                 if (internalDataRow.Path.IsAbandoned)
                 {
@@ -122,7 +121,7 @@ namespace FlowFreeSolverWpf.Model
 
         private bool[,] ConvertCombinedMatrixRowsToDlxMatrix(IList<MatrixRow> combinedMatrixRows)
         {
-            var matrix = new bool[combinedMatrixRows.Count,_numColumns];
+            var matrix = new bool[combinedMatrixRows.Count, _numColumns];
 
             for (var row = 0; row < combinedMatrixRows.Count; row++)
             {

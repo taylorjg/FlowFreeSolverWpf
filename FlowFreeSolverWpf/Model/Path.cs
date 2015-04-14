@@ -109,14 +109,14 @@ namespace FlowFreeSolverWpf.Model
         public override string ToString()
         {
             return string.Format(
-                "Coords: {0}; Direction: {1}; IsAbandoned: {2}; NumDirectionChanges: {3}",
-                PathCoordsToString(),
+                "CoordsList: {0}; Direction: {1}; IsAbandoned: {2}; NumDirectionChanges: {3}",
+                CoordsListToString(),
                 Direction,
                 IsAbandoned,
                 NumDirectionChanges);
         }
 
-        private string PathCoordsToString()
+        private string CoordsListToString()
         {
             return string.Join(", ", CoordsList.Select(c => c.ToString()).ToArray());
         }
