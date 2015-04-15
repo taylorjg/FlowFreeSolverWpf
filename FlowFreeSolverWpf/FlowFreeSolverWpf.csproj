@@ -84,7 +84,7 @@
     <Compile Include="ViewModel\IDispatcher.cs" />
     <Compile Include="Model\DotColour.cs" />
     <Compile Include="Model\GridDescription.cs" />
-    <Compile Include="Model\PreDefinedGrids.cs" />
+    <Compile Include="Model\SampleGrids.cs" />
     <Compile Include="Model\DotColours.cs" />
     <Compile Include="View\MyMessageBox.xaml.cs">
       <DependentUpon>MyMessageBox.xaml</DependentUpon>

@@ -33,7 +33,7 @@ namespace FlowFreeSolverWpf.ViewModel
             _boardControl = boardControl;
             _boardControl.CellClicked += (_, e) => CellClicked(e.Coords);
 
-            GridDescriptions = PreDefinedGrids.GridDescriptions;
+            GridDescriptions = SampleGrids.SampleGridDescriptions;
             DotColours = Model.DotColours.Colours;
             SelectedGrid = GridDescriptions.First();
             SelectedDotColour = DotColours.First();
