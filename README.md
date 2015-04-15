@@ -1,3 +1,4 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/xku8l63dxt24owk4/branch/master?svg=true)](https://ci.appveyor.com/project/taylorjg/flowfreesolverwpf/branch/master)
 
 ## Flow Free Solver
 
