@@ -86,7 +86,7 @@ namespace FlowFreeSolverWpf.ViewModel
                         maxDirectionChanges));
 
                 if (firstSolution != null) break;
-                if (!_matrixBuilder.HasAbandonedPaths()) break;
+                if (!_matrixBuilder.HasInactivePaths()) break;
 
                 maxDirectionChanges++;
             }

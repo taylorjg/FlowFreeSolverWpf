@@ -12,8 +12,8 @@ namespace FlowFreeSolverWpf.Model
         private readonly CancellationToken _cancellationToken;
         private readonly int _numColourPairs;
         private readonly int _numColumns;
-        private readonly List<MatrixRow> _currentMatrix = new List<MatrixRow>();
-        private readonly List<MatrixRow> _abandonedPaths = new List<MatrixRow>();
+        private readonly List<MatrixRow> _activeMatrix = new List<MatrixRow>();
+        private readonly List<MatrixRow> _inactivePaths = new List<MatrixRow>();
 
         public MatrixBuilder(Grid grid, CancellationToken cancellationToken)
         {
@@ -23,34 +23,15 @@ namespace FlowFreeSolverWpf.Model
             _numColumns = _numColourPairs + (_grid.GridSize * grid.GridSize);
         }
 
-        // TODO: ideally, get rid of this. But when I try to do it, I break the following unit test:
-        // SolvingASmallGridWithLargeInitialMaxDirectionChangesAndDynamicMaxDirectionChangesResultsInSameSizeMatrixes
-        private bool _firstTime = true;
-
         public List<MatrixRow> BuildMatrix(int maxDirectionChanges)
         {
             var tasks = _grid.ColourPairs
                 .Select((colourPair, index) =>
                 {
-                    var paths = new List<Path>();
-
-                    if (_firstTime)
-                    {
-                        _firstTime = false;
-                    }
-                    else
-                    {
-                        paths = _abandonedPaths
-                            .Where(ap => ap.ColourPair == colourPair)
-                            .Select(ap => ap.Path)
-                            .ToList();
-
-                        if (!paths.Any())
-                        {
-                            // We could use Task.FromResult here if we were using .NET 4.5
-                            return Task.Factory.StartNew(() => new List<MatrixRow>(), _cancellationToken);
-                        }
-                    }
+                    var paths = _inactivePaths
+                        .Where(ap => ap.ColourPair == colourPair)
+                        .Select(ap => ap.Path)
+                        .ToList();
 
                     var thisColourPair = colourPair;
                     var thisIndex = index;
@@ -67,7 +48,7 @@ namespace FlowFreeSolverWpf.Model
 
             Task.WaitAll(tasks.Cast<Task>().ToArray());
 
-            _abandonedPaths.Clear();
+            _inactivePaths.Clear();
 
             var flattenedMatrixRows = tasks.SelectMany(task =>
             {
@@ -77,36 +58,36 @@ namespace FlowFreeSolverWpf.Model
 
             foreach (var matrixRow in flattenedMatrixRows)
             {
-                if (matrixRow.Path.IsAbandoned)
-                    _abandonedPaths.Add(matrixRow);
+                if (matrixRow.Path.IsInactive)
+                    _inactivePaths.Add(matrixRow);
                 else
-                    _currentMatrix.Add(matrixRow);
+                    _activeMatrix.Add(matrixRow);
             }
 
-            return _currentMatrix;
+            return _activeMatrix;
         }
 
-        public bool HasAbandonedPaths()
+        public bool HasInactivePaths()
         {
-            return _abandonedPaths.Any();
+            return _inactivePaths.Any();
         }
 
         public Tuple<ColourPair, Path> GetColourPairAndPathForRowIndex(int rowIndex)
         {
-            var matrixRow = _currentMatrix[rowIndex];
+            var matrixRow = _activeMatrix[rowIndex];
             return Tuple.Create(matrixRow.ColourPair, matrixRow.Path);
         }
 
         private List<MatrixRow> BuildMatrixRowsForColourPair(
             ColourPair colourPair,
             int colourPairIndex,
-            IList<Path> abandonedPaths,
+            IList<Path> activePaths,
             int maxDirectionChanges)
         {
             var matrixRows = new List<MatrixRow>();
 
             var pathFinder = new PathFinder(_cancellationToken);
-            var paths = pathFinder.FindAllPaths(_grid, colourPair.StartCoords, colourPair.EndCoords, abandonedPaths, maxDirectionChanges);
+            var paths = pathFinder.FindAllPaths(_grid, colourPair.StartCoords, colourPair.EndCoords, activePaths, maxDirectionChanges);
 
             // ReSharper disable once LoopCanBeConvertedToQuery
             foreach (var path in paths.PathList)

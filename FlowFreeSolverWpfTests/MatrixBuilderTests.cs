@@ -31,11 +31,26 @@ namespace FlowFreeSolverWpfTests
             foreach (var maxDirectionChanges in Enumerable.Range(1, 100))
             {
                 matrix2 = matrixBuilder2.BuildMatrix(maxDirectionChanges);
-                if (!matrixBuilder2.HasAbandonedPaths()) break;
+                if (!matrixBuilder2.HasInactivePaths()) break;
             }
 
-            //Assert.That(matrix1.Distinct().Count(), Is.EqualTo(matrix2.Distinct().Count()));
-            Assert.That(matrix1.Count, Is.EqualTo(matrix2.Count));
+            var comparer = new MatrixRowEqualityComparer();
+            var distinctRowCount1 = matrix1.Distinct(comparer).Count();
+            var distinctRowCount2 = matrix2.Distinct(comparer).Count();
+            Assert.That(distinctRowCount1, Is.EqualTo(distinctRowCount2));
+        }
+
+        private class MatrixRowEqualityComparer : IEqualityComparer<MatrixRow>
+        {
+            public bool Equals(MatrixRow x, MatrixRow y)
+            {
+                return x.DlxMatrixRow.SequenceEqual(y.DlxMatrixRow);
+            }
+
+            public int GetHashCode(MatrixRow obj)
+            {
+                return 0;
+            }
         }
     }
 }

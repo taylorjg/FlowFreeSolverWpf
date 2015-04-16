@@ -36,8 +36,8 @@ namespace FlowFreeSolverWpfTests
 
             // Assert
             Assert.That(paths.PathList.Count(), Is.EqualTo(2));
-            Assert.That(paths.PathList, Has.All.Matches<Path>(p => !p.IsAbandoned));
-            Assert.That(paths.PathList, Has.None.Matches<Path>(p => p.IsAbandoned));
+            Assert.That(paths.PathList, Has.All.Matches<Path>(p => !p.IsInactive));
+            Assert.That(paths.PathList, Has.None.Matches<Path>(p => p.IsInactive));
             Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath1.CoordsList)));
             Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath2.CoordsList)));
         }
@@ -69,7 +69,7 @@ namespace FlowFreeSolverWpfTests
 
             // Assert
             Assert.That(paths.PathList.Count(), Is.EqualTo(2));
-            Assert.That(paths.PathList, Has.All.Matches<Path>(p => !p.IsAbandoned));
+            Assert.That(paths.PathList, Has.All.Matches<Path>(p => !p.IsInactive));
             Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath1.CoordsList)));
             Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath2.CoordsList)));
         }
@@ -109,12 +109,12 @@ namespace FlowFreeSolverWpfTests
 
             // Assert
             Assert.That(paths.PathList.Count(), Is.EqualTo(1));
-            Assert.That(paths.PathList, Has.All.Matches<Path>(p => !p.IsAbandoned));
+            Assert.That(paths.PathList, Has.All.Matches<Path>(p => !p.IsInactive));
             Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath.CoordsList)));
         }
 
         [Test]
-        public void Grid4X4WithFourColourPairsAndMaxDirectionChangesSetToOneReturnsThreeAbandonedPaths()
+        public void Grid4X4WithFourColourPairsAndMaxDirectionChangesSetToOneReturnsThreeInactivePaths()
         {
             // Arrange
             var startCoords = CoordsFactory.GetCoords(0, 3);
@@ -136,11 +136,11 @@ namespace FlowFreeSolverWpfTests
 
             // Assert
             Assert.That(paths.PathList.Count(), Is.EqualTo(3));
-            Assert.That(paths.PathList, Has.All.Matches<Path>(p => p.IsAbandoned));
+            Assert.That(paths.PathList, Has.All.Matches<Path>(p => p.IsInactive));
         }
 
         [Test]
-        public void SecondCallToFindAllPathsGivenAbandonedPathsReturnsACompletedPath()
+        public void SecondCallToFindAllPathsGivenInactivePathsReturnsACompletedPath()
         {
             // Arrange
             var startCoords = CoordsFactory.GetCoords(0, 3);
@@ -174,14 +174,14 @@ namespace FlowFreeSolverWpfTests
 
             // Assert
             Assert.That(paths1.PathList.Count(), Is.EqualTo(3));
-            Assert.That(paths1.PathList, Has.All.Matches<Path>(p => p.IsAbandoned));
+            Assert.That(paths1.PathList, Has.All.Matches<Path>(p => p.IsInactive));
 
             // Act 2
-            var abandonedPaths = paths1.PathList.ToList();
-            var paths2 = pathFinder.FindAllPaths(grid, startCoords, endCoords, abandonedPaths, 2);
+            var inactivePaths = paths1.PathList.ToList();
+            var paths2 = pathFinder.FindAllPaths(grid, startCoords, endCoords, inactivePaths, 2);
 
             // Assert 2
-            Assert.That(paths2.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath.CoordsList) && !p.IsAbandoned));
+            Assert.That(paths2.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath.CoordsList) && !p.IsInactive));
         }
 
         [Test]
@@ -203,7 +203,7 @@ namespace FlowFreeSolverWpfTests
             // Calling FindAllPaths in a loop with an increasing value of maxDirectionChanges.
             var pathFinder1 = new PathFinder(CancellationToken.None);
             var completedPaths = new List<Path>();
-            var abandonedPaths = new List<Path>();
+            var inactivePaths = new List<Path>();
             var firstCall = true;
 
             for (var maxDirectionChanges = 1; maxDirectionChanges <= 5; maxDirectionChanges++)
@@ -214,14 +214,14 @@ namespace FlowFreeSolverWpfTests
                 }
                 else
                 {
-                    if (!abandonedPaths.Any())
+                    if (!inactivePaths.Any())
                     {
                         break;
                     }
                 }
-                var pathFinderResult = pathFinder1.FindAllPaths(grid, startCoords, endCoords, abandonedPaths, maxDirectionChanges);
-                completedPaths.AddRange(pathFinderResult.PathList.Where(p => !p.IsAbandoned));
-                abandonedPaths = pathFinderResult.PathList.Where(p => p.IsAbandoned).ToList();
+                var pathFinderResult = pathFinder1.FindAllPaths(grid, startCoords, endCoords, inactivePaths, maxDirectionChanges);
+                completedPaths.AddRange(pathFinderResult.PathList.Where(p => !p.IsInactive));
+                inactivePaths = pathFinderResult.PathList.Where(p => p.IsInactive).ToList();
             }
 
             // Calling FindAllPaths once with a large value of maxDirectionChanges.
@@ -249,7 +249,7 @@ namespace FlowFreeSolverWpfTests
             // Calling FindAllPaths in a loop with an increasing value of maxDirectionChanges up to maxDirectionChangeLimit.
             var pathFinder1 = new PathFinder(CancellationToken.None);
             var completedPaths = new List<Path>();
-            var abandonedPaths = new List<Path>();
+            var inactivePaths = new List<Path>();
             var firstCall = true;
 
             for (var directionChangeLimit = 1; directionChangeLimit <= maxDirectionChangeLimit; directionChangeLimit++)
@@ -260,14 +260,14 @@ namespace FlowFreeSolverWpfTests
                 }
                 else
                 {
-                    if (!abandonedPaths.Any())
+                    if (!inactivePaths.Any())
                     {
                         break;
                     }
                 }
-                var pathFinderResult1 = pathFinder1.FindAllPaths(grid, startCoords, endCoords, abandonedPaths, directionChangeLimit);
-                completedPaths.AddRange(pathFinderResult1.PathList.Where(p => !p.IsAbandoned));
-                abandonedPaths = pathFinderResult1.PathList.Where(p => p.IsAbandoned).ToList();
+                var pathFinderResult1 = pathFinder1.FindAllPaths(grid, startCoords, endCoords, inactivePaths, directionChangeLimit);
+                completedPaths.AddRange(pathFinderResult1.PathList.Where(p => !p.IsInactive));
+                inactivePaths = pathFinderResult1.PathList.Where(p => p.IsInactive).ToList();
             }
 
             // Calling FindAllPaths once with maxDirectionChangeLimit.

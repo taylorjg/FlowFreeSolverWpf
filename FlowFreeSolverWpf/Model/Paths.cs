@@ -11,10 +11,10 @@ namespace FlowFreeSolverWpf.Model
         {
             // TODO: I think this is where the bug was. Is this a good enough fix ?
             // When we were only collecting completed paths, it made sense to check
-            // for duplicates. But now we also collect abandoned paths and we don't
-            // want to check abandoned paths for duplicates.
+            // for duplicates. But now we also collect inactive paths and we don't
+            // want to check inactive paths for duplicates.
 
-            if (path.IsAbandoned)
+            if (path.IsInactive)
             {
                 _pathList.Add(path);
             }
