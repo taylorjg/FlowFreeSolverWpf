@@ -10,7 +10,6 @@ namespace FlowFreeSolverWpf.ViewModel
 {
     public class PuzzleSolver
     {
-        private readonly Grid _grid;
         private readonly GridDescription _gridDescription;
         private readonly Action<SolutionStats, IEnumerable<Tuple<ColourPair, Path>>> _solutionFoundHandler;
         private readonly Action<SolutionStats> _noSolutionFoundHandler;
@@ -18,20 +17,18 @@ namespace FlowFreeSolverWpf.ViewModel
         private readonly Action<SolutionStats> _updateSolutionStatsHandler;
         private readonly IDispatcher _dispatcher;
         private readonly CancellationToken _cancellationToken;
-        private readonly MatrixBuilder _matrixBuilder = new MatrixBuilder();
+        private readonly MatrixBuilder _matrixBuilder;
 
         public PuzzleSolver(
             Grid grid,
             GridDescription gridDescription,
-            Action<SolutionStats,
-            IEnumerable<Tuple<ColourPair, Path>>> solutionFoundHandler,
+            Action<SolutionStats, IEnumerable<Tuple<ColourPair, Path>>> solutionFoundHandler,
             Action<SolutionStats> noSolutionFoundHandler,
             Action<SolutionStats> cancelledHandler,
             Action<SolutionStats> updateSolutionStatsHandler,
             IDispatcher dispatcher,
             CancellationToken cancellationToken)
         {
-            _grid = grid;
             _gridDescription = gridDescription;
             _solutionFoundHandler = solutionFoundHandler;
             _noSolutionFoundHandler = noSolutionFoundHandler;
@@ -39,6 +36,7 @@ namespace FlowFreeSolverWpf.ViewModel
             _updateSolutionStatsHandler = updateSolutionStatsHandler;
             _dispatcher = dispatcher;
             _cancellationToken = cancellationToken;
+            _matrixBuilder = new MatrixBuilder(grid, cancellationToken);
         }
 
         public void SolvePuzzle()
@@ -59,10 +57,8 @@ namespace FlowFreeSolverWpf.ViewModel
             {
                 if (_cancellationToken.IsCancellationRequested) break;
 
-                var localMaxDirectionChanges = maxDirectionChanges;
-
                 matrix = MeasureFunctionExecutionTime(
-                    () => _matrixBuilder.BuildMatrix(_grid, localMaxDirectionChanges, _cancellationToken),
+                    () => _matrixBuilder.BuildMatrix(maxDirectionChanges),
                     ref matrixBuildingDuration);
 
                 _dispatcher.Invoke(
@@ -76,9 +72,8 @@ namespace FlowFreeSolverWpf.ViewModel
 
                 if (_cancellationToken.IsCancellationRequested) break;
 
-                var localMatrix = matrix;
                 firstSolution = MeasureFunctionExecutionTime(
-                    () => dlx.Solve(localMatrix, r => r, r => r.DlxMatrixRow).FirstOrDefault(),
+                    () => dlx.Solve(matrix, r => r, r => r.DlxMatrixRow).FirstOrDefault(),
                     ref matrixSolvingDuration);
 
                 _dispatcher.Invoke(
@@ -91,7 +86,7 @@ namespace FlowFreeSolverWpf.ViewModel
                         maxDirectionChanges));
 
                 if (firstSolution != null) break;
-                if (!_matrixBuilder.ThereAreStillSomeAbandonedPaths()) break;
+                if (!_matrixBuilder.HasAbandonedPaths()) break;
 
                 maxDirectionChanges++;
             }
