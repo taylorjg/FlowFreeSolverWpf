@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using FlowFreeSolverWpf.Model;
 using NUnit.Framework;
 
@@ -21,21 +22,21 @@ namespace FlowFreeSolverWpfTests
                 new ColourPair(CoordsFactory.GetCoords(1, 1), CoordsFactory.GetCoords(2, 1), DotColours.Green));
 
             var matrixBuilder1 = new MatrixBuilder();
-            var matrix1 = matrixBuilder1.BuildMatrixFor(grid, 100, CancellationToken.None);
+            var matrix1 = matrixBuilder1.BuildMatrix(grid, 100, CancellationToken.None);
 
             var matrixBuilder2 = new MatrixBuilder();
-            bool[,] matrix2;
+            List<MatrixRow> matrix2;
             var maxDirectionChanges = 1;
 
             for (; ; )
             {
-                matrix2 = matrixBuilder2.BuildMatrixFor(grid, maxDirectionChanges, CancellationToken.None);
+                matrix2 = matrixBuilder2.BuildMatrix(grid, maxDirectionChanges, CancellationToken.None);
                 if (!matrixBuilder2.ThereAreStillSomeAbandonedPaths()) break;
                 maxDirectionChanges++;
             }
 
-            Assert.That(matrix1.GetLength(0), Is.EqualTo(matrix2.GetLength(0)));
-            Assert.That(matrix1.GetLength(1), Is.EqualTo(matrix2.GetLength(1)));
+            Assert.That(matrix1.Count, Is.EqualTo(matrix2.Count));
+            Assert.That(matrix1[0].DlxMatrixRow.Count, Is.EqualTo(matrix2[0].DlxMatrixRow.Count));
         }
     }
 }

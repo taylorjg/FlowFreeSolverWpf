@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace FlowFreeSolverWpf.Model
 {
+    using Matrix = List<MatrixRow>;
+    using DlxMatrixRow = List<bool>;
+
     public class MatrixBuilder
     {
         private Grid _grid;
@@ -13,34 +16,11 @@ namespace FlowFreeSolverWpf.Model
         private int _numColourPairs;
         private int _numColumns;
         private bool _initialised;
-        private IDictionary<int, Tuple<ColourPair, Path>> _rowIndexToColourPairAndPath;
-        private IList<MatrixRow> _previousCombinedMatrixRows;
-        private IList<InternalDataRow> _allAbandonedPaths;
+        private readonly Matrix _abandonedMatrix = new Matrix();
+        private readonly Matrix _currentMatrix = new Matrix();
 
-        private class MatrixRow : List<bool>
-        {
-            public MatrixRow(int numColumns)
-            {
-                var bools = new bool[numColumns];
-                AddRange(bools);
-            }
-        }
-
-        private class InternalDataRow
-        {
-            public InternalDataRow(ColourPair colourPair, Path path, MatrixRow matrixRow)
-            {
-                ColourPair = colourPair;
-                Path = path;
-                MatrixRow = matrixRow;
-            }
-
-            public ColourPair ColourPair { get; private set; }
-            public Path Path { get; private set; }
-            public MatrixRow MatrixRow { get; private set; }
-        }
-
-        public bool[,] BuildMatrixFor(Grid grid, int maxDirectionChanges, CancellationToken cancellationToken)
+        // TODO: add a constructor taking grid and cancellationToken ???
+        public List<MatrixRow> BuildMatrix(Grid grid, int maxDirectionChanges, CancellationToken cancellationToken)
         {
             _grid = grid;
             _cancellationToken = cancellationToken;
@@ -48,29 +28,30 @@ namespace FlowFreeSolverWpf.Model
             _numColourPairs = _grid.ColourPairs.Count();
             _numColumns = _numColourPairs + (_grid.GridSize * grid.GridSize);
 
-            var tasks = new List<Task<IList<InternalDataRow>>>();
-            var colourPairsWithIndexes = _grid.ColourPairs.Select((colourPair, colourPairIndex) => new { ColourPair = colourPair, ColourPairIndex = colourPairIndex });
+            var tasks = new List<Task<Matrix>>();
             var processAbandonedRowsOnly = true;
 
             if (!_initialised)
             {
-                _rowIndexToColourPairAndPath = new Dictionary<int, Tuple<ColourPair, Path>>();
-                _previousCombinedMatrixRows = new List<MatrixRow>();
-                _allAbandonedPaths = new List<InternalDataRow>();
                 _initialised = true;
                 processAbandonedRowsOnly = false;
             }
 
-            var taskFactory = new TaskFactory<IList<InternalDataRow>>();
+            var taskFactory = new TaskFactory<Matrix>();
 
-            // ReSharper disable LoopCanBeConvertedToQuery
-            foreach (var item in colourPairsWithIndexes)
+            var colourPairsWithIndices = _grid.ColourPairs.Select((colourPair, index) => new
+            {
+                ColourPair = colourPair,
+                Index = index
+            });
+
+            foreach (var item in colourPairsWithIndices)
             {
                 var copyOfItemForCapture = item;
                 IList<Path> paths = new List<Path>();
                 if (processAbandonedRowsOnly)
                 {
-                    paths = _allAbandonedPaths
+                    paths = _abandonedMatrix
                         .Where(ap => ap.ColourPair == copyOfItemForCapture.ColourPair)
                         .Select(ap => ap.Path)
                         .ToList();
@@ -80,100 +61,75 @@ namespace FlowFreeSolverWpf.Model
                     }
                 }
                 var task = taskFactory.StartNew(
-                    () => BuildInternalDataRowsForColourPair(
+                    () => BuildMatrixRowsForColourPair(
                         copyOfItemForCapture.ColourPair,
-                        copyOfItemForCapture.ColourPairIndex,
+                        copyOfItemForCapture.Index,
                         paths,
                         maxDirectionChanges));
                 tasks.Add(task);
             }
-            // ReSharper restore LoopCanBeConvertedToQuery
 
             Task.WaitAll(tasks.Cast<Task>().ToArray());
 
-            _allAbandonedPaths.Clear();
-            var combinedMatrixRows = new List<MatrixRow>();
-            combinedMatrixRows.AddRange(_previousCombinedMatrixRows);
-            foreach (var internalDataRow in tasks.SelectMany(task => task.Result))
+            _abandonedMatrix.Clear();
+
+            foreach (var matrixRow in tasks.SelectMany(task => task.Result))
             {
-                if (internalDataRow.Path.IsAbandoned)
-                {
-                    _allAbandonedPaths.Add(internalDataRow);
-                }
+                if (matrixRow.Path.IsAbandoned)
+                    _abandonedMatrix.Add(matrixRow);
                 else
-                {
-                    // TODO: need to check for duplicate paths ?
-                    combinedMatrixRows.Add(internalDataRow.MatrixRow);
-                    var rowIndex = combinedMatrixRows.Count - 1;
-                    _rowIndexToColourPairAndPath[rowIndex] = Tuple.Create(internalDataRow.ColourPair, internalDataRow.Path);
-                }
+                    _currentMatrix.Add(matrixRow);
             }
 
-            _previousCombinedMatrixRows = combinedMatrixRows;
-
-            return ConvertCombinedMatrixRowsToDlxMatrix(combinedMatrixRows);
+            return _currentMatrix;
         }
 
         public bool ThereAreStillSomeAbandonedPaths()
         {
-            return _allAbandonedPaths.Any();
-        }
-
-        private bool[,] ConvertCombinedMatrixRowsToDlxMatrix(IList<MatrixRow> combinedMatrixRows)
-        {
-            var matrix = new bool[combinedMatrixRows.Count, _numColumns];
-
-            for (var row = 0; row < combinedMatrixRows.Count; row++)
-            {
-                for (var col = 0; col < _numColumns; col++)
-                {
-                    matrix[row, col] = combinedMatrixRows[row][col];
-                }
-            }
-
-            return matrix;
+            return _abandonedMatrix.Any();
         }
 
         public Tuple<ColourPair, Path> GetColourPairAndPathForRowIndex(int rowIndex)
         {
-            return _rowIndexToColourPairAndPath[rowIndex];
+            var matrixRow = _currentMatrix[rowIndex];
+            return Tuple.Create(matrixRow.ColourPair, matrixRow.Path);
         }
 
-        private IList<InternalDataRow> BuildInternalDataRowsForColourPair(
+        private Matrix BuildMatrixRowsForColourPair(
             ColourPair colourPair,
             int colourPairIndex,
             IList<Path> abandonedPaths,
             int maxDirectionChanges)
         {
-            var internalDataRows = new List<InternalDataRow>();
+            var matrixRows = new Matrix();
 
             var pathFinder = new PathFinder(_cancellationToken);
             var paths = pathFinder.FindAllPaths(_grid, colourPair.StartCoords, colourPair.EndCoords, abandonedPaths, maxDirectionChanges);
 
-            // ReSharper disable LoopCanBeConvertedToQuery
+            // ReSharper disable once LoopCanBeConvertedToQuery
             foreach (var path in paths.PathList)
             {
-                var matrixRow = BuildMatrixRowForColourPairPath(colourPairIndex, path);
-                internalDataRows.Add(new InternalDataRow(colourPair, path, matrixRow));
+                var dlxMatrixRow = BuildDlxMatrixRowForColourPairPath(colourPairIndex, path);
+                matrixRows.Add(new MatrixRow(colourPair, path, dlxMatrixRow));
             }
-            // ReSharper restore LoopCanBeConvertedToQuery
 
-            return internalDataRows;
+            return matrixRows;
         }
 
-        private MatrixRow BuildMatrixRowForColourPairPath(int colourPairIndex, Path path)
+        private DlxMatrixRow BuildDlxMatrixRowForColourPairPath(int colourPairIndex, Path path)
         {
-            var matrixRow = new MatrixRow(_numColumns);
+            var dlxMatrixRow = new DlxMatrixRow(Enumerable.Repeat(false, _numColumns));
 
-            matrixRow[colourPairIndex] = true;
+            dlxMatrixRow[colourPairIndex] = true;
 
+            // ReSharper disable once LoopCanBePartlyConvertedToQuery
             foreach (var coords in path.CoordsList)
             {
                 var gridLocationColumnIndex = _numColourPairs + (_grid.GridSize * coords.X) + coords.Y;
-                matrixRow[gridLocationColumnIndex] = true;
+                dlxMatrixRow[gridLocationColumnIndex] = true;
             }
 
-            return matrixRow;
+            return dlxMatrixRow;
         }
     }
 }

@@ -76,6 +76,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Model\CoordsFactory.cs" />
+    <Compile Include="Model\MatrixRow.cs" />
     <Compile Include="ViewModel\CellClickedEventArgs.cs" />
     <Compile Include="View\DotColourValueConverter.cs" />
     <Compile Include="View\DotColourExtensions.cs" />
