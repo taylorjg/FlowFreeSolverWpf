@@ -16,8 +16,8 @@ namespace FlowFreeSolverWpfTests
             var startCoords = CoordsFactory.GetCoords(0, 0);
             var endCoords = CoordsFactory.GetCoords(1, 1);
 
-            // " A"
-            // "A "
+            // " B"
+            // "B "
             var grid = new Grid(2, new ColourPair(startCoords, endCoords, DotColours.Blue));
 
             var expectedPath1 = new Path();
@@ -36,8 +36,7 @@ namespace FlowFreeSolverWpfTests
 
             // Assert
             Assert.That(paths.PathList.Count(), Is.EqualTo(2));
-            Assert.That(paths.PathList, Has.All.Matches<Path>(p => !p.IsInactive));
-            Assert.That(paths.PathList, Has.None.Matches<Path>(p => p.IsInactive));
+            Assert.That(paths.PathList, Has.All.Matches<Path>(p => p.IsActive));
             Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath1.CoordsList)));
             Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath2.CoordsList)));
         }
@@ -49,8 +48,8 @@ namespace FlowFreeSolverWpfTests
             var startCoords = CoordsFactory.GetCoords(0, 0);
             var endCoords = CoordsFactory.GetCoords(1, 1);
 
-            // " A"
-            // "A "
+            // " B"
+            // "B "
             var grid = new Grid(2, new ColourPair(startCoords, endCoords, DotColours.Blue));
 
             var expectedPath1 = new Path();
@@ -69,7 +68,7 @@ namespace FlowFreeSolverWpfTests
 
             // Assert
             Assert.That(paths.PathList.Count(), Is.EqualTo(2));
-            Assert.That(paths.PathList, Has.All.Matches<Path>(p => !p.IsInactive));
+            Assert.That(paths.PathList, Has.All.Matches<Path>(p => p.IsActive));
             Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath1.CoordsList)));
             Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath2.CoordsList)));
         }
@@ -81,9 +80,9 @@ namespace FlowFreeSolverWpfTests
             var startCoords = CoordsFactory.GetCoords(0, 3);
             var endCoords = CoordsFactory.GetCoords(3, 3);
 
-            // "ABBA"
-            // " CC "
-            // " DD "
+            // "BOOB"
+            // " RR "
+            // " GG "
             // "    "
             var grid = new Grid(4,
                 new ColourPair(startCoords, endCoords, DotColours.Blue),
@@ -109,7 +108,7 @@ namespace FlowFreeSolverWpfTests
 
             // Assert
             Assert.That(paths.PathList.Count(), Is.EqualTo(1));
-            Assert.That(paths.PathList, Has.All.Matches<Path>(p => !p.IsInactive));
+            Assert.That(paths.PathList, Has.All.Matches<Path>(p => p.IsActive));
             Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath.CoordsList)));
         }
 
@@ -120,9 +119,9 @@ namespace FlowFreeSolverWpfTests
             var startCoords = CoordsFactory.GetCoords(0, 3);
             var endCoords = CoordsFactory.GetCoords(3, 3);
 
-            // "ABBA"
-            // " CC "
-            // " DD "
+            // "BOOB"
+            // " RR "
+            // " GG "
             // "    "
             var grid = new Grid(4,
                 new ColourPair(startCoords, endCoords, DotColours.Blue),
@@ -136,7 +135,7 @@ namespace FlowFreeSolverWpfTests
 
             // Assert
             Assert.That(paths.PathList.Count(), Is.EqualTo(3));
-            Assert.That(paths.PathList, Has.All.Matches<Path>(p => p.IsInactive));
+            Assert.That(paths.PathList, Has.All.Matches<Path>(p => !p.IsActive));
         }
 
         [Test]
@@ -146,9 +145,9 @@ namespace FlowFreeSolverWpfTests
             var startCoords = CoordsFactory.GetCoords(0, 3);
             var endCoords = CoordsFactory.GetCoords(3, 3);
 
-            // "ABBA"
-            // " CC "
-            // " DD "
+            // "BOOB"
+            // " RR "
+            // " GG "
             // "    "
             var grid = new Grid(4,
                 new ColourPair(startCoords, endCoords, DotColours.Blue),
@@ -174,22 +173,22 @@ namespace FlowFreeSolverWpfTests
 
             // Assert
             Assert.That(paths1.PathList.Count(), Is.EqualTo(3));
-            Assert.That(paths1.PathList, Has.All.Matches<Path>(p => p.IsInactive));
+            Assert.That(paths1.PathList, Has.All.Matches<Path>(p => !p.IsActive));
 
             // Act 2
             var inactivePaths = paths1.PathList.ToList();
             var paths2 = pathFinder.FindAllPaths(grid, startCoords, endCoords, inactivePaths, 2);
 
             // Assert 2
-            Assert.That(paths2.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath.CoordsList) && !p.IsInactive));
+            Assert.That(paths2.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath.CoordsList) && p.IsActive));
         }
 
         [Test]
         public void BugExploration()
         {
-            // "ABBA"
-            // " CC "
-            // " DD "
+            // "BOOB"
+            // " RR "
+            // " GG "
             // "    "
             var grid = new Grid(4,
                 new ColourPair(CoordsFactory.GetCoords(0, 3), CoordsFactory.GetCoords(3, 3), DotColours.Blue),
@@ -220,8 +219,8 @@ namespace FlowFreeSolverWpfTests
                     }
                 }
                 var pathFinderResult = pathFinder1.FindAllPaths(grid, startCoords, endCoords, inactivePaths, maxDirectionChanges);
-                completedPaths.AddRange(pathFinderResult.PathList.Where(p => !p.IsInactive));
-                inactivePaths = pathFinderResult.PathList.Where(p => p.IsInactive).ToList();
+                completedPaths.AddRange(pathFinderResult.PathList.Where(p => p.IsActive));
+                inactivePaths = pathFinderResult.PathList.Where(p => !p.IsActive).ToList();
             }
 
             // Calling FindAllPaths once with a large value of maxDirectionChanges.
@@ -234,6 +233,11 @@ namespace FlowFreeSolverWpfTests
         [Test]
         public void BugExploration2()
         {
+            // "   RG"
+            // "  BG "
+            // "R    "
+            // "OB YO"
+            // "    Y"
             var grid = new Grid(5,
                 new ColourPair(CoordsFactory.GetCoords(1, 1), CoordsFactory.GetCoords(2, 3), DotColours.Blue),
                 new ColourPair(CoordsFactory.GetCoords(0, 1), CoordsFactory.GetCoords(4, 1), DotColours.Orange),
@@ -241,8 +245,8 @@ namespace FlowFreeSolverWpfTests
                 new ColourPair(CoordsFactory.GetCoords(3, 3), CoordsFactory.GetCoords(4, 4), DotColours.Green),
                 new ColourPair(CoordsFactory.GetCoords(3, 1), CoordsFactory.GetCoords(4, 0), DotColours.Yellow));
 
-            var startCoords = grid.ColourPairs.ElementAt(0).StartCoords;
-            var endCoords = grid.ColourPairs.ElementAt(0).EndCoords;
+            var startCoords = grid.ColourPairs.First().StartCoords;
+            var endCoords = grid.ColourPairs.First().EndCoords;
 
             const int maxDirectionChangeLimit = 5 * 5;
 
@@ -266,8 +270,8 @@ namespace FlowFreeSolverWpfTests
                     }
                 }
                 var pathFinderResult1 = pathFinder1.FindAllPaths(grid, startCoords, endCoords, inactivePaths, directionChangeLimit);
-                completedPaths.AddRange(pathFinderResult1.PathList.Where(p => !p.IsInactive));
-                inactivePaths = pathFinderResult1.PathList.Where(p => p.IsInactive).ToList();
+                completedPaths.AddRange(pathFinderResult1.PathList.Where(p => p.IsActive));
+                inactivePaths = pathFinderResult1.PathList.Where(p => !p.IsActive).ToList();
             }
 
             // Calling FindAllPaths once with maxDirectionChangeLimit.

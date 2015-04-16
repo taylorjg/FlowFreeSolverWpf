@@ -14,16 +14,16 @@ namespace FlowFreeSolverWpf.Model
             // for duplicates. But now we also collect inactive paths and we don't
             // want to check inactive paths for duplicates.
 
-            if (path.IsInactive)
-            {
-                _pathList.Add(path);
-            }
-            else
+            if (path.IsActive)
             {
                 if (!ContainsPath(path))
                 {
                     _pathList.Add(path);
                 }
+            }
+            else
+            {
+                _pathList.Add(path);
             }
         }
 

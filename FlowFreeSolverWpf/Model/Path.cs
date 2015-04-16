@@ -12,6 +12,7 @@ namespace FlowFreeSolverWpf.Model
         {
             var path = new Path();
             path.AddCoords(startingPoint);
+            path.IsActive = true;
             path.Direction = direction;
             return path;
         }
@@ -23,7 +24,7 @@ namespace FlowFreeSolverWpf.Model
             {
                 copyOfPath.AddCoords(coords);
             }
-            copyOfPath.IsInactive = originalPath.IsInactive;
+            copyOfPath.IsActive = originalPath.IsActive;
             copyOfPath.Direction = originalPath.Direction;
             return copyOfPath;
         }
@@ -65,7 +66,7 @@ namespace FlowFreeSolverWpf.Model
             }
         }
 
-        public bool IsInactive { get; set; }
+        public bool IsActive { get; set; }
         public Direction Direction { get; set; }
 
         public int NumDirectionChanges {
@@ -109,10 +110,10 @@ namespace FlowFreeSolverWpf.Model
         public override string ToString()
         {
             return string.Format(
-                "CoordsList: {0}; Direction: {1}; IsInactive: {2}; NumDirectionChanges: {3}",
+                "CoordsList: {0}; Direction: {1}; IsActive: {2}; NumDirectionChanges: {3}",
                 CoordsListToString(),
                 Direction,
-                IsInactive,
+                IsActive,
                 NumDirectionChanges);
         }
 

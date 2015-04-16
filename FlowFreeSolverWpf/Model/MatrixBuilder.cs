@@ -25,6 +25,21 @@ namespace FlowFreeSolverWpf.Model
 
         public List<MatrixRow> BuildMatrix(int maxDirectionChanges)
         {
+            // create TransformBlock
+            // - func should call BuildMatrixRowsForColourPair()
+            // create ActionBlock
+            // - action should add paths to flattenedMatrixRows
+            // link transform block to action block with completion propagation
+            // post all task details to the transform block
+            // - colour pair
+            // - index
+            // - paths (empty initially, subsequently the formerly inactive paths for this colour pair)
+            // - max direction changes
+            // call Complete() on the transform block
+            // call Completion.Wait() on the action block
+
+            // need to handle cancellation
+
             var tasks = _grid.ColourPairs
                 .Select((colourPair, index) =>
                 {
@@ -58,10 +73,10 @@ namespace FlowFreeSolverWpf.Model
 
             foreach (var matrixRow in flattenedMatrixRows)
             {
-                if (matrixRow.Path.IsInactive)
-                    _inactivePaths.Add(matrixRow);
-                else
+                if (matrixRow.Path.IsActive)
                     _activeMatrix.Add(matrixRow);
+                else
+                    _inactivePaths.Add(matrixRow);
             }
 
             return _activeMatrix;
@@ -80,26 +95,19 @@ namespace FlowFreeSolverWpf.Model
 
         private List<MatrixRow> BuildMatrixRowsForColourPair(
             ColourPair colourPair,
-            int colourPairIndex,
+            int index,
             IList<Path> activePaths,
             int maxDirectionChanges)
         {
-            var matrixRows = new List<MatrixRow>();
-
             var pathFinder = new PathFinder(_cancellationToken);
             var paths = pathFinder.FindAllPaths(_grid, colourPair.StartCoords, colourPair.EndCoords, activePaths, maxDirectionChanges);
 
-            // ReSharper disable once LoopCanBeConvertedToQuery
-            foreach (var path in paths.PathList)
-            {
-                var dlxMatrixRow = BuildDlxMatrixRowForColourPairPath(colourPairIndex, path);
-                matrixRows.Add(new MatrixRow(colourPair, path, dlxMatrixRow));
-            }
-
-            return matrixRows;
+            return paths.PathList
+                .Select(path => BuildDlxMatrixRowForPath(colourPair, index, path))
+                .ToList();
         }
 
-        private List<bool> BuildDlxMatrixRowForColourPairPath(int colourPairIndex, Path path)
+        private MatrixRow BuildDlxMatrixRowForPath(ColourPair colourPair, int colourPairIndex, Path path)
         {
             var dlxMatrixRow = new List<bool>(Enumerable.Repeat(false, _numColumns));
 
@@ -112,7 +120,7 @@ namespace FlowFreeSolverWpf.Model
                 dlxMatrixRow[gridLocationColumnIndex] = true;
             }
 
-            return dlxMatrixRow;
+            return new MatrixRow(colourPair, path, dlxMatrixRow);
         }
     }
 }

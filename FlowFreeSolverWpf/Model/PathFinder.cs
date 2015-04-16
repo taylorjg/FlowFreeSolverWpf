@@ -57,7 +57,8 @@ namespace FlowFreeSolverWpf.Model
             if (nextCoords == endCoords)
             {
                 activePath.AddCoords(nextCoords);
-                activePath.IsInactive = false;
+                activePath.IsActive = true;
+                //activePath.IsInactive = false;
                 resultantPaths.AddPath(activePath);
                 return;
             }
@@ -77,7 +78,8 @@ namespace FlowFreeSolverWpf.Model
                 var directionToTry = directionsToTry[index];
                 var copyOfActivePath = Path.CopyOfPath(activePath);
                 copyOfActivePath.AddCoords(nextCoords);
-                copyOfActivePath.IsInactive = false;
+                copyOfActivePath.IsActive = true;
+                //copyOfActivePath.IsInactive = false;
                 copyOfActivePath.Direction = directionToTry;
 
                 if (copyOfActivePath.NumDirectionChanges <= maxDirectionChanges)
@@ -91,7 +93,8 @@ namespace FlowFreeSolverWpf.Model
                 }
                 else
                 {
-                    copyOfActivePath.IsInactive = true;
+                    copyOfActivePath.IsActive = false;
+                    //copyOfActivePath.IsInactive = true;
                     resultantPaths.AddPath(copyOfActivePath);
                 }
             }
