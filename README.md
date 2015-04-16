@@ -52,3 +52,17 @@ This project is a WPF version of my earlier [FlowFreeDlx](https://github.com/tay
 * ~~Fix the bug introduced by using Parallel.ForEach()~~
 * ~~Add an InternalDataRow inner class to simplify the MatrixBuilder code~~
 * ~~apply the MVVM design pattern (MVVM Light Toolkit ?)~~
+
+## Update (16th April 2015)
+
+The solver works quickly for small grid sizes but starts to take a long time for larger grids.
+It would be nice to improve the solve time for larger grids. Here are some ideas about how to
+achieve this:
+
+* Micro optimisations here and there (e.g. inside loops that occur thousands of times)
+
+* When finding paths, favour ones that maintain direction e.g. if heading left, we currently explore left, up and down. We should probably only explore left initially. We can explore up and down later if necessary.
+
+* The majority of the time is spent finding paths i.e. building the Dlx matrix. The Dlx solve time is very quick. At the moment, we only attempt a Dlx solve after building the martrix for a given max number of direction changes. Perhaps we could attempt Dlx solves as the matrix is being built. We could potentially use
+[TPL Dataflow](https://msdn.microsoft.com/en-us/library/hh228603%28v=vs.110%29.aspx)
+to organise this e.g. using a BatchBlock.
