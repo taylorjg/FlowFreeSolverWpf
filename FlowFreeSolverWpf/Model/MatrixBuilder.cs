@@ -6,77 +6,79 @@ using System.Threading.Tasks;
 
 namespace FlowFreeSolverWpf.Model
 {
-    using Matrix = List<MatrixRow>;
-    using DlxMatrixRow = List<bool>;
-
     public class MatrixBuilder
     {
-        private Grid _grid;
-        private CancellationToken _cancellationToken;
-        private int _numColourPairs;
-        private int _numColumns;
-        private bool _initialised;
-        private readonly Matrix _abandonedMatrix = new Matrix();
-        private readonly Matrix _currentMatrix = new Matrix();
+        private readonly Grid _grid;
+        private readonly CancellationToken _cancellationToken;
+        private readonly int _numColourPairs;
+        private readonly int _numColumns;
+        private readonly List<MatrixRow> _currentMatrix = new List<MatrixRow>();
+        private readonly List<MatrixRow> _abandonedPaths = new List<MatrixRow>();
 
-        // TODO: add a constructor taking grid and cancellationToken ???
-        public List<MatrixRow> BuildMatrix(Grid grid, int maxDirectionChanges, CancellationToken cancellationToken)
+        public MatrixBuilder(Grid grid, CancellationToken cancellationToken)
         {
             _grid = grid;
             _cancellationToken = cancellationToken;
-
             _numColourPairs = _grid.ColourPairs.Count();
             _numColumns = _numColourPairs + (_grid.GridSize * grid.GridSize);
+        }
 
-            var tasks = new List<Task<Matrix>>();
-            var processAbandonedRowsOnly = true;
+        // TODO: ideally, get rid of this. But when I try to do it, I break the following unit test:
+        // SolvingASmallGridWithLargeInitialMaxDirectionChangesAndDynamicMaxDirectionChangesResultsInSameSizeMatrixes
+        private bool _firstTime = true;
 
-            if (!_initialised)
-            {
-                _initialised = true;
-                processAbandonedRowsOnly = false;
-            }
-
-            var taskFactory = new TaskFactory<Matrix>();
-
-            var colourPairsWithIndices = _grid.ColourPairs.Select((colourPair, index) => new
-            {
-                ColourPair = colourPair,
-                Index = index
-            });
-
-            foreach (var item in colourPairsWithIndices)
-            {
-                var copyOfItemForCapture = item;
-                IList<Path> paths = new List<Path>();
-                if (processAbandonedRowsOnly)
+        public List<MatrixRow> BuildMatrix(int maxDirectionChanges)
+        {
+            var tasks = _grid.ColourPairs
+                .Select((colourPair, index) =>
                 {
-                    paths = _abandonedMatrix
-                        .Where(ap => ap.ColourPair == copyOfItemForCapture.ColourPair)
-                        .Select(ap => ap.Path)
-                        .ToList();
-                    if (!paths.Any())
+                    var paths = new List<Path>();
+
+                    if (_firstTime)
                     {
-                        continue;
+                        _firstTime = false;
                     }
-                }
-                var task = taskFactory.StartNew(
-                    () => BuildMatrixRowsForColourPair(
-                        copyOfItemForCapture.ColourPair,
-                        copyOfItemForCapture.Index,
-                        paths,
-                        maxDirectionChanges));
-                tasks.Add(task);
-            }
+                    else
+                    {
+                        paths = _abandonedPaths
+                            .Where(ap => ap.ColourPair == colourPair)
+                            .Select(ap => ap.Path)
+                            .ToList();
+
+                        if (!paths.Any())
+                        {
+                            // We could use Task.FromResult here if we were using .NET 4.5
+                            return Task.Factory.StartNew(() => new List<MatrixRow>(), _cancellationToken);
+                        }
+                    }
+
+                    var thisColourPair = colourPair;
+                    var thisIndex = index;
+
+                    return Task.Factory.StartNew(
+                        () => BuildMatrixRowsForColourPair(
+                            thisColourPair,
+                            thisIndex,
+                            paths,
+                            maxDirectionChanges),
+                        _cancellationToken);
+                })
+                .ToList();
 
             Task.WaitAll(tasks.Cast<Task>().ToArray());
 
-            _abandonedMatrix.Clear();
+            _abandonedPaths.Clear();
 
-            foreach (var matrixRow in tasks.SelectMany(task => task.Result))
+            var flattenedMatrixRows = tasks.SelectMany(task =>
+            {
+                if (task.IsCanceled || task.IsFaulted) return Enumerable.Empty<MatrixRow>();
+                return task.Result;
+            });
+
+            foreach (var matrixRow in flattenedMatrixRows)
             {
                 if (matrixRow.Path.IsAbandoned)
-                    _abandonedMatrix.Add(matrixRow);
+                    _abandonedPaths.Add(matrixRow);
                 else
                     _currentMatrix.Add(matrixRow);
             }
@@ -84,9 +86,9 @@ namespace FlowFreeSolverWpf.Model
             return _currentMatrix;
         }
 
-        public bool ThereAreStillSomeAbandonedPaths()
+        public bool HasAbandonedPaths()
         {
-            return _abandonedMatrix.Any();
+            return _abandonedPaths.Any();
         }
 
         public Tuple<ColourPair, Path> GetColourPairAndPathForRowIndex(int rowIndex)
@@ -95,13 +97,13 @@ namespace FlowFreeSolverWpf.Model
             return Tuple.Create(matrixRow.ColourPair, matrixRow.Path);
         }
 
-        private Matrix BuildMatrixRowsForColourPair(
+        private List<MatrixRow> BuildMatrixRowsForColourPair(
             ColourPair colourPair,
             int colourPairIndex,
             IList<Path> abandonedPaths,
             int maxDirectionChanges)
         {
-            var matrixRows = new Matrix();
+            var matrixRows = new List<MatrixRow>();
 
             var pathFinder = new PathFinder(_cancellationToken);
             var paths = pathFinder.FindAllPaths(_grid, colourPair.StartCoords, colourPair.EndCoords, abandonedPaths, maxDirectionChanges);
@@ -116,9 +118,9 @@ namespace FlowFreeSolverWpf.Model
             return matrixRows;
         }
 
-        private DlxMatrixRow BuildDlxMatrixRowForColourPairPath(int colourPairIndex, Path path)
+        private List<bool> BuildDlxMatrixRowForColourPairPath(int colourPairIndex, Path path)
         {
-            var dlxMatrixRow = new DlxMatrixRow(Enumerable.Repeat(false, _numColumns));
+            var dlxMatrixRow = new List<bool>(Enumerable.Repeat(false, _numColumns));
 
             dlxMatrixRow[colourPairIndex] = true;
 
