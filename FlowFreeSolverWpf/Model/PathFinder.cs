@@ -13,21 +13,18 @@ namespace FlowFreeSolverWpf.Model
             _cancellationToken = cancellationToken;
         }
 
-        public static List<Path> InitialPaths(ColourPair colourPair)
+        public static IEnumerable<Path> InitialPaths(ColourPair colourPair)
         {
-            return new List<Path>
-            {
-                Path.PathWithStartingPointAndDirection(colourPair.StartCoords, Direction.Up),
-                Path.PathWithStartingPointAndDirection(colourPair.StartCoords, Direction.Down),
-                Path.PathWithStartingPointAndDirection(colourPair.StartCoords, Direction.Left),
-                Path.PathWithStartingPointAndDirection(colourPair.StartCoords, Direction.Right)
-            };
+            yield return Path.PathWithStartingPointAndDirection(colourPair.StartCoords, Direction.Up);
+            yield return Path.PathWithStartingPointAndDirection(colourPair.StartCoords, Direction.Down);
+            yield return Path.PathWithStartingPointAndDirection(colourPair.StartCoords, Direction.Left);
+            yield return Path.PathWithStartingPointAndDirection(colourPair.StartCoords, Direction.Right);
         }
 
         public Paths FindAllPaths(
             Grid grid,
             Coords endCoords,
-            IList<Path> activePaths,
+            IEnumerable<Path> activePaths,
             int maxDirectionChanges)
         {
             var flattenedPaths = activePaths.SelectMany(activePath => FollowPath(grid, endCoords, activePath, maxDirectionChanges));

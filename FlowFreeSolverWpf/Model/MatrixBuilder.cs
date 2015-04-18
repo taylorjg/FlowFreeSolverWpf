@@ -31,19 +31,21 @@ namespace FlowFreeSolverWpf.Model
                 .Select((colourPair, index) =>
                 {
                     var paths = _firstTime
-                        ? PathFinder.InitialPaths(colourPair)
+                        ? PathFinder.InitialPaths(colourPair).ToList()
                         : _inactivePaths
                             .Where(ap => ap.ColourPair == colourPair)
                             .Select(ap => ap.Path)
                             .ToList();
 
-                    var thisColourPair = colourPair;
-                    var thisIndex = index;
+                    if (!paths.Any()) return Task.FromResult(new List<MatrixRow>());
+
+                    var colourPairLocal = colourPair;
+                    var indexLocal = index;
 
                     return Task.Factory.StartNew(
                         () => BuildMatrixRowsForColourPair(
-                            thisColourPair,
-                            thisIndex,
+                            colourPairLocal,
+                            indexLocal,
                             paths,
                             maxDirectionChanges),
                         _cancellationToken);
@@ -86,7 +88,7 @@ namespace FlowFreeSolverWpf.Model
         private List<MatrixRow> BuildMatrixRowsForColourPair(
             ColourPair colourPair,
             int colourPairIndex,
-            IList<Path> activePaths,
+            IEnumerable<Path> activePaths,
             int maxDirectionChanges)
         {
             var pathFinder = new PathFinder(_cancellationToken);
