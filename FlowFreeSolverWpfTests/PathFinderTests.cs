@@ -34,7 +34,7 @@ namespace FlowFreeSolverWpfTests
             // Act
             var pathFinder = new PathFinder(CancellationToken.None);
             var initialPathsBlue = PathFinder.InitialPaths(colourPairBlue);
-            var paths = pathFinder.FindAllPaths(grid, startCoords, endCoords, initialPathsBlue, 10);
+            var paths = pathFinder.FindAllPaths(grid, endCoords, initialPathsBlue, 10);
 
             // Assert
             Assert.That(paths.PathList.Count(), Is.EqualTo(2));
@@ -68,7 +68,7 @@ namespace FlowFreeSolverWpfTests
             // Act
             var pathFinder = new PathFinder(CancellationToken.None);
             var initialPathsBlue = PathFinder.InitialPaths(colourPairBlue);
-            var paths = pathFinder.FindAllPaths(grid, startCoords, endCoords, initialPathsBlue, 1);
+            var paths = pathFinder.FindAllPaths(grid, endCoords, initialPathsBlue, 1);
 
             // Assert
             Assert.That(paths.PathList.Count(), Is.EqualTo(2));
@@ -110,7 +110,7 @@ namespace FlowFreeSolverWpfTests
             // Act
             var pathFinder = new PathFinder(CancellationToken.None);
             var initialPathsBlue = PathFinder.InitialPaths(colourPairBlue);
-            var paths = pathFinder.FindAllPaths(grid, startCoords, endCoords, initialPathsBlue, 10);
+            var paths = pathFinder.FindAllPaths(grid, endCoords, initialPathsBlue, 10);
 
             // Assert
             Assert.That(paths.PathList.Count(), Is.EqualTo(1));
@@ -139,7 +139,7 @@ namespace FlowFreeSolverWpfTests
             // Act
             var pathFinder = new PathFinder(CancellationToken.None);
             var initialPathsBlue = PathFinder.InitialPaths(colourPairBlue);
-            var paths = pathFinder.FindAllPaths(grid, startCoords, endCoords, initialPathsBlue, 1);
+            var paths = pathFinder.FindAllPaths(grid, endCoords, initialPathsBlue, 1);
 
             // Assert
             Assert.That(paths.PathList.Count(), Is.EqualTo(3));
@@ -179,7 +179,7 @@ namespace FlowFreeSolverWpfTests
             // Act
             var pathFinder = new PathFinder(CancellationToken.None);
             var initialPathsBlue = PathFinder.InitialPaths(colourPairBlue);
-            var paths1 = pathFinder.FindAllPaths(grid, startCoords, endCoords, initialPathsBlue, 1);
+            var paths1 = pathFinder.FindAllPaths(grid, endCoords, initialPathsBlue, 1);
 
             // Assert
             Assert.That(paths1.PathList.Count(), Is.EqualTo(3));
@@ -187,7 +187,7 @@ namespace FlowFreeSolverWpfTests
 
             // Act 2
             var inactivePaths = paths1.PathList.ToList();
-            var paths2 = pathFinder.FindAllPaths(grid, startCoords, endCoords, inactivePaths, 2);
+            var paths2 = pathFinder.FindAllPaths(grid, endCoords, inactivePaths, 2);
 
             // Assert 2
             Assert.That(paths2.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath.CoordsList) && p.IsActive));
@@ -206,7 +206,6 @@ namespace FlowFreeSolverWpfTests
                 new ColourPair(CoordsFactory.GetCoords(1, 2), CoordsFactory.GetCoords(2, 2), DotColours.Red),
                 new ColourPair(CoordsFactory.GetCoords(1, 1), CoordsFactory.GetCoords(2, 1), DotColours.Green));
 
-            var startCoords = CoordsFactory.GetCoords(0, 3);
             var endCoords = CoordsFactory.GetCoords(3, 3);
 
             // Calling FindAllPaths in a loop with an increasing value of maxDirectionChanges.
@@ -215,27 +214,19 @@ namespace FlowFreeSolverWpfTests
             var inactivePaths = new List<Path>();
             var firstCall = true;
 
-            for (var maxDirectionChanges = 1; maxDirectionChanges <= 5; maxDirectionChanges++)
+            // ReSharper disable once LoopCanBePartlyConvertedToQuery
+            foreach (var maxDirectionChanges in Enumerable.Range(1, 5))
             {
-                if (firstCall)
-                {
-                    firstCall = false;
-                }
-                else
-                {
-                    if (!inactivePaths.Any())
-                    {
-                        break;
-                    }
-                }
-                var pathFinderResult = pathFinder1.FindAllPaths(grid, startCoords, endCoords, inactivePaths, maxDirectionChanges);
+                if (!firstCall && !inactivePaths.Any()) break;
+                firstCall = false;
+                var pathFinderResult = pathFinder1.FindAllPaths(grid, endCoords, inactivePaths, maxDirectionChanges);
                 completedPaths.AddRange(pathFinderResult.PathList.Where(p => p.IsActive));
                 inactivePaths = pathFinderResult.PathList.Where(p => !p.IsActive).ToList();
             }
 
             // Calling FindAllPaths once with a large value of maxDirectionChanges.
             var pathFinder2 = new PathFinder(CancellationToken.None);
-            var pathFinderResult2 = pathFinder2.FindAllPaths(grid, startCoords, endCoords, new List<Path>(), 5);
+            var pathFinderResult2 = pathFinder2.FindAllPaths(grid, endCoords, new List<Path>(), 5);
 
             Assert.That(completedPaths.Count, Is.EqualTo(pathFinderResult2.PathList.Count()));
         }
@@ -255,7 +246,6 @@ namespace FlowFreeSolverWpfTests
                 new ColourPair(CoordsFactory.GetCoords(3, 3), CoordsFactory.GetCoords(4, 4), DotColours.Green),
                 new ColourPair(CoordsFactory.GetCoords(3, 1), CoordsFactory.GetCoords(4, 0), DotColours.Yellow));
 
-            var startCoords = grid.ColourPairs.First().StartCoords;
             var endCoords = grid.ColourPairs.First().EndCoords;
 
             const int maxDirectionChangeLimit = 5 * 5;
@@ -266,27 +256,19 @@ namespace FlowFreeSolverWpfTests
             var inactivePaths = new List<Path>();
             var firstCall = true;
 
-            for (var directionChangeLimit = 1; directionChangeLimit <= maxDirectionChangeLimit; directionChangeLimit++)
+            // ReSharper disable once LoopCanBePartlyConvertedToQuery
+            foreach (var directionChangeLimit in Enumerable.Range(1, maxDirectionChangeLimit))
             {
-                if (firstCall)
-                {
-                    firstCall = false;
-                }
-                else
-                {
-                    if (!inactivePaths.Any())
-                    {
-                        break;
-                    }
-                }
-                var pathFinderResult1 = pathFinder1.FindAllPaths(grid, startCoords, endCoords, inactivePaths, directionChangeLimit);
+                if (!firstCall && !inactivePaths.Any()) break;
+                firstCall = false;
+                var pathFinderResult1 = pathFinder1.FindAllPaths(grid, endCoords, inactivePaths, directionChangeLimit);
                 completedPaths.AddRange(pathFinderResult1.PathList.Where(p => p.IsActive));
                 inactivePaths = pathFinderResult1.PathList.Where(p => !p.IsActive).ToList();
             }
 
             // Calling FindAllPaths once with maxDirectionChangeLimit.
             var pathFinder2 = new PathFinder(CancellationToken.None);
-            var pathFinderResult2 = pathFinder2.FindAllPaths(grid, startCoords, endCoords, new List<Path>(), maxDirectionChangeLimit);
+            var pathFinderResult2 = pathFinder2.FindAllPaths(grid, endCoords, new List<Path>(), maxDirectionChangeLimit);
 
             Assert.That(completedPaths.Count, Is.EqualTo(pathFinderResult2.PathList.Count()));
         }

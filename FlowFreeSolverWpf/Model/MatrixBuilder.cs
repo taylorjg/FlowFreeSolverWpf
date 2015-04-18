@@ -90,7 +90,7 @@ namespace FlowFreeSolverWpf.Model
             int maxDirectionChanges)
         {
             var pathFinder = new PathFinder(_cancellationToken);
-            var paths = pathFinder.FindAllPaths(_grid, colourPair.StartCoords, colourPair.EndCoords, activePaths, maxDirectionChanges);
+            var paths = pathFinder.FindAllPaths(_grid, colourPair.EndCoords, activePaths, maxDirectionChanges);
 
             return paths.PathList
                 .Select(path => BuildDlxMatrixRowForPath(colourPair, colourPairIndex, path))

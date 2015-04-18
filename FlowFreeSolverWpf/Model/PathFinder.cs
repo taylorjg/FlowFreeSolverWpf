@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace FlowFreeSolverWpf.Model
@@ -25,50 +26,42 @@ namespace FlowFreeSolverWpf.Model
 
         public Paths FindAllPaths(
             Grid grid,
-            Coords startCoords,
             Coords endCoords,
             IList<Path> activePaths,
             int maxDirectionChanges)
         {
-            var resultantPaths = new Paths();
-
-            foreach (var activePath in activePaths)
-            {
-                FollowPath(
-                    grid,
-                    resultantPaths,
-                    activePath,
-                    endCoords,
-                    maxDirectionChanges);
-            }
-
-            return resultantPaths;
+            var flattenedPaths = activePaths.SelectMany(activePath => FollowPath(grid, endCoords, activePath, maxDirectionChanges));
+            var paths = new Paths();
+            foreach (var path in flattenedPaths) paths.AddPath(path);
+            return paths;
         }
 
-        private void FollowPath(
+        private IEnumerable<Path> FollowPath(
             Grid grid,
-            Paths resultantPaths,
-            Path activePath,
             Coords endCoords,
+            Path activePath,
             int maxDirectionChanges)
         {
             _cancellationToken.ThrowIfCancellationRequested();
+
+            var newPaths = new List<Path>();
 
             var nextCoords = activePath.GetNextCoords(activePath.Direction);
 
             if (nextCoords == endCoords)
             {
-                activePath.AddCoords(nextCoords);
-                activePath.IsActive = true;
-                resultantPaths.AddPath(activePath);
-                return;
+                var newPath = Path.CopyOfPath(activePath);
+                newPath.AddCoords(nextCoords);
+                newPath.IsActive = true;
+                newPaths.Add(newPath);
+                return newPaths;
             }
 
             if (activePath.ContainsCoords(nextCoords) ||
                 grid.CoordsAreOffTheGrid(nextCoords) ||
                 grid.IsCellOccupied(nextCoords))
             {
-                return;
+                return newPaths;
             }
 
             var directionsToTry = activePath.Direction.DirectionsToTry();
@@ -77,26 +70,28 @@ namespace FlowFreeSolverWpf.Model
             for (var index = 0; index < directionsToTry.Length; index++)
             {
                 var directionToTry = directionsToTry[index];
-                var copyOfActivePath = Path.CopyOfPath(activePath);
-                copyOfActivePath.AddCoords(nextCoords);
-                copyOfActivePath.IsActive = true;
-                copyOfActivePath.Direction = directionToTry;
+                var newPath = Path.CopyOfPath(activePath);
+                newPath.AddCoords(nextCoords);
+                newPath.IsActive = true;
+                newPath.Direction = directionToTry;
 
-                if (copyOfActivePath.NumDirectionChanges <= maxDirectionChanges)
+                if (newPath.NumDirectionChanges <= maxDirectionChanges)
                 {
-                    FollowPath(
+                    var recursiveNewPaths = FollowPath(
                         grid,
-                        resultantPaths,
-                        copyOfActivePath,
                         endCoords,
+                        newPath,
                         maxDirectionChanges);
+                    newPaths.AddRange(recursiveNewPaths);
                 }
                 else
                 {
-                    copyOfActivePath.IsActive = false;
-                    resultantPaths.AddPath(copyOfActivePath);
+                    newPath.IsActive = false;
+                    newPaths.Add(newPath);
                 }
             }
+
+            return newPaths;
         }
     }
 }

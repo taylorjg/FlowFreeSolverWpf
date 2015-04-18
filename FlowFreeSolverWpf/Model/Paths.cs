@@ -5,7 +5,12 @@ namespace FlowFreeSolverWpf.Model
 {
     public class Paths
     {
-        private readonly IList<Path> _pathList = new List<Path>();
+        private readonly IList<Path> _pathList;
+
+        public Paths()
+        {
+            _pathList = new List<Path>();
+        }
 
         public void AddPath(Path path)
         {
