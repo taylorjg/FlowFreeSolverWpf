@@ -4,6 +4,7 @@
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:MvvmLight="clr-namespace:GalaSoft.MvvmLight.Command;assembly=GalaSoft.MvvmLight.Extras.WPF4"
         xmlns:view="clr-namespace:FlowFreeSolverWpf.View"
+        xmlns:command="http://www.galasoft.ch/mvvmlight"
         Title="Flow Free Solver"
         Width="690"
         Height="780"
@@ -13,7 +14,7 @@
 
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Loaded">
-            <MvvmLight:EventToCommand Command="{Binding LoadedCommand}" />
+            <command:EventToCommand Command="{Binding LoadedCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
     
@@ -44,7 +45,7 @@
                 </ComboBox.SelectedItem>
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">
-                        <MvvmLight:EventToCommand Command="{Binding SelectedGridChangedCommand}"
+                        <command:EventToCommand Command="{Binding SelectedGridChangedCommand}"
                                       MustToggleIsEnabledValue="True" 
                                       PassEventArgsToCommand="True" />
                     </i:EventTrigger>
