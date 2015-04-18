@@ -18,7 +18,8 @@ namespace FlowFreeSolverWpfTests
 
             // " B"
             // "B "
-            var grid = new Grid(2, new ColourPair(startCoords, endCoords, DotColours.Blue));
+            var colourPairBlue = new ColourPair(startCoords, endCoords, DotColours.Blue);
+            var grid = new Grid(2, colourPairBlue);
 
             var expectedPath1 = new Path();
             expectedPath1.AddCoords(startCoords);
@@ -32,7 +33,8 @@ namespace FlowFreeSolverWpfTests
 
             // Act
             var pathFinder = new PathFinder(CancellationToken.None);
-            var paths = pathFinder.FindAllPaths(grid, startCoords, endCoords, new List<Path>(), 10);
+            var initialPathsBlue = PathFinder.InitialPaths(colourPairBlue);
+            var paths = pathFinder.FindAllPaths(grid, startCoords, endCoords, initialPathsBlue, 10);
 
             // Assert
             Assert.That(paths.PathList.Count(), Is.EqualTo(2));
@@ -50,7 +52,8 @@ namespace FlowFreeSolverWpfTests
 
             // " B"
             // "B "
-            var grid = new Grid(2, new ColourPair(startCoords, endCoords, DotColours.Blue));
+            var colourPairBlue = new ColourPair(startCoords, endCoords, DotColours.Blue);
+            var grid = new Grid(2, colourPairBlue);
 
             var expectedPath1 = new Path();
             expectedPath1.AddCoords(startCoords);
@@ -64,7 +67,8 @@ namespace FlowFreeSolverWpfTests
 
             // Act
             var pathFinder = new PathFinder(CancellationToken.None);
-            var paths = pathFinder.FindAllPaths(grid, startCoords, endCoords, new List<Path>(), 1);
+            var initialPathsBlue = PathFinder.InitialPaths(colourPairBlue);
+            var paths = pathFinder.FindAllPaths(grid, startCoords, endCoords, initialPathsBlue, 1);
 
             // Assert
             Assert.That(paths.PathList.Count(), Is.EqualTo(2));
@@ -84,8 +88,9 @@ namespace FlowFreeSolverWpfTests
             // " RR "
             // " GG "
             // "    "
+            var colourPairBlue = new ColourPair(startCoords, endCoords, DotColours.Blue);
             var grid = new Grid(4,
-                new ColourPair(startCoords, endCoords, DotColours.Blue),
+                colourPairBlue,
                 new ColourPair(CoordsFactory.GetCoords(1, 3), CoordsFactory.GetCoords(2, 3), DotColours.Orange),
                 new ColourPair(CoordsFactory.GetCoords(1, 2), CoordsFactory.GetCoords(2, 2), DotColours.Red),
                 new ColourPair(CoordsFactory.GetCoords(1, 1), CoordsFactory.GetCoords(2, 1), DotColours.Green));
@@ -104,7 +109,8 @@ namespace FlowFreeSolverWpfTests
 
             // Act
             var pathFinder = new PathFinder(CancellationToken.None);
-            var paths = pathFinder.FindAllPaths(grid, startCoords, endCoords, new List<Path>(), 10);
+            var initialPathsBlue = PathFinder.InitialPaths(colourPairBlue);
+            var paths = pathFinder.FindAllPaths(grid, startCoords, endCoords, initialPathsBlue, 10);
 
             // Assert
             Assert.That(paths.PathList.Count(), Is.EqualTo(1));
@@ -123,15 +129,17 @@ namespace FlowFreeSolverWpfTests
             // " RR "
             // " GG "
             // "    "
+            var colourPairBlue = new ColourPair(startCoords, endCoords, DotColours.Blue);
             var grid = new Grid(4,
-                new ColourPair(startCoords, endCoords, DotColours.Blue),
+                colourPairBlue,
                 new ColourPair(CoordsFactory.GetCoords(1, 3), CoordsFactory.GetCoords(2, 3), DotColours.Orange),
                 new ColourPair(CoordsFactory.GetCoords(1, 2), CoordsFactory.GetCoords(2, 2), DotColours.Red),
                 new ColourPair(CoordsFactory.GetCoords(1, 1), CoordsFactory.GetCoords(2, 1), DotColours.Green));
 
             // Act
             var pathFinder = new PathFinder(CancellationToken.None);
-            var paths = pathFinder.FindAllPaths(grid, startCoords, endCoords, new List<Path>(), 1);
+            var initialPathsBlue = PathFinder.InitialPaths(colourPairBlue);
+            var paths = pathFinder.FindAllPaths(grid, startCoords, endCoords, initialPathsBlue, 1);
 
             // Assert
             Assert.That(paths.PathList.Count(), Is.EqualTo(3));
@@ -149,8 +157,9 @@ namespace FlowFreeSolverWpfTests
             // " RR "
             // " GG "
             // "    "
+            var colourPairBlue = new ColourPair(startCoords, endCoords, DotColours.Blue);
             var grid = new Grid(4,
-                new ColourPair(startCoords, endCoords, DotColours.Blue),
+                colourPairBlue,
                 new ColourPair(CoordsFactory.GetCoords(1, 3), CoordsFactory.GetCoords(2, 3), DotColours.Orange),
                 new ColourPair(CoordsFactory.GetCoords(1, 2), CoordsFactory.GetCoords(2, 2), DotColours.Red),
                 new ColourPair(CoordsFactory.GetCoords(1, 1), CoordsFactory.GetCoords(2, 1), DotColours.Green));
@@ -169,7 +178,8 @@ namespace FlowFreeSolverWpfTests
 
             // Act
             var pathFinder = new PathFinder(CancellationToken.None);
-            var paths1 = pathFinder.FindAllPaths(grid, startCoords, endCoords, new List<Path>(), 1);
+            var initialPathsBlue = PathFinder.InitialPaths(colourPairBlue);
+            var paths1 = pathFinder.FindAllPaths(grid, startCoords, endCoords, initialPathsBlue, 1);
 
             // Assert
             Assert.That(paths1.PathList.Count(), Is.EqualTo(3));

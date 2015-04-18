@@ -10,143 +10,79 @@ namespace FlowFreeSolverWpf.ViewModel
 {
     public class PuzzleSolver
     {
+        private readonly Grid _grid;
         private readonly GridDescription _gridDescription;
         private readonly Action<SolutionStats, IEnumerable<Tuple<ColourPair, Path>>> _solutionFoundHandler;
         private readonly Action<SolutionStats> _noSolutionFoundHandler;
-        private readonly Action<SolutionStats> _cancelledHandler;
         private readonly Action<SolutionStats> _updateSolutionStatsHandler;
         private readonly IDispatcher _dispatcher;
         private readonly CancellationToken _cancellationToken;
-        private readonly MatrixBuilder _matrixBuilder;
 
         public PuzzleSolver(
             Grid grid,
             GridDescription gridDescription,
             Action<SolutionStats, IEnumerable<Tuple<ColourPair, Path>>> solutionFoundHandler,
             Action<SolutionStats> noSolutionFoundHandler,
-            Action<SolutionStats> cancelledHandler,
             Action<SolutionStats> updateSolutionStatsHandler,
             IDispatcher dispatcher,
             CancellationToken cancellationToken)
         {
+            _grid = grid;
             _gridDescription = gridDescription;
             _solutionFoundHandler = solutionFoundHandler;
             _noSolutionFoundHandler = noSolutionFoundHandler;
-            _cancelledHandler = cancelledHandler;
             _updateSolutionStatsHandler = updateSolutionStatsHandler;
             _dispatcher = dispatcher;
             _cancellationToken = cancellationToken;
-            _matrixBuilder = new MatrixBuilder(grid, cancellationToken);
         }
 
         public void SolvePuzzle()
         {
-            Task.Factory.StartNew(SolvePuzzleInBackground, _cancellationToken);
+            Task.Factory.StartNew(
+                SolvePuzzleInBackground,
+                _cancellationToken,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Default);
         }
 
         private void SolvePuzzleInBackground()
         {
+            var matrixBuilder = new MatrixBuilder(_grid, _cancellationToken);
             var dlx = new Dlx(_cancellationToken);
-            var matrix = new List<MatrixRow>();
             var maxDirectionChanges = _gridDescription.InitialMaxDirectionChanges;
-            TimeSpan? matrixBuildingDuration = null;
-            TimeSpan? matrixSolvingDuration = null;
-            Solution firstSolution = null;
+            var matrix = new List<MatrixRow>();
+            var puzzleSolverStats = new PuzzleSolverStats(_dispatcher, _cancellationToken, _updateSolutionStatsHandler);
+            Solution solution = null;
 
-            for (;;)
+            while (solution == null)
             {
-                if (_cancellationToken.IsCancellationRequested) break;
+                var maxDirectionChangesLocal = maxDirectionChanges;
+                var matrixLocal1 = matrix;
 
-                matrix = MeasureFunctionExecutionTime(
-                    () => _matrixBuilder.BuildMatrix(maxDirectionChanges),
-                    ref matrixBuildingDuration);
+                matrix = puzzleSolverStats.MeasureMatrixBuildingTime(
+                    () => matrixBuilder.BuildMatrix(maxDirectionChangesLocal), maxDirectionChangesLocal, matrixLocal1);
 
-                _dispatcher.Invoke(
-                    _updateSolutionStatsHandler,
-                    new SolutionStats(
-                        matrix.Count,
-                        matrix[0].DlxMatrixRow.Count,
-                        matrixBuildingDuration,
-                        matrixSolvingDuration,
-                        maxDirectionChanges));
+                var matrixLocal2 = matrix;
 
-                if (_cancellationToken.IsCancellationRequested) break;
+                solution = puzzleSolverStats.MeasureMatrixSolvingTime(
+                    () => dlx.Solve(matrixLocal2, r => r, r => r.DlxRow).FirstOrDefault(), maxDirectionChangesLocal, matrixLocal2);
 
-                firstSolution = MeasureFunctionExecutionTime(
-                    () => dlx.Solve(matrix, r => r, r => r.DlxMatrixRow).FirstOrDefault(),
-                    ref matrixSolvingDuration);
-
-                _dispatcher.Invoke(
-                    _updateSolutionStatsHandler,
-                    new SolutionStats(
-                        matrix.Count,
-                        matrix[0].DlxMatrixRow.Count,
-                        matrixBuildingDuration,
-                        matrixSolvingDuration,
-                        maxDirectionChanges));
-
-                if (firstSolution != null) break;
-                if (!_matrixBuilder.HasInactivePaths()) break;
+                if (!matrixBuilder.HasInactivePaths()) break;
 
                 maxDirectionChanges++;
             }
 
-            int maxActualDirectionChanges;
+            var solutionStats = puzzleSolverStats.GetFinalStats(matrixBuilder, matrix, solution);
 
-            if (firstSolution != null)
+            if (solution != null)
             {
-                maxActualDirectionChanges = 
-                    firstSolution
-                    .RowIndexes
-                    .Max(rowIndex => _matrixBuilder.GetColourPairAndPathForRowIndex(rowIndex).Item2.NumDirectionChanges);
+                var colourPairPaths = solution.RowIndexes.Select(matrixBuilder.GetColourPairAndPathForRowIndex);
+                _dispatcher.Invoke(_solutionFoundHandler, solutionStats, colourPairPaths);
             }
             else
             {
-                var matrixRowCount = matrix.Count;
-                maxActualDirectionChanges =
-                    Enumerable.Range(0, matrixRowCount)
-                    .Max(rowIndex => _matrixBuilder.GetColourPairAndPathForRowIndex(rowIndex).Item2.NumDirectionChanges);
+                _dispatcher.Invoke(_noSolutionFoundHandler, solutionStats);
             }
-
-            var solutionStats = new SolutionStats(
-                matrix.Count,
-                matrix[0].DlxMatrixRow.Count,
-                matrixBuildingDuration,
-                matrixSolvingDuration,
-                maxActualDirectionChanges);
-
-            if (_cancellationToken.IsCancellationRequested)
-            {
-                _dispatcher.Invoke(_cancelledHandler, solutionStats);
-            }
-            else
-            {
-                if (firstSolution != null)
-                {
-                    var colourPairPaths = firstSolution.RowIndexes.Select(_matrixBuilder.GetColourPairAndPathForRowIndex);
-                    _dispatcher.Invoke(_solutionFoundHandler, solutionStats, colourPairPaths);
-                }
-                else
-                {
-                    _dispatcher.Invoke(_noSolutionFoundHandler, solutionStats);
-                }
-            }
-        }
-
-        private static TResult MeasureFunctionExecutionTime<TResult>(Func<TResult> func, ref TimeSpan? cumulativeDuration)
-        {
-            var stopwatch = new System.Diagnostics.Stopwatch();
-
-            stopwatch.Start();
-            var result = func();
-            stopwatch.Stop();
-
-            if (cumulativeDuration.HasValue)
-                cumulativeDuration += stopwatch.Elapsed;
-            else
-                cumulativeDuration = stopwatch.Elapsed;
-
-            return result;
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 
 namespace FlowFreeSolverWpf.Model
@@ -13,6 +12,17 @@ namespace FlowFreeSolverWpf.Model
             _cancellationToken = cancellationToken;
         }
 
+        public static List<Path> InitialPaths(ColourPair colourPair)
+        {
+            return new List<Path>
+            {
+                Path.PathWithStartingPointAndDirection(colourPair.StartCoords, Direction.Up),
+                Path.PathWithStartingPointAndDirection(colourPair.StartCoords, Direction.Down),
+                Path.PathWithStartingPointAndDirection(colourPair.StartCoords, Direction.Left),
+                Path.PathWithStartingPointAndDirection(colourPair.StartCoords, Direction.Right)
+            };
+        }
+
         public Paths FindAllPaths(
             Grid grid,
             Coords startCoords,
@@ -21,14 +31,6 @@ namespace FlowFreeSolverWpf.Model
             int maxDirectionChanges)
         {
             var resultantPaths = new Paths();
-
-            if (!activePaths.Any())
-            {
-                activePaths.Add(Path.PathWithStartingPointAndDirection(startCoords, Direction.Up));
-                activePaths.Add(Path.PathWithStartingPointAndDirection(startCoords, Direction.Down));
-                activePaths.Add(Path.PathWithStartingPointAndDirection(startCoords, Direction.Left));
-                activePaths.Add(Path.PathWithStartingPointAndDirection(startCoords, Direction.Right));
-            }
 
             foreach (var activePath in activePaths)
             {
@@ -50,7 +52,7 @@ namespace FlowFreeSolverWpf.Model
             Coords endCoords,
             int maxDirectionChanges)
         {
-            if (_cancellationToken.IsCancellationRequested) return;
+            _cancellationToken.ThrowIfCancellationRequested();
 
             var nextCoords = activePath.GetNextCoords(activePath.Direction);
 
@@ -58,7 +60,6 @@ namespace FlowFreeSolverWpf.Model
             {
                 activePath.AddCoords(nextCoords);
                 activePath.IsActive = true;
-                //activePath.IsInactive = false;
                 resultantPaths.AddPath(activePath);
                 return;
             }
@@ -79,7 +80,6 @@ namespace FlowFreeSolverWpf.Model
                 var copyOfActivePath = Path.CopyOfPath(activePath);
                 copyOfActivePath.AddCoords(nextCoords);
                 copyOfActivePath.IsActive = true;
-                //copyOfActivePath.IsInactive = false;
                 copyOfActivePath.Direction = directionToTry;
 
                 if (copyOfActivePath.NumDirectionChanges <= maxDirectionChanges)
@@ -94,7 +94,6 @@ namespace FlowFreeSolverWpf.Model
                 else
                 {
                     copyOfActivePath.IsActive = false;
-                    //copyOfActivePath.IsInactive = true;
                     resultantPaths.AddPath(copyOfActivePath);
                 }
             }

@@ -12,7 +12,7 @@ namespace FlowFreeSolverWpf.Model
         private readonly CancellationToken _cancellationToken;
         private readonly int _numColourPairs;
         private readonly int _numColumns;
-        private readonly List<MatrixRow> _activeMatrix = new List<MatrixRow>();
+        private readonly List<MatrixRow> _activePaths = new List<MatrixRow>();
         private readonly List<MatrixRow> _inactivePaths = new List<MatrixRow>();
 
         public MatrixBuilder(Grid grid, CancellationToken cancellationToken)
@@ -23,30 +23,19 @@ namespace FlowFreeSolverWpf.Model
             _numColumns = _numColourPairs + (_grid.GridSize * grid.GridSize);
         }
 
+        private bool _firstTime = true;
+
         public List<MatrixRow> BuildMatrix(int maxDirectionChanges)
         {
-            // create TransformBlock
-            // - func should call BuildMatrixRowsForColourPair()
-            // create ActionBlock
-            // - action should add paths to flattenedMatrixRows
-            // link transform block to action block with completion propagation
-            // post all task details to the transform block
-            // - colour pair
-            // - index
-            // - paths (empty initially, subsequently the formerly inactive paths for this colour pair)
-            // - max direction changes
-            // call Complete() on the transform block
-            // call Completion.Wait() on the action block
-
-            // need to handle cancellation
-
             var tasks = _grid.ColourPairs
                 .Select((colourPair, index) =>
                 {
-                    var paths = _inactivePaths
-                        .Where(ap => ap.ColourPair == colourPair)
-                        .Select(ap => ap.Path)
-                        .ToList();
+                    var paths = _firstTime
+                        ? PathFinder.InitialPaths(colourPair)
+                        : _inactivePaths
+                            .Where(ap => ap.ColourPair == colourPair)
+                            .Select(ap => ap.Path)
+                            .ToList();
 
                     var thisColourPair = colourPair;
                     var thisIndex = index;
@@ -63,6 +52,7 @@ namespace FlowFreeSolverWpf.Model
 
             Task.WaitAll(tasks.Cast<Task>().ToArray());
 
+            _firstTime = false;
             _inactivePaths.Clear();
 
             var flattenedMatrixRows = tasks.SelectMany(task =>
@@ -74,12 +64,12 @@ namespace FlowFreeSolverWpf.Model
             foreach (var matrixRow in flattenedMatrixRows)
             {
                 if (matrixRow.Path.IsActive)
-                    _activeMatrix.Add(matrixRow);
+                    _activePaths.Add(matrixRow);
                 else
                     _inactivePaths.Add(matrixRow);
             }
 
-            return _activeMatrix;
+            return _activePaths;
         }
 
         public bool HasInactivePaths()
@@ -89,13 +79,13 @@ namespace FlowFreeSolverWpf.Model
 
         public Tuple<ColourPair, Path> GetColourPairAndPathForRowIndex(int rowIndex)
         {
-            var matrixRow = _activeMatrix[rowIndex];
+            var matrixRow = _activePaths[rowIndex];
             return Tuple.Create(matrixRow.ColourPair, matrixRow.Path);
         }
 
         private List<MatrixRow> BuildMatrixRowsForColourPair(
             ColourPair colourPair,
-            int index,
+            int colourPairIndex,
             IList<Path> activePaths,
             int maxDirectionChanges)
         {
@@ -103,7 +93,7 @@ namespace FlowFreeSolverWpf.Model
             var paths = pathFinder.FindAllPaths(_grid, colourPair.StartCoords, colourPair.EndCoords, activePaths, maxDirectionChanges);
 
             return paths.PathList
-                .Select(path => BuildDlxMatrixRowForPath(colourPair, index, path))
+                .Select(path => BuildDlxMatrixRowForPath(colourPair, colourPairIndex, path))
                 .ToList();
         }
 

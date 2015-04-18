@@ -149,7 +149,6 @@ namespace FlowFreeSolverWpf.ViewModel
                 SelectedGrid,
                 OnSolveSolutionFound,
                 OnSolveNoSolutionFound,
-                OnSolveCancelled,
                 SetStatusMessageFromSolutionStats,
                 _dispatcher,
                 _cancellationTokenSource.Token);
@@ -203,12 +202,6 @@ namespace FlowFreeSolverWpf.ViewModel
             _dialogService.CloseSolvingDialog(true);
             _dialogService.ShowMyMessageBox("Sorry - no solution was found!");
             SetStatusMessageFromSolutionStats(solutionStats /*, "no solution found" */);
-        }
-
-        private void OnSolveCancelled(SolutionStats solutionStats)
-        {
-            _dialogService.ShowMyMessageBox("You cancelled the solving process before completion!");
-            SetStatusMessageFromSolutionStats(solutionStats /*, "cancelled" */);
         }
 
         private void OnClear()

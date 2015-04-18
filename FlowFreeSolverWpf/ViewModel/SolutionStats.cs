@@ -4,6 +4,12 @@ namespace FlowFreeSolverWpf.ViewModel
 {
     public class SolutionStats
     {
+        private readonly int _numMatrixRows;
+        private readonly int _numMatrixCols;
+        private readonly TimeSpan? _matrixBuildingDuration;
+        private readonly TimeSpan? _matrixSolvingDuration;
+        private readonly int _maxDirectionChanges;
+
         public SolutionStats(
             int numMatrixRows,
             int numMatrixCols,
@@ -11,17 +17,36 @@ namespace FlowFreeSolverWpf.ViewModel
             TimeSpan? matrixSolvingDuration,
             int maxDirectionChanges)
         {
-            NumMatrixRows = numMatrixRows;
-            NumMatrixCols = numMatrixCols;
-            MatrixBuildingDuration = matrixBuildingDuration;
-            MatrixSolvingDuration = matrixSolvingDuration;
-            MaxDirectionChanges = maxDirectionChanges;
+            _numMatrixRows = numMatrixRows;
+            _numMatrixCols = numMatrixCols;
+            _matrixBuildingDuration = matrixBuildingDuration;
+            _matrixSolvingDuration = matrixSolvingDuration;
+            _maxDirectionChanges = maxDirectionChanges;
         }
 
-        public int NumMatrixRows { get; private set; }
-        public int NumMatrixCols { get; private set; }
-        public TimeSpan? MatrixBuildingDuration { get; private set; }
-        public TimeSpan? MatrixSolvingDuration { get; private set; }
-        public int MaxDirectionChanges { get; private set; }
+        public int NumMatrixRows
+        {
+            get { return _numMatrixRows; }
+        }
+
+        public int NumMatrixCols
+        {
+            get { return _numMatrixCols; }
+        }
+
+        public TimeSpan? MatrixBuildingDuration
+        {
+            get { return _matrixBuildingDuration; }
+        }
+
+        public TimeSpan? MatrixSolvingDuration
+        {
+            get { return _matrixSolvingDuration; }
+        }
+
+        public int MaxDirectionChanges
+        {
+            get { return _maxDirectionChanges; }
+        }
     }
 }

@@ -6,13 +6,13 @@ namespace FlowFreeSolverWpf.Model
     {
         private readonly ColourPair _colourPair;
         private readonly Path _path;
-        private readonly List<bool> _dlxMatrixRow;
+        private readonly List<bool> _dlxRow;
 
-        public MatrixRow(ColourPair colourPair, Path path, List<bool> dlxMatrixRow)
+        public MatrixRow(ColourPair colourPair, Path path, List<bool> dlxRow)
         {
             _colourPair = colourPair;
             _path = path;
-            _dlxMatrixRow = dlxMatrixRow;
+            _dlxRow = dlxRow;
         }
 
         public ColourPair ColourPair
@@ -25,9 +25,9 @@ namespace FlowFreeSolverWpf.Model
             get { return _path; }
         }
 
-        public List<bool> DlxMatrixRow
+        public List<bool> DlxRow
         {
-            get { return _dlxMatrixRow; }
+            get { return _dlxRow; }
         }
     }
 }
