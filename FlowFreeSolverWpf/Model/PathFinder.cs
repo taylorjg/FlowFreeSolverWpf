@@ -47,9 +47,7 @@ namespace FlowFreeSolverWpf.Model
 
             if (nextCoords == endCoords)
             {
-                var newPath = Path.CopyOfPath(activePath);
-                newPath.AddCoords(nextCoords);
-                newPath.IsActive = true;
+                var newPath = activePath.PathWithNewCoordsAndDirection(nextCoords, activePath.Direction, true);
                 newPaths.Add(newPath);
                 return newPaths;
             }
@@ -67,12 +65,12 @@ namespace FlowFreeSolverWpf.Model
             for (var index = 0; index < directionsToTry.Length; index++)
             {
                 var directionToTry = directionsToTry[index];
-                var newPath = Path.CopyOfPath(activePath);
-                newPath.AddCoords(nextCoords);
-                newPath.IsActive = true;
-                newPath.Direction = directionToTry;
+                var oldNumDirectionChanges = activePath.NumDirectionChanges;
+                var newNumDirectionChanges = oldNumDirectionChanges + ((directionToTry != activePath.Direction) ? 1 : 0);
+                var isActive = (newNumDirectionChanges <= maxDirectionChanges);
+                var newPath = activePath.PathWithNewCoordsAndDirection(nextCoords, directionToTry, isActive);
 
-                if (newPath.NumDirectionChanges <= maxDirectionChanges)
+                if (newPath.IsActive)
                 {
                     var recursiveNewPaths = FollowPath(
                         grid,
@@ -83,7 +81,6 @@ namespace FlowFreeSolverWpf.Model
                 }
                 else
                 {
-                    newPath.IsActive = false;
                     newPaths.Add(newPath);
                 }
             }

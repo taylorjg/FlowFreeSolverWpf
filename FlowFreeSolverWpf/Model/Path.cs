@@ -6,32 +6,25 @@ namespace FlowFreeSolverWpf.Model
 {
     public class Path
     {
-        private readonly IList<Coords> _coordsList = new List<Coords>();
+        private readonly IReadOnlyList<Coords> _coordsList;
+        private readonly Direction _direction;
+        private readonly bool _isActive;
+
+        public Path(IEnumerable<Coords> coordsList, Direction direction, bool isActive)
+        {
+            _coordsList = new List<Coords>(coordsList);
+            _direction = direction;
+            _isActive = isActive;
+        }
 
         public static Path PathWithStartingPointAndDirection(Coords startingPoint, Direction direction)
         {
-            var path = new Path();
-            path.AddCoords(startingPoint);
-            path.IsActive = true;
-            path.Direction = direction;
-            return path;
+            return new Path(new[]{startingPoint}, direction, true);
         }
 
-        public static Path CopyOfPath(Path originalPath)
+        public Path PathWithNewCoordsAndDirection(Coords newCoords, Direction direction, bool isActive)
         {
-            var copyOfPath = new Path();
-            foreach (var coords in originalPath.CoordsList)
-            {
-                copyOfPath.AddCoords(coords);
-            }
-            copyOfPath.IsActive = originalPath.IsActive;
-            copyOfPath.Direction = originalPath.Direction;
-            return copyOfPath;
-        }
-
-        public void AddCoords(Coords coords)
-        {
-            _coordsList.Add(coords);
+            return new Path(CoordsList.Concat(new[] {newCoords}), direction, isActive);
         }
 
         public bool ContainsCoords(Coords coords)
@@ -41,6 +34,16 @@ namespace FlowFreeSolverWpf.Model
 
         public IEnumerable<Coords> CoordsList {
             get { return _coordsList; }
+        }
+
+        public Direction Direction
+        {
+            get { return _direction; }
+        }
+
+        public bool IsActive
+        {
+            get { return _isActive; }
         }
 
         public Coords GetNextCoords(Direction direction)
@@ -65,9 +68,6 @@ namespace FlowFreeSolverWpf.Model
                     throw new InvalidOperationException("Unknown direction");
             }
         }
-
-        public bool IsActive { get; set; }
-        public Direction Direction { get; set; }
 
         public int NumDirectionChanges {
             get

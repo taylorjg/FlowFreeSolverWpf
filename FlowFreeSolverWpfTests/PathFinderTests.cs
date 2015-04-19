@@ -13,123 +13,133 @@ namespace FlowFreeSolverWpfTests
         public void Grid2X2WithOneColourPair()
         {
             // Arrange
-            var startCoords = CoordsFactory.GetCoords(0, 0);
-            var endCoords = CoordsFactory.GetCoords(1, 1);
+            var startCoordsBlue = CoordsFactory.GetCoords(0, 0);
+            var endCoordsBlue = CoordsFactory.GetCoords(1, 1);
 
             // " B"
             // "B "
-            var colourPairBlue = new ColourPair(startCoords, endCoords, DotColours.Blue);
+            var colourPairBlue = new ColourPair(startCoordsBlue, endCoordsBlue, DotColours.Blue);
             var grid = new Grid(2, colourPairBlue);
 
-            var expectedPath1 = new Path();
-            expectedPath1.AddCoords(startCoords);
-            expectedPath1.AddCoords(CoordsFactory.GetCoords(1, 0));
-            expectedPath1.AddCoords(endCoords);
+            var expectedCoordsList1 = new[]
+            {
+                startCoordsBlue,
+                CoordsFactory.GetCoords(1, 0),
+                endCoordsBlue
+            };
 
-            var expectedPath2 = new Path();
-            expectedPath2.AddCoords(startCoords);
-            expectedPath2.AddCoords(CoordsFactory.GetCoords(0, 1));
-            expectedPath2.AddCoords(endCoords);
+            var expectedCoordsList2 = new[]
+            {
+                startCoordsBlue,
+                CoordsFactory.GetCoords(0, 1),
+                endCoordsBlue
+            };
 
             // Act
             var pathFinder = new PathFinder(CancellationToken.None);
             var initialPathsBlue = PathFinder.InitialPaths(colourPairBlue);
-            var paths = pathFinder.FindAllPaths(grid, endCoords, initialPathsBlue, 10);
+            var paths = pathFinder.FindAllPaths(grid, endCoordsBlue, initialPathsBlue, 10);
 
             // Assert
             Assert.That(paths.PathList.Count(), Is.EqualTo(2));
             Assert.That(paths.PathList, Has.All.Matches<Path>(p => p.IsActive));
-            Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath1.CoordsList)));
-            Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath2.CoordsList)));
+            Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedCoordsList1)));
+            Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedCoordsList2)));
         }
 
         [Test]
         public void Grid2X2WithOneColourPairAndMaxDirectionChangesSetToOne()
         {
             // Arrange
-            var startCoords = CoordsFactory.GetCoords(0, 0);
-            var endCoords = CoordsFactory.GetCoords(1, 1);
+            var startCoordsBlue = CoordsFactory.GetCoords(0, 0);
+            var endCoordsBlue = CoordsFactory.GetCoords(1, 1);
 
             // " B"
             // "B "
-            var colourPairBlue = new ColourPair(startCoords, endCoords, DotColours.Blue);
+            var colourPairBlue = new ColourPair(startCoordsBlue, endCoordsBlue, DotColours.Blue);
             var grid = new Grid(2, colourPairBlue);
 
-            var expectedPath1 = new Path();
-            expectedPath1.AddCoords(startCoords);
-            expectedPath1.AddCoords(CoordsFactory.GetCoords(1, 0));
-            expectedPath1.AddCoords(endCoords);
+            var expectedCoordsList1 = new[]
+            {
+                startCoordsBlue,
+                CoordsFactory.GetCoords(1, 0),
+                endCoordsBlue
+            };
 
-            var expectedPath2 = new Path();
-            expectedPath2.AddCoords(startCoords);
-            expectedPath2.AddCoords(CoordsFactory.GetCoords(0, 1));
-            expectedPath2.AddCoords(endCoords);
+            var expectedCoordsList2 = new[]
+            {
+                startCoordsBlue,
+                CoordsFactory.GetCoords(0, 1),
+                endCoordsBlue
+            };
 
             // Act
             var pathFinder = new PathFinder(CancellationToken.None);
             var initialPathsBlue = PathFinder.InitialPaths(colourPairBlue);
-            var paths = pathFinder.FindAllPaths(grid, endCoords, initialPathsBlue, 1);
+            var paths = pathFinder.FindAllPaths(grid, endCoordsBlue, initialPathsBlue, 1);
 
             // Assert
             Assert.That(paths.PathList.Count(), Is.EqualTo(2));
             Assert.That(paths.PathList, Has.All.Matches<Path>(p => p.IsActive));
-            Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath1.CoordsList)));
-            Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath2.CoordsList)));
+            Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedCoordsList1)));
+            Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedCoordsList2)));
         }
 
         [Test]
         public void Grid4X4WithFourColourPairs()
         {
             // Arrange
-            var startCoords = CoordsFactory.GetCoords(0, 3);
-            var endCoords = CoordsFactory.GetCoords(3, 3);
+            var startCoordsBlue = CoordsFactory.GetCoords(0, 3);
+            var endCoordsBlue = CoordsFactory.GetCoords(3, 3);
 
             // "BOOB"
             // " RR "
             // " GG "
             // "    "
-            var colourPairBlue = new ColourPair(startCoords, endCoords, DotColours.Blue);
+            var colourPairBlue = new ColourPair(startCoordsBlue, endCoordsBlue, DotColours.Blue);
             var grid = new Grid(4,
                 colourPairBlue,
                 new ColourPair(CoordsFactory.GetCoords(1, 3), CoordsFactory.GetCoords(2, 3), DotColours.Orange),
                 new ColourPair(CoordsFactory.GetCoords(1, 2), CoordsFactory.GetCoords(2, 2), DotColours.Red),
                 new ColourPair(CoordsFactory.GetCoords(1, 1), CoordsFactory.GetCoords(2, 1), DotColours.Green));
 
-            var expectedPath = new Path();
-            expectedPath.AddCoords(startCoords);
-            expectedPath.AddCoords(CoordsFactory.GetCoords(0, 2));
-            expectedPath.AddCoords(CoordsFactory.GetCoords(0, 1));
-            expectedPath.AddCoords(CoordsFactory.GetCoords(0, 0));
-            expectedPath.AddCoords(CoordsFactory.GetCoords(1, 0));
-            expectedPath.AddCoords(CoordsFactory.GetCoords(2, 0));
-            expectedPath.AddCoords(CoordsFactory.GetCoords(3, 0));
-            expectedPath.AddCoords(CoordsFactory.GetCoords(3, 1));
-            expectedPath.AddCoords(CoordsFactory.GetCoords(3, 2));
-            expectedPath.AddCoords(endCoords);
+            var expectedCoordsList = new[]
+            {
+                startCoordsBlue,
+                CoordsFactory.GetCoords(0, 2),
+                CoordsFactory.GetCoords(0, 1),
+                CoordsFactory.GetCoords(0, 0),
+                CoordsFactory.GetCoords(1, 0),
+                CoordsFactory.GetCoords(2, 0),
+                CoordsFactory.GetCoords(3, 0),
+                CoordsFactory.GetCoords(3, 1),
+                CoordsFactory.GetCoords(3, 2),
+                endCoordsBlue
+            };
 
             // Act
             var pathFinder = new PathFinder(CancellationToken.None);
             var initialPathsBlue = PathFinder.InitialPaths(colourPairBlue);
-            var paths = pathFinder.FindAllPaths(grid, endCoords, initialPathsBlue, 10);
+            var paths = pathFinder.FindAllPaths(grid, endCoordsBlue, initialPathsBlue, 10);
 
             // Assert
             Assert.That(paths.PathList.Count(), Is.EqualTo(1));
             Assert.That(paths.PathList, Has.All.Matches<Path>(p => p.IsActive));
-            Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath.CoordsList)));
+            Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedCoordsList)));
         }
 
         [Test]
-        public void Grid4X4WithFourColourPairsAndMaxDirectionChangesSetToOneReturnsThreeInactivePaths()
+        public void OnePossiblePathWithTwoDirectionChanges_FindAllPathsWithMaxDirectionChangesSetToOne_ReturnsAllInactivePaths()
         {
             // Arrange
-            var startCoords = CoordsFactory.GetCoords(0, 3);
-            var endCoords = CoordsFactory.GetCoords(3, 3);
+            var startCoordsBlue = CoordsFactory.GetCoords(0, 3);
+            var endCoordsBlue = CoordsFactory.GetCoords(3, 3);
 
             // "BOOB"
             // " RR "
             // " GG "
             // "    "
-            var colourPairBlue = new ColourPair(startCoords, endCoords, DotColours.Blue);
+            var colourPairBlue = new ColourPair(startCoordsBlue, endCoordsBlue, DotColours.Blue);
             var grid = new Grid(4,
                 colourPairBlue,
                 new ColourPair(CoordsFactory.GetCoords(1, 3), CoordsFactory.GetCoords(2, 3), DotColours.Orange),
@@ -139,58 +149,52 @@ namespace FlowFreeSolverWpfTests
             // Act
             var pathFinder = new PathFinder(CancellationToken.None);
             var initialPathsBlue = PathFinder.InitialPaths(colourPairBlue);
-            var paths = pathFinder.FindAllPaths(grid, endCoords, initialPathsBlue, 1);
+            var paths = pathFinder.FindAllPaths(grid, endCoordsBlue, initialPathsBlue, 1);
 
             // Assert
-            Assert.That(paths.PathList.Count(), Is.EqualTo(3));
             Assert.That(paths.PathList, Has.All.Matches<Path>(p => !p.IsActive));
         }
 
         [Test]
-        public void SecondCallToFindAllPathsGivenInactivePathsReturnsACompletedPath()
+        public void OnePossiblePathWithTwoDirectionChanges_FindAllPathsCalledTwiceWithMaxDirectionChangesOneThenTwo_ReturnsTheOnePossiblePath()
         {
             // Arrange
-            var startCoords = CoordsFactory.GetCoords(0, 3);
-            var endCoords = CoordsFactory.GetCoords(3, 3);
+            var startCoordsBlue = CoordsFactory.GetCoords(0, 3);
+            var endCoordsBlue = CoordsFactory.GetCoords(3, 3);
 
             // "BOOB"
             // " RR "
             // " GG "
             // "    "
-            var colourPairBlue = new ColourPair(startCoords, endCoords, DotColours.Blue);
+            var colourPairBlue = new ColourPair(startCoordsBlue, endCoordsBlue, DotColours.Blue);
             var grid = new Grid(4,
                 colourPairBlue,
                 new ColourPair(CoordsFactory.GetCoords(1, 3), CoordsFactory.GetCoords(2, 3), DotColours.Orange),
                 new ColourPair(CoordsFactory.GetCoords(1, 2), CoordsFactory.GetCoords(2, 2), DotColours.Red),
                 new ColourPair(CoordsFactory.GetCoords(1, 1), CoordsFactory.GetCoords(2, 1), DotColours.Green));
 
-            var expectedPath = new Path();
-            expectedPath.AddCoords(startCoords);
-            expectedPath.AddCoords(CoordsFactory.GetCoords(0, 2));
-            expectedPath.AddCoords(CoordsFactory.GetCoords(0, 1));
-            expectedPath.AddCoords(CoordsFactory.GetCoords(0, 0));
-            expectedPath.AddCoords(CoordsFactory.GetCoords(1, 0));
-            expectedPath.AddCoords(CoordsFactory.GetCoords(2, 0));
-            expectedPath.AddCoords(CoordsFactory.GetCoords(3, 0));
-            expectedPath.AddCoords(CoordsFactory.GetCoords(3, 1));
-            expectedPath.AddCoords(CoordsFactory.GetCoords(3, 2));
-            expectedPath.AddCoords(endCoords);
+            var expectedCoordsList = new[]
+            {
+                startCoordsBlue,
+                CoordsFactory.GetCoords(0, 2),
+                CoordsFactory.GetCoords(0, 1),
+                CoordsFactory.GetCoords(0, 0),
+                CoordsFactory.GetCoords(1, 0),
+                CoordsFactory.GetCoords(2, 0),
+                CoordsFactory.GetCoords(3, 0),
+                CoordsFactory.GetCoords(3, 1),
+                CoordsFactory.GetCoords(3, 2),
+                endCoordsBlue
+            };
 
             // Act
             var pathFinder = new PathFinder(CancellationToken.None);
             var initialPathsBlue = PathFinder.InitialPaths(colourPairBlue);
-            var paths1 = pathFinder.FindAllPaths(grid, endCoords, initialPathsBlue, 1);
-
-            // Assert
-            Assert.That(paths1.PathList.Count(), Is.EqualTo(3));
-            Assert.That(paths1.PathList, Has.All.Matches<Path>(p => !p.IsActive));
-
-            // Act 2
-            var inactivePaths = paths1.PathList.ToList();
-            var paths2 = pathFinder.FindAllPaths(grid, endCoords, inactivePaths, 2);
+            var paths1 = pathFinder.FindAllPaths(grid, endCoordsBlue, initialPathsBlue, 1);
+            var paths2 = pathFinder.FindAllPaths(grid, endCoordsBlue, paths1.PathList.ToList(), 2);
 
             // Assert 2
-            Assert.That(paths2.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedPath.CoordsList) && p.IsActive));
+            Assert.That(paths2.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedCoordsList) && p.IsActive));
         }
 
         [Test]
