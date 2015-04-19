@@ -77,6 +77,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CoordsFactoryTests.cs" />
+    <Compile Include="CoordsTests.cs" />
     <Compile Include="DispatcherTestHelper.cs" />
     <Compile Include="MainWindowViewModelTests.cs" />
     <Compile Include="MatrixBuilderTests.cs" />

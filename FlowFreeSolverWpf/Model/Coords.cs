@@ -1,22 +1,24 @@
-﻿namespace FlowFreeSolverWpf.Model
+﻿using System;
+
+namespace FlowFreeSolverWpf.Model
 {
     public struct Coords
     {
-        private readonly int _value;
+        private readonly Int16 _value;
 
         public Coords(int x, int y)
         {
-            _value = x << 16 | y;
+            _value = Convert.ToInt16(x << 8 | y);
         }
 
         public int X
         {
-            get { return _value >> 16; }
+            get { return _value >> 8; }
         }
 
         public int Y
         {
-            get { return _value & 0x0000FFFF; }
+            get { return _value & 0x00FF; }
         }
 
         public override bool Equals(object rhs)
