@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace FlowFreeSolverWpf.Model
 {
     public class Path
     {
-        private readonly IReadOnlyList<Coords> _coordsList;
+        private readonly ReadOnlyCollection<Coords> _coordsList;
         private readonly Direction _direction;
         private readonly bool _isActive;
 
         public Path(IEnumerable<Coords> coordsList, Direction direction, bool isActive)
         {
-            _coordsList = new List<Coords>(coordsList);
+            _coordsList = new ReadOnlyCollection<Coords>(coordsList.ToList());
             _direction = direction;
             _isActive = isActive;
         }
