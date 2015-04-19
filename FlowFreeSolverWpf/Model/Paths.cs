@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace FlowFreeSolverWpf.Model
 {
@@ -21,7 +20,7 @@ namespace FlowFreeSolverWpf.Model
 
             if (path.IsActive)
             {
-                if (!ContainsPath(path))
+                if (!_pathList.Contains(path))
                 {
                     _pathList.Add(path);
                 }
@@ -30,11 +29,6 @@ namespace FlowFreeSolverWpf.Model
             {
                 _pathList.Add(path);
             }
-        }
-
-        public bool ContainsPath(Path path)
-        {
-            return _pathList.Any(p => p.CoordsList.SequenceEqual(path.CoordsList));
         }
 
         public IEnumerable<Path> PathList {
