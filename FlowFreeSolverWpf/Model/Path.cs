@@ -30,7 +30,7 @@ namespace FlowFreeSolverWpf.Model
 
         public bool ContainsCoords(Coords coords)
         {
-            return _coordsList.Any(c => c == coords);
+            return _coordsList.Any(c => c.Equals(coords));
         }
 
         public IEnumerable<Coords> CoordsList {

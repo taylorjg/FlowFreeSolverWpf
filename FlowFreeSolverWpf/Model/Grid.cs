@@ -26,7 +26,7 @@ namespace FlowFreeSolverWpf.Model
 
         public bool IsCellOccupied(Coords coords)
         {
-            return _colourPairs.Any(cp => cp.StartCoords == coords || cp.EndCoords == coords);
+            return _colourPairs.Any(cp => cp.StartCoords.Equals(coords)  || cp.EndCoords.Equals(coords));
         }
 
         public bool CoordsAreOffTheGrid(Coords coords)

@@ -45,7 +45,7 @@ namespace FlowFreeSolverWpf.Model
 
             var nextCoords = activePath.GetNextCoords(activePath.Direction);
 
-            if (nextCoords == endCoords)
+            if (nextCoords.Equals(endCoords))
             {
                 var newPath = activePath.PathWithNewCoordsAndDirection(nextCoords, activePath.Direction, true);
                 newPaths.Add(newPath);

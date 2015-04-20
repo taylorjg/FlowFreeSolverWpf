@@ -39,15 +39,5 @@ namespace FlowFreeSolverWpf.Model
         {
             return string.Format("({0}, {1})", X, Y);
         }
-
-        public static bool operator ==(Coords coords1, Coords coords2)
-        {
-            return Equals(coords1, coords2);
-        }
-
-        public static bool operator !=(Coords coords1, Coords coords2)
-        {
-            return !Equals(coords1, coords2);
-        }
     }
 }
