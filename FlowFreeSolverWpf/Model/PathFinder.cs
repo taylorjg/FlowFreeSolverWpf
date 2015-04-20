@@ -15,10 +15,10 @@ namespace FlowFreeSolverWpf.Model
 
         public static IEnumerable<Path> InitialPaths(ColourPair colourPair)
         {
-            yield return Path.PathWithStartingPointAndDirection(colourPair.StartCoords, Direction.Up);
-            yield return Path.PathWithStartingPointAndDirection(colourPair.StartCoords, Direction.Down);
-            yield return Path.PathWithStartingPointAndDirection(colourPair.StartCoords, Direction.Left);
-            yield return Path.PathWithStartingPointAndDirection(colourPair.StartCoords, Direction.Right);
+            yield return Path.PathWithStartCoordsAndDirection(colourPair.StartCoords, Direction.Up);
+            yield return Path.PathWithStartCoordsAndDirection(colourPair.StartCoords, Direction.Down);
+            yield return Path.PathWithStartCoordsAndDirection(colourPair.StartCoords, Direction.Left);
+            yield return Path.PathWithStartCoordsAndDirection(colourPair.StartCoords, Direction.Right);
         }
 
         public Paths FindAllPaths(
@@ -47,7 +47,7 @@ namespace FlowFreeSolverWpf.Model
 
             if (nextCoords.Equals(endCoords))
             {
-                var newPath = activePath.PathWithNewCoordsAndDirection(nextCoords, activePath.Direction, true);
+                var newPath = activePath.PathWithEndCoords(nextCoords);
                 newPaths.Add(newPath);
                 return newPaths;
             }
@@ -65,10 +65,7 @@ namespace FlowFreeSolverWpf.Model
             for (var index = 0; index < directionsToTry.Length; index++)
             {
                 var directionToTry = directionsToTry[index];
-                var oldNumDirectionChanges = activePath.NumDirectionChanges;
-                var newNumDirectionChanges = oldNumDirectionChanges + ((directionToTry != activePath.Direction) ? 1 : 0);
-                var isActive = (newNumDirectionChanges <= maxDirectionChanges);
-                var newPath = activePath.PathWithNewCoordsAndDirection(nextCoords, directionToTry, isActive);
+                var newPath = activePath.PathWithNewCoordsAndDirection(nextCoords, directionToTry, maxDirectionChanges);
 
                 if (newPath.IsActive)
                 {
