@@ -42,19 +42,18 @@ namespace FlowFreeSolverWpf.Model
             _cancellationToken.ThrowIfCancellationRequested();
 
             var newPaths = new List<Path>();
-
-            var nextCoords = activePath.GetNextCoords(activePath.Direction);
+            var nextCoords = activePath.GetNextCoords();
 
             if (nextCoords.Equals(endCoords))
             {
-                var newPath = activePath.PathWithEndCoords(nextCoords);
+                var newPath = activePath.PathWithEndCoords(endCoords);
                 newPaths.Add(newPath);
                 return newPaths;
             }
 
-            if (activePath.ContainsCoords(nextCoords) ||
-                grid.CoordsAreOffTheGrid(nextCoords) ||
-                grid.IsCellOccupied(nextCoords))
+            if (grid.CoordsAreOffTheGrid(nextCoords) ||
+                grid.IsCellOccupied(nextCoords) ||
+                activePath.ContainsCoords(nextCoords))
             {
                 return newPaths;
             }

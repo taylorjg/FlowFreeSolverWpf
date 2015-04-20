@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-//using System.Collections;
+﻿using System.Linq;
 
 namespace FlowFreeSolverWpf.Model
 {
@@ -10,7 +7,6 @@ namespace FlowFreeSolverWpf.Model
         private readonly Coords[] _coordsList;
         private readonly Direction _direction;
         private readonly bool _isActive;
-        //private readonly BitArray _bitArray;
 
         private Path(Coords[] coordsList, Direction direction, bool isActive)
         {
@@ -40,9 +36,9 @@ namespace FlowFreeSolverWpf.Model
             return _coordsList.Any(c => c.Equals(coords));
         }
 
-        public IReadOnlyList<Coords> CoordsList
+        public Coords[] CoordsList
         {
-            get { return new ReadOnlyCollection<Coords>(_coordsList); }
+            get { return _coordsList; }
         }
 
         public Direction Direction
@@ -55,7 +51,7 @@ namespace FlowFreeSolverWpf.Model
             get { return _isActive; }
         }
 
-        public Coords GetNextCoords(Direction direction)
+        public Coords GetNextCoords()
         {
             return PathUtils.GetNextCoords(_coordsList, Direction);
         }
