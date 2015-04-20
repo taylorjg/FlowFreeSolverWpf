@@ -76,6 +76,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BitArrayEnumeratorTests.cs" />
+    <Compile Include="BitArrayExploratoryTests.cs" />
     <Compile Include="CoordsFactoryTests.cs" />
     <Compile Include="CoordsTests.cs" />
     <Compile Include="DispatcherTestHelper.cs" />

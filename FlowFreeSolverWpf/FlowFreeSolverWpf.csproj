@@ -86,6 +86,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Model\CoordsFactory.cs" />
+    <Compile Include="Model\BitArrayEnumerable.cs" />
+    <Compile Include="Model\BitArrayEnumerator.cs" />
     <Compile Include="Model\MatrixRow.cs" />
     <Compile Include="ViewModel\CellClickedEventArgs.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />

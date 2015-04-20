@@ -44,7 +44,7 @@ namespace FlowFreeSolverWpf.ViewModel
 
             return new SolutionStats(
                 matrix.Count,
-                matrix.Any() ? matrix.First().DlxRow.Count : 0,
+                matrix.Any() ? matrix.First().DlxRowEnumerable.Count() : 0,
                 MatrixBuildingDuration,
                 MatrixSolvingDuration,
                 maxActualDirectionChanges);
@@ -77,7 +77,7 @@ namespace FlowFreeSolverWpf.ViewModel
 
             _solutionStats = new SolutionStats(
                 matrix.Count,
-                matrix.Any() ? matrix.First().DlxRow.Count : 0,
+                matrix.Any() ? matrix.First().DlxRowEnumerable.Count() : 0,
                 MatrixBuildingDuration,
                 MatrixSolvingDuration,
                 maxDirectionChanges);

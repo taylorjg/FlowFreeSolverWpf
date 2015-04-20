@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 
 namespace FlowFreeSolverWpf.Model
@@ -6,9 +7,9 @@ namespace FlowFreeSolverWpf.Model
     {
         private readonly ColourPair _colourPair;
         private readonly Path _path;
-        private readonly List<bool> _dlxRow;
+        private readonly BitArray _dlxRow;
 
-        public MatrixRow(ColourPair colourPair, Path path, List<bool> dlxRow)
+        public MatrixRow(ColourPair colourPair, Path path, BitArray dlxRow)
         {
             _colourPair = colourPair;
             _path = path;
@@ -25,9 +26,9 @@ namespace FlowFreeSolverWpf.Model
             get { return _path; }
         }
 
-        public List<bool> DlxRow
+        public IEnumerable<bool> DlxRowEnumerable
         {
-            get { return _dlxRow; }
+            get { return new BitArrayEnumerable(_dlxRow); }
         }
     }
 }

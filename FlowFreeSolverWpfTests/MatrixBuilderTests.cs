@@ -44,7 +44,7 @@ namespace FlowFreeSolverWpfTests
         {
             public bool Equals(MatrixRow x, MatrixRow y)
             {
-                return x.DlxRow.SequenceEqual(y.DlxRow);
+                return x.DlxRowEnumerable.SequenceEqual(y.DlxRowEnumerable);
             }
 
             public int GetHashCode(MatrixRow obj)

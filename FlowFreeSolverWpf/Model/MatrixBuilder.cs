@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -43,7 +44,7 @@ namespace FlowFreeSolverWpf.Model
                     var indexLocal = index;
 
                     return Task.Factory.StartNew(
-                        () => BuildMatrixRowsForColourPair(
+                        () => FindAllPathsForColourPair(
                             colourPairLocal,
                             indexLocal,
                             paths,
@@ -85,7 +86,7 @@ namespace FlowFreeSolverWpf.Model
             return Tuple.Create(matrixRow.ColourPair, matrixRow.Path);
         }
 
-        private List<MatrixRow> BuildMatrixRowsForColourPair(
+        private List<MatrixRow> FindAllPathsForColourPair(
             ColourPair colourPair,
             int colourPairIndex,
             IEnumerable<Path> activePaths,
@@ -93,26 +94,33 @@ namespace FlowFreeSolverWpf.Model
         {
             var pathFinder = new PathFinder(_cancellationToken);
             var paths = pathFinder.FindAllPaths(_grid, colourPair.EndCoords, activePaths, maxDirectionChanges);
+            return BuildMatrixRowsForColourPairPaths(colourPair, colourPairIndex, paths);
+        }
 
+        private List<MatrixRow> BuildMatrixRowsForColourPairPaths(
+            ColourPair colourPair,
+            int colourPairIndex,
+            Paths paths)
+        {
             return paths.PathList
-                .Select(path => BuildDlxMatrixRowForPath(colourPair, colourPairIndex, path))
+                .Select(path => BuildMatrixRowForColourPairPath(colourPair, colourPairIndex, path))
                 .ToList();
         }
 
-        private MatrixRow BuildDlxMatrixRowForPath(ColourPair colourPair, int colourPairIndex, Path path)
+        private MatrixRow BuildMatrixRowForColourPairPath(ColourPair colourPair, int colourPairIndex, Path path)
         {
-            var dlxMatrixRow = new List<bool>(Enumerable.Repeat(false, _numColumns));
+            var dlxRow = new BitArray(_numColumns);
 
-            dlxMatrixRow[colourPairIndex] = true;
+            dlxRow[colourPairIndex] = true;
 
             // ReSharper disable once LoopCanBePartlyConvertedToQuery
             foreach (var coords in path.CoordsList)
             {
-                var gridLocationColumnIndex = _numColourPairs + (_grid.GridSize * coords.X) + coords.Y;
-                dlxMatrixRow[gridLocationColumnIndex] = true;
+                var gridLocationIndex = _numColourPairs + (_grid.GridSize * coords.X) + coords.Y;
+                dlxRow[gridLocationIndex] = true;
             }
 
-            return new MatrixRow(colourPair, path, dlxMatrixRow);
+            return new MatrixRow(colourPair, path, dlxRow);
         }
     }
 }

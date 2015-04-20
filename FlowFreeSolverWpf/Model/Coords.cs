@@ -18,7 +18,10 @@ namespace FlowFreeSolverWpf.Model
 
         public int Y
         {
-            get { return _value & 0x00FF; }
+            get
+            {
+                return unchecked((Int16)((_value & 0xFF) << 8) >> 8);
+            }
         }
 
         public override bool Equals(object rhs)

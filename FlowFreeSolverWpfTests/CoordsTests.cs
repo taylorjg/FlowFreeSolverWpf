@@ -14,7 +14,7 @@ namespace FlowFreeSolverWpfTests
             Assert.That(c.Y, Is.EqualTo(2));
         }
 
-        [Test, Ignore("Currently, this test fails because c.Y returns 255 instead of -1")]
+        [Test]
         public void Test2()
         {
             var c = new Coords(-1, -1);
