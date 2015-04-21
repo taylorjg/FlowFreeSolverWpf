@@ -67,7 +67,7 @@ namespace FlowFreeSolverWpf.ViewModel
                 solution = puzzleSolverStats.MeasureMatrixSolvingTime(
                     () => dlx.Solve(matrixLocal2, r => r, r => r.DlxRowEnumerable).FirstOrDefault(), maxDirectionChangesLocal, matrixLocal2);
 
-                if (!matrixBuilder.HasInactivePaths()) break;
+                if (!matrixBuilder.HasStalledPaths()) break;
 
                 maxDirectionChanges++;
             }

@@ -31,7 +31,7 @@ namespace FlowFreeSolverWpfTests
             foreach (var maxDirectionChanges in Enumerable.Range(1, 100))
             {
                 matrix2 = matrixBuilder2.BuildMatrix(maxDirectionChanges);
-                if (!matrixBuilder2.HasInactivePaths()) break;
+                if (!matrixBuilder2.HasStalledPaths()) break;
             }
 
             var comparer = new MatrixRowEqualityComparer();

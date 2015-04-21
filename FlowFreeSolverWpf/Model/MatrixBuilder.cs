@@ -13,8 +13,10 @@ namespace FlowFreeSolverWpf.Model
         private readonly CancellationToken _cancellationToken;
         private readonly int _numColourPairs;
         private readonly int _numColumns;
-        private readonly List<MatrixRow> _activePaths = new List<MatrixRow>();
-        private readonly List<MatrixRow> _inactivePaths = new List<MatrixRow>();
+        private readonly List<MatrixRow> _currentMatrix = new List<MatrixRow>();
+
+        // TODO: change type to List<Path> and rename to _stalledPaths
+        private readonly List<MatrixRow> _stalledMatrixRows;
 
         public MatrixBuilder(Grid grid, CancellationToken cancellationToken)
         {
@@ -22,9 +24,15 @@ namespace FlowFreeSolverWpf.Model
             _cancellationToken = cancellationToken;
             _numColourPairs = _grid.ColourPairs.Count();
             _numColumns = _numColourPairs + (_grid.GridSize * grid.GridSize);
+            _stalledMatrixRows =
+                _grid.ColourPairs
+                    .SelectMany(
+                        // TODO: add an Index property to ColourPair
+                        (colourPair, index) =>
+                            PathFinder.InitialPaths(colourPair)
+                                .Select(path => BuildMatrixRowForColourPairPath(colourPair, index, path)))
+                    .ToList();
         }
-
-        private bool _firstTime = true;
 
         public List<MatrixRow> BuildMatrix(int maxDirectionChanges)
         {
@@ -48,13 +56,7 @@ namespace FlowFreeSolverWpf.Model
             var tuples = _grid.ColourPairs
                 .SelectMany((colourPair, index) =>
                 {
-                    var paths = (_firstTime
-                        ? PathFinder.InitialPaths(colourPair)
-                        : _inactivePaths
-                            .Where(ap => ap.ColourPair.DotColour == colourPair.DotColour)
-                            .Select(ap => ap.Path))
-                        .ToList();
-
+                    var paths = GetStalledPathsForColourPair(colourPair);
                     return paths.Any()
                         ? new[] {Tuple.Create(colourPair, index, paths, maxDirectionChanges)}
                         : Enumerable.Empty<Tuple<ColourPair, int, List<Path>, int>>();
@@ -65,28 +67,35 @@ namespace FlowFreeSolverWpf.Model
             transformBlock.Complete();
             actionBlock.Completion.Wait(_cancellationToken);
 
-            _firstTime = false;
-            _inactivePaths.Clear();
+            _stalledMatrixRows.Clear();
 
             foreach (var matrixRow in flattenedMatrixRows)
             {
                 if (matrixRow.Path.IsActive)
-                    _activePaths.Add(matrixRow);
+                    _currentMatrix.Add(matrixRow);
                 else
-                    _inactivePaths.Add(matrixRow);
+                    _stalledMatrixRows.Add(matrixRow);
             }
 
-            return _activePaths;
+            return _currentMatrix;
         }
 
-        public bool HasInactivePaths()
+        private List<Path> GetStalledPathsForColourPair(ColourPair colourPair)
         {
-            return _inactivePaths.Any();
+            return _stalledMatrixRows
+                .Where(matrixRow => matrixRow.ColourPair.DotColour == colourPair.DotColour)
+                .Select(matrixRow => matrixRow.Path)
+                .ToList();
+        }
+
+        public bool HasStalledPaths()
+        {
+            return _stalledMatrixRows.Any();
         }
 
         public Tuple<ColourPair, Path> GetColourPairAndPathForRowIndex(int rowIndex)
         {
-            var matrixRow = _activePaths[rowIndex];
+            var matrixRow = _currentMatrix[rowIndex];
             return Tuple.Create(matrixRow.ColourPair, matrixRow.Path);
         }
 
