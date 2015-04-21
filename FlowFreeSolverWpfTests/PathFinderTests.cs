@@ -41,10 +41,10 @@ namespace FlowFreeSolverWpfTests
             var paths = pathFinder.FindAllPaths(grid, endCoordsBlue, initialPathsBlue, 10);
 
             // Assert
-            Assert.That(paths.PathList.Count(), Is.EqualTo(2));
-            Assert.That(paths.PathList, Has.All.Matches<Path>(p => p.IsActive));
-            Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedCoordsList1)));
-            Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedCoordsList2)));
+            Assert.That(paths.Count(), Is.EqualTo(2));
+            Assert.That(paths, Has.All.Matches<Path>(p => p.IsActive));
+            Assert.That(paths, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedCoordsList1)));
+            Assert.That(paths, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedCoordsList2)));
         }
 
         [Test]
@@ -79,10 +79,10 @@ namespace FlowFreeSolverWpfTests
             var paths = pathFinder.FindAllPaths(grid, endCoordsBlue, initialPathsBlue, 1);
 
             // Assert
-            Assert.That(paths.PathList.Count(), Is.EqualTo(2));
-            Assert.That(paths.PathList, Has.All.Matches<Path>(p => p.IsActive));
-            Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedCoordsList1)));
-            Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedCoordsList2)));
+            Assert.That(paths.Count(), Is.EqualTo(2));
+            Assert.That(paths, Has.All.Matches<Path>(p => p.IsActive));
+            Assert.That(paths, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedCoordsList1)));
+            Assert.That(paths, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedCoordsList2)));
         }
 
         [Test]
@@ -123,9 +123,9 @@ namespace FlowFreeSolverWpfTests
             var paths = pathFinder.FindAllPaths(grid, endCoordsBlue, initialPathsBlue, 10);
 
             // Assert
-            Assert.That(paths.PathList.Count(), Is.EqualTo(1));
-            Assert.That(paths.PathList, Has.All.Matches<Path>(p => p.IsActive));
-            Assert.That(paths.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedCoordsList)));
+            Assert.That(paths.Count(), Is.EqualTo(1));
+            Assert.That(paths, Has.All.Matches<Path>(p => p.IsActive));
+            Assert.That(paths, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedCoordsList)));
         }
 
         [Test]
@@ -152,7 +152,7 @@ namespace FlowFreeSolverWpfTests
             var paths = pathFinder.FindAllPaths(grid, endCoordsBlue, initialPathsBlue, 1);
 
             // Assert
-            Assert.That(paths.PathList, Has.All.Matches<Path>(p => !p.IsActive));
+            Assert.That(paths, Has.All.Matches<Path>(p => !p.IsActive));
         }
 
         [Test]
@@ -191,10 +191,10 @@ namespace FlowFreeSolverWpfTests
             var pathFinder = new PathFinder(CancellationToken.None);
             var initialPathsBlue = PathFinder.InitialPaths(colourPairBlue);
             var paths1 = pathFinder.FindAllPaths(grid, endCoordsBlue, initialPathsBlue, 1);
-            var paths2 = pathFinder.FindAllPaths(grid, endCoordsBlue, paths1.PathList.ToList(), 2);
+            var paths2 = pathFinder.FindAllPaths(grid, endCoordsBlue, paths1.ToList(), 2);
 
             // Assert 2
-            Assert.That(paths2.PathList, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedCoordsList) && p.IsActive));
+            Assert.That(paths2, Has.Exactly(1).Matches<Path>(p => p.CoordsList.SequenceEqual(expectedCoordsList) && p.IsActive));
         }
 
         [Test]
@@ -223,16 +223,16 @@ namespace FlowFreeSolverWpfTests
             {
                 if (!firstCall && !inactivePaths.Any()) break;
                 firstCall = false;
-                var pathFinderResult = pathFinder1.FindAllPaths(grid, endCoords, inactivePaths, maxDirectionChanges);
-                completedPaths.AddRange(pathFinderResult.PathList.Where(p => p.IsActive));
-                inactivePaths = pathFinderResult.PathList.Where(p => !p.IsActive).ToList();
+                var pathFinderResult = pathFinder1.FindAllPaths(grid, endCoords, inactivePaths, maxDirectionChanges).ToList();
+                completedPaths.AddRange(pathFinderResult.Where(p => p.IsActive));
+                inactivePaths = pathFinderResult.Where(p => !p.IsActive).ToList();
             }
 
             // Calling FindAllPaths once with a large value of maxDirectionChanges.
             var pathFinder2 = new PathFinder(CancellationToken.None);
             var pathFinderResult2 = pathFinder2.FindAllPaths(grid, endCoords, new List<Path>(), 5);
 
-            Assert.That(completedPaths.Count, Is.EqualTo(pathFinderResult2.PathList.Count()));
+            Assert.That(completedPaths.Count, Is.EqualTo(pathFinderResult2.Count()));
         }
 
         [Test]
@@ -265,16 +265,16 @@ namespace FlowFreeSolverWpfTests
             {
                 if (!firstCall && !inactivePaths.Any()) break;
                 firstCall = false;
-                var pathFinderResult1 = pathFinder1.FindAllPaths(grid, endCoords, inactivePaths, directionChangeLimit);
-                completedPaths.AddRange(pathFinderResult1.PathList.Where(p => p.IsActive));
-                inactivePaths = pathFinderResult1.PathList.Where(p => !p.IsActive).ToList();
+                var pathFinderResult1 = pathFinder1.FindAllPaths(grid, endCoords, inactivePaths, directionChangeLimit).ToList();
+                completedPaths.AddRange(pathFinderResult1.Where(p => p.IsActive));
+                inactivePaths = pathFinderResult1.Where(p => !p.IsActive).ToList();
             }
 
             // Calling FindAllPaths once with maxDirectionChangeLimit.
             var pathFinder2 = new PathFinder(CancellationToken.None);
             var pathFinderResult2 = pathFinder2.FindAllPaths(grid, endCoords, new List<Path>(), maxDirectionChangeLimit);
 
-            Assert.That(completedPaths.Count, Is.EqualTo(pathFinderResult2.PathList.Count()));
+            Assert.That(completedPaths.Count, Is.EqualTo(pathFinderResult2.Count()));
         }
     }
 }
