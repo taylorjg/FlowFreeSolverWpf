@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 
 namespace FlowFreeSolverWpf.Model
 {
@@ -28,41 +28,45 @@ namespace FlowFreeSolverWpf.Model
 
         public List<MatrixRow> BuildMatrix(int maxDirectionChanges)
         {
-            var tasks = _grid.ColourPairs
-                .Select((colourPair, index) =>
+            var flattenedMatrixRows = new List<MatrixRow>();
+
+            var transformBlock = new TransformBlock<Tuple<ColourPair, int, List<Path>, int>, List<MatrixRow>>(
+                tuple => FindAllPathsForColourPair(
+                    tuple.Item1,
+                    tuple.Item2,
+                    tuple.Item3,
+                    tuple.Item4),
+                new ExecutionDataflowBlockOptions
                 {
-                    var paths = _firstTime
-                        ? PathFinder.InitialPaths(colourPair).ToList()
+                    MaxDegreeOfParallelism = Environment.ProcessorCount
+                });
+
+            var actionBlock = new ActionBlock<List<MatrixRow>>(matrixRows => flattenedMatrixRows.AddRange(matrixRows));
+
+            transformBlock.LinkTo(actionBlock, new DataflowLinkOptions {PropagateCompletion = true});
+
+            var tuples = _grid.ColourPairs
+                .SelectMany((colourPair, index) =>
+                {
+                    var paths = (_firstTime
+                        ? PathFinder.InitialPaths(colourPair)
                         : _inactivePaths
-                            .Where(ap => ap.ColourPair == colourPair)
-                            .Select(ap => ap.Path)
-                            .ToList();
+                            .Where(ap => ap.ColourPair.DotColour == colourPair.DotColour)
+                            .Select(ap => ap.Path))
+                        .ToList();
 
-                    if (!paths.Any()) return Task.FromResult(new List<MatrixRow>());
+                    return paths.Any()
+                        ? new[] {Tuple.Create(colourPair, index, paths, maxDirectionChanges)}
+                        : Enumerable.Empty<Tuple<ColourPair, int, List<Path>, int>>();
+                });
 
-                    var colourPairLocal = colourPair;
-                    var indexLocal = index;
+            foreach (var tuple in tuples) transformBlock.Post(tuple);
 
-                    return Task.Factory.StartNew(
-                        () => FindAllPathsForColourPair(
-                            colourPairLocal,
-                            indexLocal,
-                            paths,
-                            maxDirectionChanges),
-                        _cancellationToken);
-                })
-                .ToList();
-
-            Task.WaitAll(tasks.Cast<Task>().ToArray());
+            transformBlock.Complete();
+            actionBlock.Completion.Wait(_cancellationToken);
 
             _firstTime = false;
             _inactivePaths.Clear();
-
-            var flattenedMatrixRows = tasks.SelectMany(task =>
-            {
-                if (task.IsCanceled || task.IsFaulted) return Enumerable.Empty<MatrixRow>();
-                return task.Result;
-            });
 
             foreach (var matrixRow in flattenedMatrixRows)
             {
