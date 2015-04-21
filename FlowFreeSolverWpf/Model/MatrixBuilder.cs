@@ -14,9 +14,7 @@ namespace FlowFreeSolverWpf.Model
         private readonly int _numColourPairs;
         private readonly int _numColumns;
         private readonly List<MatrixRow> _currentMatrix = new List<MatrixRow>();
-
-        // TODO: change type to List<Path> and rename to _stalledPaths
-        private readonly List<MatrixRow> _stalledMatrixRows;
+        private readonly List<Path> _stalledPaths;
 
         public MatrixBuilder(Grid grid, CancellationToken cancellationToken)
         {
@@ -24,21 +22,15 @@ namespace FlowFreeSolverWpf.Model
             _cancellationToken = cancellationToken;
             _numColourPairs = _grid.ColourPairs.Count();
             _numColumns = _numColourPairs + (_grid.GridSize * grid.GridSize);
-            _stalledMatrixRows =
-                _grid.ColourPairs
-                    .SelectMany(
-                        // TODO: add an Index property to ColourPair
-                        (colourPair, index) =>
-                            PathFinder.InitialPaths(colourPair)
-                                .Select(path => BuildMatrixRowForColourPairPath(colourPair, index, path)))
-                    .ToList();
+            _stalledPaths = _grid.ColourPairs.SelectMany(PathFinder.InitialPaths).ToList();
         }
 
         public List<MatrixRow> BuildMatrix(int maxDirectionChanges)
         {
             var flattenedMatrixRows = new List<MatrixRow>();
+            var flattenedStalledPaths = new List<Path>();
 
-            var transformBlock = new TransformBlock<Tuple<ColourPair, int, List<Path>, int>, List<MatrixRow>>(
+            var transformBlock = new TransformBlock<Tuple<ColourPair, int, List<Path>, int>, Tuple<List<MatrixRow>, List<Path>>>(
                 tuple => FindAllPathsForColourPair(
                     tuple.Item1,
                     tuple.Item2,
@@ -49,7 +41,11 @@ namespace FlowFreeSolverWpf.Model
                     MaxDegreeOfParallelism = Environment.ProcessorCount
                 });
 
-            var actionBlock = new ActionBlock<List<MatrixRow>>(matrixRows => flattenedMatrixRows.AddRange(matrixRows));
+            var actionBlock = new ActionBlock<Tuple<List<MatrixRow>, List<Path>>>(tuple =>
+            {
+                flattenedMatrixRows.AddRange(tuple.Item1);
+                flattenedStalledPaths.AddRange(tuple.Item2);
+            });
 
             transformBlock.LinkTo(actionBlock, new DataflowLinkOptions {PropagateCompletion = true});
 
@@ -67,39 +63,32 @@ namespace FlowFreeSolverWpf.Model
             transformBlock.Complete();
             actionBlock.Completion.Wait(_cancellationToken);
 
-            _stalledMatrixRows.Clear();
+            _currentMatrix.AddRange(flattenedMatrixRows);
 
-            foreach (var matrixRow in flattenedMatrixRows)
-            {
-                if (matrixRow.Path.IsActive)
-                    _currentMatrix.Add(matrixRow);
-                else
-                    _stalledMatrixRows.Add(matrixRow);
-            }
+            _stalledPaths.Clear();
+            _stalledPaths.AddRange(flattenedStalledPaths);
 
             return _currentMatrix;
         }
 
         private List<Path> GetStalledPathsForColourPair(ColourPair colourPair)
         {
-            return _stalledMatrixRows
-                .Where(matrixRow => matrixRow.ColourPair.DotColour == colourPair.DotColour)
-                .Select(matrixRow => matrixRow.Path)
-                .ToList();
+            return _stalledPaths.Where(path => path.CoordsList.First().Equals(colourPair.StartCoords)).ToList();
         }
 
         public bool HasStalledPaths()
         {
-            return _stalledMatrixRows.Any();
+            return _stalledPaths.Any();
         }
 
+        // TODO: Why not just return the MatrixRow ?
         public Tuple<ColourPair, Path> GetColourPairAndPathForRowIndex(int rowIndex)
         {
             var matrixRow = _currentMatrix[rowIndex];
             return Tuple.Create(matrixRow.ColourPair, matrixRow.Path);
         }
 
-        private List<MatrixRow> FindAllPathsForColourPair(
+        private Tuple<List<MatrixRow>, List<Path>> FindAllPathsForColourPair(
             ColourPair colourPair,
             int colourPairIndex,
             IEnumerable<Path> activePaths,
@@ -107,15 +96,19 @@ namespace FlowFreeSolverWpf.Model
         {
             var pathFinder = new PathFinder(_cancellationToken);
             var paths = pathFinder.FindAllPaths(_grid, colourPair.EndCoords, activePaths, maxDirectionChanges);
-            return BuildMatrixRowsForColourPairPaths(colourPair, colourPairIndex, paths);
+            var partitionedPaths = paths.ToLookup(p => p.IsActive);
+            var completedPaths = partitionedPaths[true].ToList();
+            var stalledPaths = partitionedPaths[false].ToList();
+            var matrixRows = BuildMatrixRowsForColourPairPaths(colourPair, colourPairIndex, completedPaths);
+            return Tuple.Create(matrixRows, stalledPaths);
         }
 
         private List<MatrixRow> BuildMatrixRowsForColourPairPaths(
             ColourPair colourPair,
             int colourPairIndex,
-            Paths paths)
+            IEnumerable<Path> paths)
         {
-            return paths.PathList
+            return paths
                 .Select(path => BuildMatrixRowForColourPairPath(colourPair, colourPairIndex, path))
                 .ToList();
         }

@@ -21,7 +21,7 @@ namespace FlowFreeSolverWpf.Model
             yield return Path.PathWithStartCoordsAndDirection(colourPair.StartCoords, Direction.Right);
         }
 
-        public Paths FindAllPaths(
+        public IEnumerable<Path> FindAllPaths(
             Grid grid,
             Coords endCoords,
             IEnumerable<Path> activePaths,
@@ -30,7 +30,7 @@ namespace FlowFreeSolverWpf.Model
             var flattenedPaths = activePaths.SelectMany(activePath => FollowPath(grid, endCoords, activePath, maxDirectionChanges));
             var paths = new Paths();
             foreach (var path in flattenedPaths) paths.AddPath(path);
-            return paths;
+            return paths.PathList;
         }
 
         private IEnumerable<Path> FollowPath(
