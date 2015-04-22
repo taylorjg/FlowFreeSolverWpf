@@ -81,11 +81,9 @@ namespace FlowFreeSolverWpf.Model
             return _stalledPaths.Any();
         }
 
-        // TODO: Why not just return the MatrixRow ?
-        public Tuple<ColourPair, Path> GetColourPairAndPathForRowIndex(int rowIndex)
+        public MatrixRow GetColourPairAndPathForRowIndex(int rowIndex)
         {
-            var matrixRow = _currentMatrix[rowIndex];
-            return Tuple.Create(matrixRow.ColourPair, matrixRow.Path);
+            return _currentMatrix[rowIndex];
         }
 
         private Tuple<List<MatrixRow>, List<Path>> FindAllPathsForColourPair(

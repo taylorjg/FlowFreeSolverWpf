@@ -12,7 +12,7 @@ namespace FlowFreeSolverWpf.ViewModel
     {
         private readonly Grid _grid;
         private readonly GridDescription _gridDescription;
-        private readonly Action<SolutionStats, IEnumerable<Tuple<ColourPair, Path>>> _solutionFoundHandler;
+        private readonly Action<SolutionStats, IEnumerable<MatrixRow>> _solutionFoundHandler;
         private readonly Action<SolutionStats> _noSolutionFoundHandler;
         private readonly Action<SolutionStats> _updateSolutionStatsHandler;
         private readonly IDispatcher _dispatcher;
@@ -21,7 +21,7 @@ namespace FlowFreeSolverWpf.ViewModel
         public PuzzleSolver(
             Grid grid,
             GridDescription gridDescription,
-            Action<SolutionStats, IEnumerable<Tuple<ColourPair, Path>>> solutionFoundHandler,
+            Action<SolutionStats, IEnumerable<MatrixRow>> solutionFoundHandler,
             Action<SolutionStats> noSolutionFoundHandler,
             Action<SolutionStats> updateSolutionStatsHandler,
             IDispatcher dispatcher,

@@ -180,19 +180,19 @@ namespace FlowFreeSolverWpf.ViewModel
             _cancellationTokenSource.Cancel();
         }
 
-        private void OnSolveSolutionFound(SolutionStats solutionStats, IEnumerable<Tuple<ColourPair, Path>> colourPairPaths)
+        private void OnSolveSolutionFound(SolutionStats solutionStats, IEnumerable<MatrixRow> colourPairPaths)
         {
             DrawSolution(colourPairPaths);
             SetStatusMessageFromSolutionStats(solutionStats);
             _dialogService.CloseSolvingDialog(true);
         }
 
-        public void DrawSolution(IEnumerable<Tuple<ColourPair, Path>> colourPairPaths)
+        public void DrawSolution(IEnumerable<MatrixRow> colourPairPaths)
         {
             foreach (var colourPairPath in colourPairPaths)
             {
-                var colourPair = colourPairPath.Item1;
-                var path = colourPairPath.Item2;
+                var colourPair = colourPairPath.ColourPair;
+                var path = colourPairPath.Path;
                 _boardControl.DrawPath(colourPair, path);
             }
         }
