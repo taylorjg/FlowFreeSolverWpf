@@ -150,7 +150,6 @@
     <Compile Include="Model\MatrixBuilder.cs" />
     <Compile Include="Model\Path.cs" />
     <Compile Include="Model\PathFinder.cs" />
-    <Compile Include="Model\Paths.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

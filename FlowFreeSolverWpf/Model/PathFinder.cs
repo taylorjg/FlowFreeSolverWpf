@@ -24,47 +24,44 @@ namespace FlowFreeSolverWpf.Model
         public IEnumerable<Path> FindAllPaths(
             Grid grid,
             Coords endCoords,
-            IEnumerable<Path> activePaths,
+            IEnumerable<Path> paths,
             int maxDirectionChanges)
         {
-            var flattenedPaths = activePaths.SelectMany(activePath => FollowPath(grid, endCoords, activePath, maxDirectionChanges));
-            var paths = new Paths();
-            foreach (var path in flattenedPaths) paths.AddPath(path);
-            return paths.PathList;
+            return paths.SelectMany(path => FollowPath(grid, endCoords, path, maxDirectionChanges));
         }
 
         private IEnumerable<Path> FollowPath(
             Grid grid,
             Coords endCoords,
-            Path activePath,
+            Path path,
             int maxDirectionChanges)
         {
             _cancellationToken.ThrowIfCancellationRequested();
 
             var newPaths = new List<Path>();
-            var nextCoords = activePath.GetNextCoords();
+            var nextCoords = path.GetNextCoords();
 
             if (nextCoords.Equals(endCoords))
             {
-                var newPath = activePath.PathWithEndCoords(endCoords);
+                var newPath = path.PathWithEndCoords(endCoords);
                 newPaths.Add(newPath);
                 return newPaths;
             }
 
             if (grid.CoordsAreOffTheGrid(nextCoords) ||
                 grid.IsCellOccupied(nextCoords) ||
-                activePath.ContainsCoords(nextCoords))
+                path.ContainsCoords(nextCoords))
             {
                 return newPaths;
             }
 
-            var directionsToTry = activePath.Direction.DirectionsToTry();
+            var directionsToTry = path.Direction.DirectionsToTry();
 
             // ReSharper disable once ForCanBeConvertedToForeach
             for (var index = 0; index < directionsToTry.Length; index++)
             {
                 var directionToTry = directionsToTry[index];
-                var newPath = activePath.PathWithNewCoordsAndDirection(nextCoords, directionToTry, maxDirectionChanges);
+                var newPath = path.PathWithNewCoordsAndDirection(nextCoords, directionToTry, maxDirectionChanges);
 
                 if (newPath.IsActive)
                 {
