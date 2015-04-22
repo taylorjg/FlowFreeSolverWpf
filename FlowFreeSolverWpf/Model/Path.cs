@@ -1,20 +1,21 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace FlowFreeSolverWpf.Model
 {
     public class Path
     {
         private readonly Coords[] _coordsList;
-        private readonly Direction _direction;
-        private readonly bool _isActive;
-        private readonly int _numDirectionChanges;
+        private readonly int _bits;
+
+        private const int DirectionMask = 0x000000FF;
+        private const int NumDirectionChangesMask = 0x0000FF00;
+        private const int IsActiveMask = 0x00010000;
 
         private Path(Coords[] coordsList, Direction direction, int numDirectionChanges, bool isActive)
         {
             _coordsList = coordsList;
-            _direction = direction;
-            _isActive = isActive;
-            _numDirectionChanges = numDirectionChanges;
+            _bits = (Byte) direction | (((Byte) numDirectionChanges) << 8) | ((isActive ? 1 : 0) << 16);
         }
 
         public static Path PathWithStartCoordsAndDirection(Coords startCoords, Direction direction)
@@ -46,20 +47,17 @@ namespace FlowFreeSolverWpf.Model
 
         public Direction Direction
         {
-            get { return _direction; }
-        }
-
-        public bool IsActive
-        {
-            get { return _isActive; }
+            get { return (Direction) (_bits & DirectionMask); }
         }
 
         public int NumDirectionChanges
         {
-            get
-            {
-                return _numDirectionChanges;
-            }
+            get { return (_bits & NumDirectionChangesMask) >> 8; }
+        }
+
+        public bool IsActive
+        {
+            get { return (_bits & IsActiveMask) != 0; }
         }
 
         public Coords GetNextCoords()
