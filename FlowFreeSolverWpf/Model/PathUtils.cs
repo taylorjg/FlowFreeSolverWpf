@@ -58,7 +58,7 @@ namespace FlowFreeSolverWpf.Model
             return newNumDirectionChanges <= maxDirectionChanges;
         }
 
-        private static Direction DirectionOfTravel(Coords coords1, Coords coords2)
+        public static Direction DirectionOfTravel(Coords coords1, Coords coords2)
         {
             var absX = Math.Abs(coords1.X - coords2.X);
             var absY = Math.Abs(coords1.Y - coords2.Y);

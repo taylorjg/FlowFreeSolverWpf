@@ -81,7 +81,7 @@ namespace FlowFreeSolverWpf.Model
             return _stalledPaths.Any();
         }
 
-        public MatrixRow GetColourPairAndPathForRowIndex(int rowIndex)
+        public MatrixRow GetMatrixRowAtRowIndex(int rowIndex)
         {
             return _currentMatrix[rowIndex];
         }

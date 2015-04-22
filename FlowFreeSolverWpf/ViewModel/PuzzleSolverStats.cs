@@ -40,7 +40,7 @@ namespace FlowFreeSolverWpf.ViewModel
         public SolutionStats GetFinalStats(MatrixBuilder matrixBuilder, List<MatrixRow> matrix, Solution solution)
         {
             var rowIndexes = (solution != null) ? solution.RowIndexes : Enumerable.Range(0, matrix.Count);
-            var maxActualDirectionChanges = rowIndexes.Max(rowIndex => matrixBuilder.GetColourPairAndPathForRowIndex(rowIndex).Path.NumDirectionChanges);
+            var maxActualDirectionChanges = rowIndexes.Max(rowIndex => matrixBuilder.GetMatrixRowAtRowIndex(rowIndex).Path.NumDirectionChanges);
 
             return new SolutionStats(
                 matrix.Count,

@@ -76,7 +76,7 @@ namespace FlowFreeSolverWpf.ViewModel
 
             if (solution != null)
             {
-                var colourPairPaths = solution.RowIndexes.Select(matrixBuilder.GetColourPairAndPathForRowIndex);
+                var colourPairPaths = solution.RowIndexes.Select(matrixBuilder.GetMatrixRowAtRowIndex);
                 _dispatcher.Invoke(_solutionFoundHandler, solutionStats, colourPairPaths);
             }
             else
